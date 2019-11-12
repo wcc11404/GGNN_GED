@@ -113,7 +113,9 @@ def main(args):
         model=baseNER(args)
     if args.use_gpu==True:
         if args.gpu_list is not None:
-            os.environ["CUDA_VISIBLE_DEVICES"]=args.gpu_list
+            os.environ["CUDA_VISIBLE_DEVICES"]=str(args.gpu_list)
+            if args.loginfor:
+                print("use {} gpu".format(args.gpu_list))
         model.to("cuda")
     else:
         model.to("cpu")
