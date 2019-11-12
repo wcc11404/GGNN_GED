@@ -8,7 +8,6 @@ class baseNER(nn.Module):
         self.rnn = RnnTemplate(args.rnn_type, args.batch_size, args.embed_dim, args.embed_dim, args.rnn_drop)
         self.hiddenlinear = LinearTemplate(args.embed_dim, args.hidden_dim, activation="tanh")
         self.linear = LinearTemplate(args.hidden_dim, 2, activation=None)
-        # self.linear = LinearTemplate(args.embed_dim, 2, activation=None)
         #self.logsoftmax=nn.LogSoftmax(dim=2)
 
         self.load_embedding(args)

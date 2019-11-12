@@ -5,6 +5,7 @@ import argparse
 import torch
 from sklearn.metrics import precision_recall_fscore_support,accuracy_score
 from model.utils import savecheckpoint,loadcheckpoint
+import numpy as np
 
 def evaluate(args,dataloader,model,Loss=None,mode="average"):
     loss=0
@@ -108,6 +109,8 @@ def test(args,model,Corpus):
     print("Test Precision : {}\tTest Recall : {}\tTest F0.5 : {}".format(test_p,test_r,test_f))
 
 def main(args):
+    if args.random_seed is not None:
+        setup_seed(args.random_seed)
     corpus=GedCorpus("data",args)
     if args.arch=="baseNER":
         model=baseNER(args)
@@ -126,12 +129,21 @@ def main(args):
     elif args.mode == "Test":
         test(args, model, corpus)
 
+def setup_seed(seed):
+    np.random.seed(seed)
+    # random.seed(seed)
+    torch.manual_seed(seed) #cpu
+    torch.cuda.manual_seed_all(seed)  #并行gpu
+    # torch.backends.cudnn.deterministic = True  #cpu/gpu结果一致
+    # torch.backends.cudnn.benchmark = True   #训练集变化不大时使训练加速
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--use-gpu",default="True")
     parser.add_argument("--gpu-list",default="0")
     parser.add_argument("--mode",default="Train")
     parser.add_argument("--use-lower",default="True")
+    parser.add_argument("--random-seed",type=int,default=44)
     parser.add_argument("--arch",default="baseNER")
 
     parser.add_argument("--batch-size",type=int,default=32)

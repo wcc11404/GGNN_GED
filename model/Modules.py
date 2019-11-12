@@ -22,7 +22,6 @@ class EmbeddingTemplate(nn.Module):
         w2v={}
         if w2v_dir is None or not os.path.exists(w2v_dir):
             raise KeyError("w2v file is not exists")
-        #temp=self.wordembedding.weight.detach().numpy()
         temp = np.random.normal(loc=0.0, scale=1.0, size=(len(word2id), self.embed_dim))
         temp[0] = np.zeros(shape=[1, self.embed_dim], dtype=float)
 
@@ -40,36 +39,6 @@ class EmbeddingTemplate(nn.Module):
                     temp[word2id[w]]=np.array(line[1:])
                     s.add(w)
                     num+=1
-        # with open(w2v_dir,"rb") as f:
-        #     header=f.readline()
-        #     vocab_size, layer1_size = map(int, header.split())  # 3000000 300
-        #     assert self.embed_dim==layer1_size
-        #     binary_len = np.dtype('float32').itemsize * layer1_size  # 1200
-        #     for line in range(vocab_size):
-        #         word = []
-        #         while True:
-        #             ch = f.read(1)
-        #             if ch == ' ':
-        #                 word = ''.join(word)
-        #                 break
-        #             if ch != '\n':
-        #                 word.append(ch)
-        #         if word in word2id:
-        #             temp[word2id[word]]=np.fromstring(f.read(binary_len), dtype='float32')
-        #             num+=1
-        #         else:
-        #             f.read(binary_len)
-        #         w2v[word]=np.fromstring(f.read(binary_len), dtype='float32')
-
-        # num=0
-        # temp=np.zeros(shape=[1,self.embed_dim],dtype=float)#pad
-        # #temp.append([0 for _ in range(self.embed_dim)])
-        # for i in range(1,self.vocab_size):
-        #     if id2word[i] in w2v:
-        #         temp=np.append(temp,[w2v[id2word[i]]],axis=0)
-        #         num+=1
-        #     else:
-        #         temp=np.append(temp,np.random.normal(loc=0.0,scale=1.0,size=(1,self.embed_dim)),axis=0)#正态分布
 
         self.wordembedding.weight.data.copy_(torch.from_numpy(temp))
 
