@@ -3,6 +3,7 @@ from torch.utils.data import Dataset, DataLoader
 import torch
 import os
 from collections import Counter
+import pickle
 
 def collate_fn(train_data):
     def pad(data,max_length,paditem=0):
@@ -38,31 +39,78 @@ def collate_fn(train_data):
 class GedCorpus:
     def __init__(self,fdir,args):
         self.args=args
-        self.trainx,self.trainy,self.trainsize=self.load(fdir+r"/fce-public.train.original.tsv")
-        self.word2id,self.id2word=self.makeword2veclist([self.trainx])
+        self.label2id = {"c": 0, "i": 1}
+        if args.preprocess_dir is None or not os.path.exists(args.preprocess_dir):
+            #os.makedirs(args.preprocess_dir)
+            #Train
+            self.trainx,self.trainy,self.trainsize=self.load(fdir+r"/fce-public.train.original.tsv")
+            self.word2id,self.id2word=self.makeword2veclist([self.trainx])
+            self.trainx, self.trainy = self.preprocess((self.trainx, self.trainy), ispad=False)
+
+            #Dev
+            self.devx, self.devy, self.devsize = self.load(fdir + r"/fce-public.dev.original.tsv")
+            self.devx, self.devy = self.preprocess((self.devx, self.devy), ispad=False)
+
+            #Test
+            self.testx, self.testy, self.testsize = self.load(fdir + r"/fce-public.test.original.tsv")
+            self.testx, self.testy = self.preprocess((self.testx, self.testy), ispad=False)
+
+            self.save_preprocess(args.preprocess_dir)
+        else:
+            self.load_preprocess(args.preprocess_dir)
+
         self.vocabularysize=len(self.id2word)
         args.vocabulary_size=self.vocabularysize
         args.word2id=self.word2id
         self.datasize=len(self.trainx)
-        self.label2id={"c":0,"i":1}
-        self.trainx,self.trainy=self.preprocess((self.trainx,self.trainy),ispad=False)
+
         if bool(args.loginfor):
             print("dictionary size : "+str(self.vocabularysize))
-            print("train size : " + str(self.datasize))
+            print("train data size : " + str(self.datasize))
+            print("dev data size : " + str(len(self.devx)))
+            print("test data size : " + str(len(self.testx)))
+
+        #Train
         self.traindataset=GedDataset(self.trainx,self.trainy,self.trainsize,args.batch_size)
         self.traindataloader=DataLoader(dataset=self.traindataset,batch_size=args.batch_size,shuffle=True,collate_fn=collate_fn)
 
         #Dev
-        self.devx,self.devy,self.devsize=self.load(fdir+r"/fce-public.dev.original.tsv")
-        self.devx,self.devy=self.preprocess((self.devx,self.devy),ispad=False)
-        self.devdataset=GedDataset(self.devx,self.devy,self.devsize,1)
+        self.devdataset=GedDataset(self.devx,self.devy,self.devsize,args.batch_size)
         self.devdataloader=DataLoader(dataset=self.devdataset,batch_size=args.batch_size,shuffle=False,collate_fn=collate_fn)
 
         #Test
-        self.testx,self.testy,self.testsize=self.load(fdir+r"/fce-public.test.original.tsv")
-        self.testx,self.testy=self.preprocess((self.testx,self.testy),ispad=False)
         self.testdataset=GedDataset(self.testx,self.testy,self.testsize,1)
         self.testdataloader=DataLoader(dataset=self.testdataset,batch_size=1,shuffle=False,collate_fn=collate_fn)
+
+    def save_preprocess(self,dir):
+        f=open(dir,'wb')
+        pickle.dump(self.trainx,f)
+        pickle.dump(self.trainy,f)
+        pickle.dump(self.trainsize,f)
+        pickle.dump(self.word2id,f)
+        pickle.dump(self.id2word,f)
+        pickle.dump(self.devx,f)
+        pickle.dump(self.devy,f)
+        pickle.dump(self.devsize,f)
+        pickle.dump(self.testx,f)
+        pickle.dump(self.testy,f)
+        pickle.dump(self.testsize,f)
+        f.close()
+
+    def load_preprocess(self,dir):
+        f = open(dir, 'rb')
+        self.trainx = pickle.load(f)
+        self.trainy = pickle.load(f)
+        self.trainsize = pickle.load(f)
+        self.word2id = pickle.load(f)
+        self.id2word = pickle.load(f)
+        self.devx = pickle.load(f)
+        self.devy = pickle.load(f)
+        self.devsize = pickle.load(f)
+        self.testx = pickle.load(f)
+        self.testy = pickle.load(f)
+        self.testsize = pickle.load(f)
+        f.close()
 
     def load(self,fpath):
         if not os.path.exists(fpath):
