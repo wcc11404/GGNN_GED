@@ -105,7 +105,7 @@ def test(args,model,Corpus):
     model.eval()
     #_, train_p, train_r, train_f = evaluate(Corpus.traindataloader, model, Loss=None)
     #_, dev_p, dev_r, dev_f = evaluate(Corpus.devdataloader, model, Loss=None)
-    _, test_p, test_r, test_f = evaluate(Corpus.testdataloader, model, Loss=None)
+    _, test_p, test_r, test_f = evaluate(args, Corpus.testdataloader, model, Loss=None)
     print("Test Precision : {}\tTest Recall : {}\tTest F0.5 : {}".format(test_p,test_r,test_f))
 
 def main(args):
