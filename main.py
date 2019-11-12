@@ -112,10 +112,10 @@ def main(args):
     if args.arch=="baseNER":
         model=baseNER(args)
     if bool(args.use_gpu):
-        if args.gpu_list is not None:
-            os.environ["CUDA_VISIBLE_DEVICES"]=str(args.gpu_list)
-            if bool(args.loginfor):
-                print("use {} gpu".format(args.gpu_list))
+        # if args.gpu_list is not None:
+        #     os.environ["CUDA_VISIBLE_DEVICES"]=str(args.gpu_list)
+        #     if bool(args.loginfor):
+        #         print("use {} gpu".format(args.gpu_list))
         model.to("cuda")
     else:
         model.to("cpu")
@@ -149,8 +149,8 @@ if __name__ == "__main__":
     parser.add_argument("--w2v-dir", default="data/w2v_300d.txt")
     parser.add_argument("--max-epoch", type=int, default=50)
     parser.add_argument("--early-stop", type=int, default=10)
-    parser.add_argument("--lr", type=float, default=1e-3)
-    parser.add_argument("--optimizer", default="adam")
+    parser.add_argument("--lr", type=float, default=1)
+    parser.add_argument("--optimizer", default="adadelta")
 
     args=parser.parse_args()
     main(args)
