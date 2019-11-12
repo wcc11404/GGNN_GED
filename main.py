@@ -7,7 +7,6 @@ import argparse
 from sklearn.metrics import precision_recall_fscore_support,accuracy_score
 from model.utils import savecheckpoint,loadcheckpoint
 
-
 def evaluate(args,dataloader,model,Loss=None,mode="average"):
     loss=0
     length=0
@@ -46,9 +45,9 @@ def train(args,model,Corpus):
     summary = []
     Loss = torch.nn.CrossEntropyLoss(ignore_index=-1, reduction="sum")
     if args.optimizer.lower() == "adam":
-        optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, betas=(0.9, 0.998), eps=1e-08,weight_decay=0.0001)
+        optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, betas=(0.9, 0.998), eps=1e-08, weight_decay=args.weight_decay)
     elif args.optimizer.lower() == "adadelta":
-        optimizer = torch.optim.Adadelta(model.parameters(), lr=args.lr, weight_decay=0.0001)
+        optimizer = torch.optim.Adadelta(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
 
     if args.load_dir is not None:
         loadcheckpoint(model, args.load_dir)
@@ -108,10 +107,10 @@ def test(args,model,Corpus):
     model.eval()
     #_, train_p, train_r, train_f = evaluate(args, Corpus.traindataloader, model, Loss=None)
     _, dev_p, dev_r, dev_f = evaluate(args, Corpus.devdataloader, model, Loss=None)
-    print("Dev Precision : {}\tDev Recall : {}\tDev F0.5 : {}".format(dev_p,dev_r,dev_f))
+    print("Dev Precision : {:.4f}\tDev Recall : {:.4f}\tDev F0.5 : {:.4f}".format(dev_p,dev_r,dev_f))
 
     _, test_p, test_r, test_f = evaluate(args, Corpus.testdataloader, model, Loss=None)
-    print("Test Precision : {}\tTest Recall : {}\tTest F0.5 : {}".format(test_p,test_r,test_f))
+    print("Test Precision : {:.4f}\tTest Recall : {:.4f}\tTest F0.5 : {:.4f}".format(test_p,test_r,test_f))
 
 def main(args):
     if args.random_seed is not None:
@@ -144,19 +143,19 @@ def setup_seed(seed):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--use-gpu",default="True")
-    parser.add_argument("--gpu-list",default="0")
-    parser.add_argument("--mode",default="Train")
-    parser.add_argument("--use-lower",default="True")
-    parser.add_argument("--random-seed",type=int,default=44)
-    parser.add_argument("--arch",default="baseNER")
+    parser.add_argument("--use-gpu", default="True")
+    parser.add_argument("--gpu-list", default="0")
+    parser.add_argument("--mode", default="Train")
+    parser.add_argument("--use-lower", default="True")
+    parser.add_argument("--random-seed", type=int, default=44)
+    parser.add_argument("--arch", default="baseNER")
 
-    parser.add_argument("--batch-size",type=int,default=32)
-    parser.add_argument("--loginfor",default="True")
+    parser.add_argument("--batch-size", type=int, default=32)
+    parser.add_argument("--loginfor", default="True")
 
     # parser.add_argument("--vocabulary-size",type=int,default=32)
-    parser.add_argument("--embed-dim",type=int,default=300)
-    parser.add_argument("--embed-drop",type=float,default=0.5)
+    parser.add_argument("--embed-dim", type=int, default=300)
+    parser.add_argument("--embed-drop", type=float, default=0.5)
 
     parser.add_argument("--rnn-type", default="LSTM")
     parser.add_argument("--rnn-drop", type=float, default=0.5)
@@ -169,6 +168,7 @@ if __name__ == "__main__":
     parser.add_argument("--max-epoch", type=int, default=50)
     parser.add_argument("--early-stop", type=int, default=10)
     parser.add_argument("--lr", type=float, default=1)
+    parser.add_argument("--weight-decay", type=float, default=0.0001)
     parser.add_argument("--optimizer", default="adadelta")
 
     args=parser.parse_args()

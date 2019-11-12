@@ -13,16 +13,25 @@ class EmbeddingTemplate(nn.Module):
         self.wordembedding = nn.Embedding(vocab_size, embed_dim)
         self.wordembeddingdropout = nn.Dropout(embed_drop)
 
+        self.init_weight()
+
+    def init_weight(self):
+        for name, param in self.wordembedding.named_parameters():
+            if 'bias' in name:
+                nn.init.constant_(param, 0.0)
+            elif 'weight' in name:
+                nn.init.xavier_uniform_(param)
+
     def forward(self, batchinput):# B * S
         embedout = self.wordembedding(batchinput)
         embedout = self.wordembeddingdropout(embedout)
         return embedout # B * S * E
 
     def load_from_w2v(self, word2id, padandunk=True, w2v_dir=None, lower=True, loginfor=True):  # 加载w2v
-        w2v={}
         if w2v_dir is None or not os.path.exists(w2v_dir):
             raise KeyError("w2v file is not exists")
-        temp = np.random.normal(loc=0.0, scale=1.0, size=(len(word2id), self.embed_dim))
+        temp = self.wordembedding.weight.detach().numpy()
+        # temp = np.random.normal(loc=0.0, scale=1.0, size=(len(word2id), self.embed_dim))
         temp[0] = np.zeros(shape=[1, self.embed_dim], dtype=float)
 
         s=set()

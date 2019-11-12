@@ -41,18 +41,13 @@ class GedCorpus:
         self.args=args
         self.label2id = {"c": 0, "i": 1}
         if args.preprocess_dir is None or not os.path.exists(args.preprocess_dir):
-            #os.makedirs(args.preprocess_dir)
-            #Train
             self.trainx,self.trainy,self.trainsize=self.load(fdir+r"/fce-public.train.original.tsv")
-            self.word2id,self.id2word=self.makeword2veclist([self.trainx])
-            self.trainx, self.trainy = self.preprocess((self.trainx, self.trainy), ispad=False)
-
-            #Dev
             self.devx, self.devy, self.devsize = self.load(fdir + r"/fce-public.dev.original.tsv")
-            self.devx, self.devy = self.preprocess((self.devx, self.devy), ispad=False)
-
-            #Test
             self.testx, self.testy, self.testsize = self.load(fdir + r"/fce-public.test.original.tsv")
+            self.word2id,self.id2word=self.makeword2veclist([self.trainx,self.devx])
+
+            self.trainx, self.trainy = self.preprocess((self.trainx, self.trainy), ispad=False)
+            self.devx, self.devy = self.preprocess((self.devx, self.devy), ispad=False)
             self.testx, self.testy = self.preprocess((self.testx, self.testy), ispad=False)
 
             self.save_preprocess(args.preprocess_dir)
