@@ -18,7 +18,7 @@ class EmbeddingTemplate(nn.Module):
         embedout = self.wordembeddingdropout(embedout)
         return embedout # B * S * E
 
-    def load_from_w2v(self,word2id,padandunk=True,w2v_dir=None,loginfor=True):#加载w2v
+    def load_from_w2v(self, word2id, padandunk=True, w2v_dir=None, lower=True, loginfor=True):  # 加载w2v
         w2v={}
         if w2v_dir is None or not os.path.exists(w2v_dir):
             raise KeyError("w2v file is not exists")
@@ -33,6 +33,8 @@ class EmbeddingTemplate(nn.Module):
                 if len(line)<=2:
                     continue
                 w=line[0]
+                # if lower:
+                #     w=w.lower()
                 if w in word2id:
                     temp[word2id[w]]=np.array(line[1:])
                     num+=1

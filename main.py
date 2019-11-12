@@ -131,6 +131,7 @@ if __name__ == "__main__":
     parser.add_argument("--use-gpu",default="True")
     parser.add_argument("--gpu-list",default="0")
     parser.add_argument("--mode",default="Train")
+    parser.add_argument("--use-lower",default="True")
     parser.add_argument("--arch",default="baseNER")
 
     parser.add_argument("--batch-size",type=int,default=32)

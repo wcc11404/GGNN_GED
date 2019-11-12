@@ -37,6 +37,7 @@ def collate_fn(train_data):
 
 class GedCorpus:
     def __init__(self,fdir,args):
+        self.args=args
         self.trainx,self.trainy,self.trainsize=self.load(fdir+r"/fce-public.train.original.tsv")
         self.word2id,self.id2word=self.makeword2veclist([self.trainx])
         self.vocabularysize=len(self.id2word)
@@ -76,6 +77,8 @@ class GedCorpus:
             sentence=sentence.split("\n")
             for wordpair in sentence:
                 wordpair=wordpair.split("\t")
+                if bool(self.args.use_lower):
+                    wordlist[0]=wordlist[0].lower()
                 wordlist.append(wordpair[0])
                 labellist.append(wordpair[1])
             x.append(wordlist)
