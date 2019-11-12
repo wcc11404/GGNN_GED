@@ -78,7 +78,7 @@ class GedCorpus:
             for wordpair in sentence:
                 wordpair=wordpair.split("\t")
                 if bool(self.args.use_lower):
-                    wordlist[0]=wordlist[0].lower()
+                    wordpair[0]=wordpair[0].lower()
                 wordlist.append(wordpair[0])
                 labellist.append(wordpair[1])
             x.append(wordlist)
