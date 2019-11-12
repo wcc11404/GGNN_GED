@@ -144,7 +144,7 @@ if __name__ == "__main__":
 
     parser.add_argument("--save-dir", default="checkpoint")
     parser.add_argument("--load-dir", default=None)
-    parser.add_argument("--w2v-dir", default="data/GoogleNews-vectors-negative300.bin")
+    parser.add_argument("--w2v-dir", default="data/w2v_300d.txt")
     parser.add_argument("--max-epoch", type=int, default=50)
     parser.add_argument("--early-stop", type=int, default=10)
     parser.add_argument("--lr", type=float, default=1e-3)

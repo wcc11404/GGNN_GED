@@ -25,26 +25,35 @@ class EmbeddingTemplate(nn.Module):
         temp=self.wordembedding.weight.detach().numpy()
 
         num = 0
-        with open(w2v_dir,"rb") as f:
-            header=f.readline()
-            vocab_size, layer1_size = map(int, header.split())  # 3000000 300
-            assert self.embed_dim==layer1_size
-            binary_len = np.dtype('float32').itemsize * layer1_size  # 1200
-            for line in range(vocab_size):
-                word = []
-                while True:
-                    ch = f.read(1)
-                    if ch == ' ':
-                        word = ''.join(word)
-                        break
-                    if ch != '\n':
-                        word.append(ch)
-                if word in word2id:
-                    temp[word2id[word]]=np.fromstring(f.read(binary_len), dtype='float32')
+        with open(w2v_dir,'r') as f:
+            for line in f:
+                line=line.strip().split()
+                if len(line)<=2:
+                    continue
+                w=line[0]
+                if w in word2id:
+                    temp[word2id[w]]=np.array(line[1:])
                     num+=1
-                else:
-                    f.read(binary_len)
-                w2v[word]=np.fromstring(f.read(binary_len), dtype='float32')
+        # with open(w2v_dir,"rb") as f:
+        #     header=f.readline()
+        #     vocab_size, layer1_size = map(int, header.split())  # 3000000 300
+        #     assert self.embed_dim==layer1_size
+        #     binary_len = np.dtype('float32').itemsize * layer1_size  # 1200
+        #     for line in range(vocab_size):
+        #         word = []
+        #         while True:
+        #             ch = f.read(1)
+        #             if ch == ' ':
+        #                 word = ''.join(word)
+        #                 break
+        #             if ch != '\n':
+        #                 word.append(ch)
+        #         if word in word2id:
+        #             temp[word2id[word]]=np.fromstring(f.read(binary_len), dtype='float32')
+        #             num+=1
+        #         else:
+        #             f.read(binary_len)
+        #         w2v[word]=np.fromstring(f.read(binary_len), dtype='float32')
 
         # num=0
         # temp=np.zeros(shape=[1,self.embed_dim],dtype=float)#pad
