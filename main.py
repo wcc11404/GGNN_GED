@@ -106,8 +106,8 @@ def test(args,model,Corpus):
         raise KeyError("load_dir has an invaild value: None")
     loadcheckpoint(model,args.load_dir)
     model.eval()
-    #_, train_p, train_r, train_f = evaluate(Corpus.traindataloader, model, Loss=None)
-    _, dev_p, dev_r, dev_f = evaluate(Corpus.devdataloader, model, Loss=None)
+    #_, train_p, train_r, train_f = evaluate(args, Corpus.traindataloader, model, Loss=None)
+    _, dev_p, dev_r, dev_f = evaluate(args, Corpus.devdataloader, model, Loss=None)
     print("Dev Precision : {}\tDev Recall : {}\tDev F0.5 : {}".format(dev_p,dev_r,dev_f))
 
     _, test_p, test_r, test_f = evaluate(args, Corpus.testdataloader, model, Loss=None)
