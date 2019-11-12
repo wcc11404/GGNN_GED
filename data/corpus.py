@@ -37,7 +37,7 @@ def collate_fn(train_data):
 
 class GedCorpus:
     def __init__(self,fdir,args):
-        self.trainx,self.trainy,self.trainsize=self.load(fdir+r"\fce-public.train.original.tsv")
+        self.trainx,self.trainy,self.trainsize=self.load(fdir+r"/fce-public.train.original.tsv")
         self.word2id,self.id2word=self.makeword2veclist([self.trainx])
         self.vocabularysize=len(self.id2word)
         args.vocabulary_size=self.vocabularysize
@@ -52,13 +52,13 @@ class GedCorpus:
         self.traindataloader=DataLoader(dataset=self.traindataset,batch_size=args.batch_size,shuffle=True,collate_fn=collate_fn)
 
         #Dev
-        self.devx,self.devy,self.devsize=self.load(fdir+r"\fce-public.dev.original.tsv")
+        self.devx,self.devy,self.devsize=self.load(fdir+r"/fce-public.dev.original.tsv")
         self.devx,self.devy=self.preprocess((self.devx,self.devy),ispad=False)
         self.devdataset=GedDataset(self.devx,self.devy,self.devsize,1)
         self.devdataloader=DataLoader(dataset=self.devdataset,batch_size=args.batch_size,shuffle=False,collate_fn=collate_fn)
 
         #Test
-        self.testx,self.testy,self.testsize=self.load(fdir+r"\fce-public.test.original.tsv")
+        self.testx,self.testy,self.testsize=self.load(fdir+r"/fce-public.test.original.tsv")
         self.testx,self.testy=self.preprocess((self.testx,self.testy),ispad=False)
         self.testdataset=GedDataset(self.testx,self.testy,self.testsize,1)
         self.testdataloader=DataLoader(dataset=self.testdataset,batch_size=1,shuffle=False,collate_fn=collate_fn)

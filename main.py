@@ -5,7 +5,7 @@ import argparse
 import torch
 from sklearn.metrics import precision_recall_fscore_support,accuracy_score
 from model.utils import savecheckpoint,loadcheckpoint
-#
+
 def evaluate(args,dataloader,model,Loss=None,mode="average"):
     loss=0
     length=0
@@ -51,7 +51,7 @@ def train(args,model,Corpus):
         loadcheckpoint(model, args.load_dir)
     if args.save_dir is not None:
         if not os.path.exists(args.save_dir):
-            os.mkdirs(args.save_dir)
+            os.makedirs(args.save_dir)
 
     for epoch in range(1, args.max_epoch + 1):
         model.train()
