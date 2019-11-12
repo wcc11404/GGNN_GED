@@ -45,7 +45,7 @@ class GedCorpus:
         self.datasize=len(self.trainx)
         self.label2id={"c":0,"i":1}
         self.trainx,self.trainy=self.preprocess((self.trainx,self.trainy),ispad=False)
-        if args.loginfor:
+        if bool(args.loginfor):
             print("dictionary size : "+str(self.vocabularysize))
             print("train size : " + str(self.datasize))
         self.traindataset=GedDataset(self.trainx,self.trainy,self.trainsize,args.batch_size)

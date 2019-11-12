@@ -11,11 +11,11 @@ class baseNER(nn.Module):
         # self.linear = LinearTemplate(args.embed_dim, 2, activation=None)
         #self.logsoftmax=nn.LogSoftmax(dim=2)
 
-        self.load_embedding(args)
+        #self.load_embedding(args)
 
     def load_embedding(self,args):
         if args.w2v_dir is not None:
-            self.wordembedding.load_from_w2v(args.word2id, True, args.w2v_dir, args.loginfor)
+            self.wordembedding.load_from_w2v(args.word2id, True, args.w2v_dir, bool(args.loginfor))
             del args.word2id
 
     def forward(self, batchinput, batchlength):

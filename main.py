@@ -111,7 +111,7 @@ def main(args):
     corpus=GedCorpus("data",args)
     if args.arch=="baseNER":
         model=baseNER(args)
-    if args.use_gpu==True:
+    if bool(args.use_gpu):
         if args.gpu_list is not None:
             os.environ["CUDA_VISIBLE_DEVICES"]=str(args.gpu_list)
             if args.loginfor:
@@ -128,13 +128,13 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--use-gpu",type=bool,default=True)
+    parser.add_argument("--use-gpu",default="True")
     parser.add_argument("--gpu-list",default="0")
     parser.add_argument("--mode",default="Train")
     parser.add_argument("--arch",default="baseNER")
 
     parser.add_argument("--batch-size",type=int,default=32)
-    parser.add_argument("--loginfor",type=bool,default=True)
+    parser.add_argument("--loginfor",default="True")
 
     # parser.add_argument("--vocabulary-size",type=int,default=32)
     parser.add_argument("--embed-dim",type=int,default=300)
