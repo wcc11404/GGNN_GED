@@ -40,6 +40,7 @@ def train(args,model,Corpus):
         loadcheckpoint(model, args.load_dir)
 
     max_dev_f0_5 = 0
+    max_index = 0
     early_stop=0
     summary = []
     Loss = torch.nn.CrossEntropyLoss(ignore_index=-1, reduction="sum")
@@ -88,6 +89,7 @@ def train(args,model,Corpus):
 
         if max_dev_f0_5 < dev_f0_5:
             max_dev_f0_5 = dev_f0_5
+            max_index = epoch
             early_stop=0
             if args.save_dir is not None:
                 savecheckpoint(model, dir=args.save_dir + "/checkpoint" + str(epoch) + ".pt")
@@ -96,7 +98,7 @@ def train(args,model,Corpus):
             if early_stop>= args.early_stop:
                 break
 
-    print("max dev f0.5: "+str(max_dev_f0_5))
+    print("epoch {} get the max dev f0.5: {}".format(max_index,max_dev_f0_5))
 
 def test(args,model,Corpus):
     if args.load_dir is None:
