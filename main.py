@@ -12,7 +12,7 @@ def evaluate(args,dataloader,model,Loss=None,mode="average"):
     predict=[]
     groundtruth=[]
     for (train_x, train_y, train_length) in dataloader:
-        if args.use_gpu == True:
+        if bool(args.use_gpu):
             train_x=train_x.cuda()
             train_y=train_y.cuda()
             train_length=train_length.cuda()
@@ -56,7 +56,7 @@ def train(args,model,Corpus):
     for epoch in range(1, args.max_epoch + 1):
         model.train()
         for (train_x, train_y, train_length) in Corpus.traindataloader:
-            if args.use_gpu==True:
+            if bool(args.use_gpu):
                 train_x=train_x.cuda()
                 train_y=train_y.cuda()
                 train_length=train_length.cuda()
@@ -80,7 +80,7 @@ def train(args,model,Corpus):
                "dev_r": dev_r,
                "dev_f0.5": dev_f0_5
                }
-        if args.loginfor:
+        if bool(args.loginfor):
             print("epoch {}  dev loss: {:.4f}  dev p: {:.4f}  dev r: {:.4f}  dev f0.5: {:.4f}  train f0.5: {:.4f}"
                   .format(log["epoch"],log["dev_loss"],log["dev_p"],log["dev_r"],log["dev_f0.5"],log["train_f0.5"]))
         summary.append(log)
@@ -114,7 +114,7 @@ def main(args):
     if bool(args.use_gpu):
         if args.gpu_list is not None:
             os.environ["CUDA_VISIBLE_DEVICES"]=str(args.gpu_list)
-            if args.loginfor:
+            if bool(args.loginfor):
                 print("use {} gpu".format(args.gpu_list))
         model.to("cuda")
     else:
