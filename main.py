@@ -168,7 +168,7 @@ if __name__ == "__main__":
     parser.add_argument("--max-epoch", type=int, default=50)
     parser.add_argument("--early-stop", type=int, default=10)
     parser.add_argument("--lr", type=float, default=1)
-    parser.add_argument("--weight-decay", type=float, default=0.0001)
+    parser.add_argument("--weight-decay", type=float, default=0.0005)
     parser.add_argument("--optimizer", default="adadelta")
 
     args=parser.parse_args()
