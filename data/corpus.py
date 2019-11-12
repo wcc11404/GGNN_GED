@@ -41,7 +41,7 @@ class GedCorpus:
         self.word2id,self.id2word=self.makeword2veclist([self.trainx])
         self.vocabularysize=len(self.id2word)
         args.vocabulary_size=self.vocabularysize
-        args.id2word=self.id2word
+        args.word2id=self.word2id
         self.datasize=len(self.trainx)
         self.label2id={"c":0,"i":1}
         self.trainx,self.trainy=self.preprocess((self.trainx,self.trainy),ispad=False)

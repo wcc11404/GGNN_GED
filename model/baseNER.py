@@ -15,8 +15,8 @@ class baseNER(nn.Module):
 
     def load_embedding(self,args):
         if args.w2v_dir is not None:
-            self.wordembedding.load_from_w2v(args.id2word, True, args.w2v_dir, args.loginfor)
-            del args.id2word
+            self.wordembedding.load_from_w2v(args.word2id, True, args.w2v_dir, args.loginfor)
+            del args.word2id
 
     def forward(self, batchinput, batchlength):
         out = self.wordembedding(batchinput)
