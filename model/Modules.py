@@ -22,7 +22,9 @@ class EmbeddingTemplate(nn.Module):
         w2v={}
         if w2v_dir is None or not os.path.exists(w2v_dir):
             raise KeyError("w2v file is not exists")
-        temp=self.wordembedding.weight.detach().numpy()
+        #temp=self.wordembedding.weight.detach().numpy()
+        temp = np.random.normal(loc=0.0, scale=1.0, size=(len(word2id), self.embed_dim))
+        temp[0] = np.zeros(shape=[1, self.embed_dim], dtype=float)
 
         num = 0
         with open(w2v_dir,'r') as f:
