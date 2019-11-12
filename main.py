@@ -1,11 +1,12 @@
+import numpy as np
+import torch
 from data.corpus import GedCorpus
 from model.baseNER import baseNER
 import os
 import argparse
-import torch
 from sklearn.metrics import precision_recall_fscore_support,accuracy_score
 from model.utils import savecheckpoint,loadcheckpoint
-import numpy as np
+
 
 def evaluate(args,dataloader,model,Loss=None,mode="average"):
     loss=0
@@ -106,7 +107,9 @@ def test(args,model,Corpus):
     loadcheckpoint(model,args.load_dir)
     model.eval()
     #_, train_p, train_r, train_f = evaluate(Corpus.traindataloader, model, Loss=None)
-    #_, dev_p, dev_r, dev_f = evaluate(Corpus.devdataloader, model, Loss=None)
+    _, dev_p, dev_r, dev_f = evaluate(Corpus.devdataloader, model, Loss=None)
+    print("Dev Precision : {}\tDev Recall : {}\tDev F0.5 : {}".format(dev_p,dev_r,dev_f))
+
     _, test_p, test_r, test_f = evaluate(args, Corpus.testdataloader, model, Loss=None)
     print("Test Precision : {}\tTest Recall : {}\tTest F0.5 : {}".format(test_p,test_r,test_f))
 
