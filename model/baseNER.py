@@ -11,7 +11,7 @@ class baseNER(nn.Module):
         # self.linear = LinearTemplate(args.embed_dim, 2, activation=None)
         #self.logsoftmax=nn.LogSoftmax(dim=2)
 
-        #self.load_embedding(args)
+        self.load_embedding(args)
 
     def load_embedding(self,args):
         if args.w2v_dir is not None:
