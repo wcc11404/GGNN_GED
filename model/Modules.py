@@ -26,6 +26,7 @@ class EmbeddingTemplate(nn.Module):
         temp = np.random.normal(loc=0.0, scale=1.0, size=(len(word2id), self.embed_dim))
         temp[0] = np.zeros(shape=[1, self.embed_dim], dtype=float)
 
+        s=set()
         num = 0
         with open(w2v_dir,'r') as f:
             for line in f:
@@ -33,10 +34,11 @@ class EmbeddingTemplate(nn.Module):
                 if len(line)<=2:
                     continue
                 w=line[0]
-                # if lower:
-                #     w=w.lower()
-                if w in word2id:
+                if lower:
+                    w=w.lower()
+                if w in word2id and w not in s:
                     temp[word2id[w]]=np.array(line[1:])
+                    s.add(w)
                     num+=1
         # with open(w2v_dir,"rb") as f:
         #     header=f.readline()
