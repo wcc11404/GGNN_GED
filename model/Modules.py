@@ -98,9 +98,9 @@ class RnnTemplate(nn.Module):
             batchinput = batchinput.view(-1, wl, self.input_dim)
             batchlength = batchlength.view(-1)
 
-        batchlength, itemIdx = batchlength.sort(0, descending=True)
-        _, recoverItemIdx = itemIdx.sort(0, descending=False)
-        batchinput = batchinput[itemIdx]
+        # batchlength, itemIdx = batchlength.sort(0, descending=True)
+        # _, recoverItemIdx = itemIdx.sort(0, descending=False)
+        # batchinput = batchinput[itemIdx]
 
         batchinput = batchinput.permute(1, 0, 2).contiguous() # S * B * E
         mask_input = pack_padded_sequence(batchinput, batchlength, batch_first=False)
@@ -110,14 +110,14 @@ class RnnTemplate(nn.Module):
         rnn_ouput, _ = pad_packed_sequence(rnn_ouput, batch_first=False)
         rnn_ouput = rnn_ouput.permute(1, 0, 2).contiguous() # B * S * E
 
-        rnn_ouput = rnn_ouput[recoverItemIdx]
+        # rnn_ouput = rnn_ouput[recoverItemIdx]
 
         rnn_ouput=self.rnndropout(rnn_ouput)
 
         if ischar:
             rnn_ouput = rnn_ouput.view(self.batch_size, -1, wl, self.input_dim)
             batchlength = batchlength.view(self.batch_size, -1)
-            
+
         return rnn_ouput # B * S * E
 
 class LinearTemplate(nn.Module):
