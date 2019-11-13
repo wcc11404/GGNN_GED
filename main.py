@@ -91,18 +91,18 @@ def train(args,model,Corpus):
                   .format(log["epoch"],log["dev_loss"],log["dev_p"],log["dev_r"],log["dev_f0.5"],log["train_f0.5"]))
         summary.append(log)
 
+        if args.save_dir is not None:
+            savecheckpoint(model, dir=args.save_dir + "/checkpoint" + str(epoch) + ".pt")
         if max_dev_f0_5 < dev_f0_5:
             max_dev_f0_5 = dev_f0_5
             max_index = epoch
             early_stop=0
-            if args.save_dir is not None:
-                savecheckpoint(model, dir=args.save_dir + "/checkpoint" + str(epoch) + ".pt")
         else:
             early_stop+=1
             if early_stop>= args.early_stop:
                 break
 
-    print("epoch {} get the max dev f0.5: {}".format(max_index,max_dev_f0_5))
+    print("epoch {} get the max dev f0.5: {}".format(max_index, max_dev_f0_5))
 
 def test(args,model,Corpus):
     if args.load_dir is None:
@@ -163,7 +163,7 @@ if __name__ == "__main__":
     parser.add_argument("--embed-drop", type=float, default=0.5)
 
     parser.add_argument("--rnn-type", default="LSTM")
-    parser.add_argument("--rnn-drop", type=float, default=0.5)
+    parser.add_argument("--rnn-drop", type=float, default=0.4)
     parser.add_argument("--hidden-dim", type=int, default=50)
 
     parser.add_argument("--save-dir", default="checkpoint")
