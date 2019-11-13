@@ -38,7 +38,7 @@ def collate_fn(train_data):
             temp.append(max(m))
         return max(temp)
 
-    train_x = []
+    train_x= []
     train_y = []
     train_length = []
     train_x_char = []

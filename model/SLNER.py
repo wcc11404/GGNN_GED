@@ -2,9 +2,9 @@ import torch
 from torch import nn
 from .Modules import EmbeddingTemplate, RnnTemplate, LinearTemplate
 
-class baseNER(nn.Module):
+class SLNER(nn.Module):
     def __init__(self,args):
-        super(baseNER, self).__init__()
+        super(SLNER, self).__init__()
         self.wordembedding = EmbeddingTemplate(args.word_vocabulary_size, args.word_embed_dim, args.embed_drop)
         self.rnn = RnnTemplate(args.rnn_type, args.batch_size, args.word_embed_dim, args.word_embed_dim, args.rnn_drop)
 
@@ -20,7 +20,6 @@ class baseNER(nn.Module):
             self.hiddenlinear = LinearTemplate(args.word_embed_dim, args.hidden_dim, activation="tanh")
 
         self.linear = LinearTemplate(args.hidden_dim, 2, activation=None)
-        #self.logsoftmax=nn.LogSoftmax(dim=2)
 
         self.load_embedding(args)
 
