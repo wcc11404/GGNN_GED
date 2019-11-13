@@ -160,10 +160,10 @@ if __name__ == "__main__":
     # parser.add_argument("--vocabulary-size",type=int,default=32)
     parser.add_argument("--word-embed-dim", type=int, default=300)
     parser.add_argument("--char-embed-dim", type=int, default=100)
-    parser.add_argument("--embed-drop", type=float, default=0.5)
+    parser.add_argument("--embed-drop", type=float, default=0.6)
 
     parser.add_argument("--rnn-type", default="LSTM")
-    parser.add_argument("--rnn-drop", type=float, default=0.5)
+    parser.add_argument("--rnn-drop", type=float, default=0.6)
     parser.add_argument("--hidden-dim", type=int, default=50)
 
     parser.add_argument("--save-dir", default="checkpoint")
