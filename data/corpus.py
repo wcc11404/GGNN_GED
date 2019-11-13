@@ -28,7 +28,7 @@ def collate_fn(train_data):
         train_y.append(data[1]) #
         train_length.append(data[2]) # B
         train_char_x.append(data[3]) # B * (S) * (W) ()代表需要pad
-    train_x, train_y, train_length, train_char_x = sort(train_x, train_y, train_length, train_char_x)
+    # train_x, train_y, train_length, train_char_x = sort(train_x, train_y, train_length, train_char_x)
     train_x=pad(train_x,max(train_length),paditem=0) # B * S
     train_y=pad(train_y,max(train_length),paditem=-1) # B * S
 

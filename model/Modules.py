@@ -58,10 +58,10 @@ class RnnTemplate(nn.Module):
     def __init__(self, rnn_type, batch_size, input_dim, hidden_dim, rnn_drop,
                  numLayers=1, bidirectional=True, initalizer_type="normal"):
         super(RnnTemplate, self).__init__()
-        self.type=rnn_type
-        self.batch_size=batch_size
-        self.input_dim=input_dim
-        self.hidden_dim=hidden_dim
+        self.type = rnn_type
+        self.batch_size = batch_size
+        self.input_dim = input_dim
+        self.hidden_dim = hidden_dim
         self.rnndropout = nn.Dropout(rnn_drop)
 
         hidden_dim = hidden_dim // 2 if bidirectional else hidden_dim
@@ -98,9 +98,9 @@ class RnnTemplate(nn.Module):
             batchinput = batchinput.view(-1, wl, self.input_dim)
             batchlength = batchlength.view(-1)
 
-        # batchlength, itemIdx = batchlength.sort(0, descending=True)
-        # _, recoverItemIdx = itemIdx.sort(0, descending=False)
-        # batchinput = batchinput[itemIdx]
+        batchlength, itemIdx = batchlength.sort(0, descending=True)
+        _, recoverItemIdx = itemIdx.sort(0, descending=False)
+        batchinput = batchinput[itemIdx]
 
         batchinput = batchinput.permute(1, 0, 2).contiguous() # S * B * E
         mask_input = pack_padded_sequence(batchinput, batchlength, batch_first=False)
@@ -110,7 +110,7 @@ class RnnTemplate(nn.Module):
         rnn_ouput, _ = pad_packed_sequence(rnn_ouput, batch_first=False)
         rnn_ouput = rnn_ouput.permute(1, 0, 2).contiguous() # B * S * E
 
-        # rnn_ouput = rnn_ouput[recoverItemIdx]
+        rnn_ouput = rnn_ouput[recoverItemIdx]
 
         rnn_ouput=self.rnndropout(rnn_ouput)
 
