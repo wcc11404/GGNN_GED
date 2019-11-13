@@ -12,12 +12,14 @@ def evaluate(args,dataloader,model,Loss=None,mode="average"):
     length=0
     predict=[]
     groundtruth=[]
-    for (train_x, train_y, train_length) in dataloader:
+    for (train_x, train_y, train_length, train_x_char, train_length_char) in dataloader:
         if bool(args.use_gpu):
-            train_x=train_x.cuda()
-            train_y=train_y.cuda()
-            train_length=train_length.cuda()
-        out=model(train_x,train_length)
+            train_x = train_x.cuda()
+            train_y = train_y.cuda()
+            train_length = train_length.cuda()
+            train_x_char = train_x_char.cuda()
+            train_length_char = train_length_char.cuda()
+        out = model(train_x, train_length, train_x_char, train_length_char)
         if Loss is not None:
             loss+=Loss(out.view(-1,2),train_y.view(-1)).item()
         out=out.cpu().detach().numpy()
@@ -57,14 +59,16 @@ def train(args,model,Corpus):
 
     for epoch in range(1, args.max_epoch + 1):
         model.train()
-        for (train_x, train_y, train_length) in Corpus.traindataloader:
+        for (train_x, train_y, train_length, train_x_char, train_length_char) in Corpus.traindataloader:
             if bool(args.use_gpu):
-                train_x=train_x.cuda()
-                train_y=train_y.cuda()
-                train_length=train_length.cuda()
+                train_x = train_x.cuda()
+                train_y = train_y.cuda()
+                train_length = train_length.cuda()
+                train_x_char = train_x_char.cuda()
+                train_length_char = train_length_char.cuda()
 
             optimizer.zero_grad()
-            out = model(train_x, train_length)
+            out = model(train_x, train_length, train_x_char, train_length_char)
             loss = Loss(out.view(-1, 2), train_y.view(-1))
             loss.backward()
             optimizer.step()

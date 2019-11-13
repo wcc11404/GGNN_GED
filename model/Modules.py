@@ -94,9 +94,10 @@ class RnnTemplate(nn.Module):
     def forward(self, batchinput, batchlength, ischar=False): # B * S * E
         if ischar:
             assert len(batchinput.shape)==4
+            sl = batchinput.shape[1]
             wl = batchinput.shape[2]
-            batchinput = batchinput.view(-1, wl, self.input_dim)
-            batchlength = batchlength.view(-1)
+            batchinput = batchinput.view(-1, wl, self.input_dim) # (B*S) * W * E
+            batchlength = batchlength.view(-1) # (B*S)
 
         batchlength, itemIdx = batchlength.sort(0, descending=True)
         _, recoverItemIdx = itemIdx.sort(0, descending=False)
@@ -115,8 +116,8 @@ class RnnTemplate(nn.Module):
         rnn_ouput=self.rnndropout(rnn_ouput)
 
         if ischar:
-            rnn_ouput = rnn_ouput.view(self.batch_size, -1, wl, self.input_dim)
-            batchlength = batchlength.view(self.batch_size, -1)
+            rnn_ouput = rnn_ouput.view(-1, sl, wl, self.input_dim)
+            batchlength = batchlength.view(-1, sl)
 
         return rnn_ouput # B * S * E
 
