@@ -16,13 +16,14 @@ class baseNER(nn.Module):
             self.hiddenlinear = LinearTemplate(args.word_embed_dim + args.char_embed_dim, args.hidden_dim,
                                                activation="tanh")
         else:
-            self.charembedding=None
+            self.charembedding = None
             self.hiddenlinear = LinearTemplate(args.word_embed_dim, args.hidden_dim, activation="tanh")
 
         self.linear = LinearTemplate(args.hidden_dim, 2, activation=None)
         #self.logsoftmax=nn.LogSoftmax(dim=2)
 
-        self.load_embedding(args)
+        if args.mode == "Train" and args.load_dir is None:
+            self.load_embedding(args)
 
     def load_embedding(self,args):
         if args.w2v_dir is not None:
@@ -31,13 +32,13 @@ class baseNER(nn.Module):
 
     def forward(self, batchinput, batchlength, batchinput_char, batchlength_char):
         out = self.wordembedding(batchinput)
-        out = self.rnn(out, batchlength)
+        out = self.rnn(out, batchlength)    # B S E
 
         if self.charembedding is not None:
             charout = self.charembedding(batchinput_char)
-            charout = self.charrnn(charout, batchlength_char, ischar=True)
-            charout = charout.index_select(2, self.index)
-            charout = charout.squeeze(2)
+            charout = self.charrnn(charout, batchlength_char, ischar=True) # B S W E
+            charout = charout.index_select(2, self.index) # B S 1 E
+            charout = charout.squeeze(2)    # B S E
             out = torch.cat([out,charout],2)
 
         out = self.hiddenlinear(out)

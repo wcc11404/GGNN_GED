@@ -69,10 +69,6 @@ class GedCorpus:
     def __init__(self,fdir,args):
         self.args=args
         self.label2id = {"c": 0, "i": 1}
-        # self.char2id = {chr(ord('a')+i):i for i in range(26)}
-        # self.char2id.update({chr(ord('A')+i):i+26 for i in range(26)})
-        # self.id2char=[chr(ord('a')+i) for i in range(26)]
-        # self.id2char.extend([chr(ord('A')+i) for i in range(26)])
         if args.preprocess_dir is None or not os.path.exists(args.preprocess_dir):
             self.trainx, self.trainy, self.trainsize = self.load(fdir + r"/fce-public.train.original.tsv",bool(self.args.use_lower))
             self.devx, self.devy, self.devsize = self.load(fdir + r"/fce-public.dev.original.tsv",bool(self.args.use_lower))

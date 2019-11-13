@@ -22,7 +22,7 @@ class EmbeddingTemplate(nn.Module):
             elif 'weight' in name:
                 nn.init.xavier_uniform_(param)
 
-    def forward(self, batchinput):# B * S
+    def forward(self, batchinput): # B * S
         embedout = self.wordembedding(batchinput)
         embedout = self.wordembeddingdropout(embedout)
         return embedout # B * S * E
@@ -31,7 +31,6 @@ class EmbeddingTemplate(nn.Module):
         if w2v_dir is None or not os.path.exists(w2v_dir):
             raise KeyError("w2v file is not exists")
         temp = self.wordembedding.weight.detach().numpy()
-        # temp = np.random.normal(loc=0.0, scale=1.0, size=(len(word2id), self.embed_dim))
         temp[0] = np.zeros(shape=[1, self.embed_dim], dtype=float)
 
         s=set()
@@ -124,7 +123,7 @@ class RnnTemplate(nn.Module):
 class LinearTemplate(nn.Module):
     def __init__(self, input_dim, output_dim, activation=None):
         super(LinearTemplate, self).__init__()
-        self.linear=nn.Linear(input_dim,output_dim)
+        self.linear = nn.Linear(input_dim, output_dim)
         if activation=="sigmoid":
             self.activation=F.sigmoid
         elif activation=="softmax":
@@ -148,10 +147,10 @@ class LinearTemplate(nn.Module):
                 nn.init.xavier_uniform_(param)
 
     def forward(self, batchinput):
-        out=self.linear(batchinput)
+        out = self.linear(batchinput)
         if self.activation is not None:
             if self.activation is F.softmax:
-                out=self.activation(out,dim=-1)
+                out = self.activation(out, dim=-1)
             else:
-                out=self.activation(out)
+                out = self.activation(out)
         return out
