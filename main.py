@@ -154,7 +154,8 @@ if __name__ == "__main__":
     parser.add_argument("--loginfor", default="True")
 
     # parser.add_argument("--vocabulary-size",type=int,default=32)
-    parser.add_argument("--embed-dim", type=int, default=300)
+    parser.add_argument("--word-embed-dim", type=int, default=300)
+    parser.add_argument("--char-embed-dim", type=int, default=100)
     parser.add_argument("--embed-drop", type=float, default=0.5)
 
     parser.add_argument("--rnn-type", default="LSTM")
@@ -168,7 +169,7 @@ if __name__ == "__main__":
     parser.add_argument("--max-epoch", type=int, default=50)
     parser.add_argument("--early-stop", type=int, default=10)
     parser.add_argument("--lr", type=float, default=1)
-    parser.add_argument("--weight-decay", type=float, default=0.0000)
+    parser.add_argument("--weight-decay", type=float, default=0.0001)
     parser.add_argument("--optimizer", default="adadelta")
 
     args=parser.parse_args()

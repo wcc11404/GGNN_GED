@@ -6,7 +6,7 @@ from collections import Counter
 import pickle
 
 def collate_fn(train_data):
-    def pad(data,max_length,paditem=0):
+    def pad(data, max_length, paditem=0):
         re=[]
         for d in data:
             temp=d[:]
@@ -22,13 +22,15 @@ def collate_fn(train_data):
     train_x=[]
     train_y=[]
     train_length=[]
+    train_char_x=[]
     for data in train_data:
         train_x.append(data[0])
-        train_y.append(data[1])
-        train_length.append(data[2])
-    train_x, train_y, train_length = sort(train_x, train_y, train_length)
-    train_x=pad(train_x,max(train_length),paditem=0)
-    train_y=pad(train_y,max(train_length),paditem=-1)
+        train_y.append(data[1]) #
+        train_length.append(data[2]) # B
+        train_char_x.append(data[3]) # B * (S) * (W) ()代表需要pad
+    #train_x, train_y, train_length, train_char_x = sort(train_x, train_y, train_length, train_char_x)
+    train_x=pad(train_x,max(train_length),paditem=0) # B * S
+    train_y=pad(train_y,max(train_length),paditem=-1) # B * S
 
     train_x=torch.from_numpy(np.array(train_x)).long()
     train_y=torch.from_numpy(np.array(train_y)).long()
@@ -40,54 +42,70 @@ class GedCorpus:
     def __init__(self,fdir,args):
         self.args=args
         self.label2id = {"c": 0, "i": 1}
+        # self.char2id = {chr(ord('a')+i):i for i in range(26)}
+        # self.char2id.update({chr(ord('A')+i):i+26 for i in range(26)})
+        # self.id2char=[chr(ord('a')+i) for i in range(26)]
+        # self.id2char.extend([chr(ord('A')+i) for i in range(26)])
         if args.preprocess_dir is None or not os.path.exists(args.preprocess_dir):
-            self.trainx,self.trainy,self.trainsize=self.load(fdir+r"/fce-public.train.original.tsv")
+            self.trainx, self.trainy, self.trainsize = self.load(fdir + r"/fce-public.train.original.tsv")
             self.devx, self.devy, self.devsize = self.load(fdir + r"/fce-public.dev.original.tsv")
             self.testx, self.testy, self.testsize = self.load(fdir + r"/fce-public.test.original.tsv")
-            self.word2id,self.id2word=self.makeword2veclist([self.trainx,self.devx])
+            self.word2id, self.id2word = self.makeword2veclist([self.trainx, self.devx])
+            self.char2id, self.id2char = self.makechar2veclist([self.trainx, self.devx])
 
-            self.trainx, self.trainy = self.preprocess((self.trainx, self.trainy), ispad=False)
-            self.devx, self.devy = self.preprocess((self.devx, self.devy), ispad=False)
-            self.testx, self.testy = self.preprocess((self.testx, self.testy), ispad=False)
+            self.trainx, self.trainy , self.trainx_char = self.preprocess((self.trainx, self.trainy), ispad=False)
+            self.devx, self.devy, self.devx_char = self.preprocess((self.devx, self.devy), ispad=False)
+            self.testx, self.testy, self.testx_char = self.preprocess((self.testx, self.testy), ispad=False)
 
             self.save_preprocess(args.preprocess_dir)
         else:
             self.load_preprocess(args.preprocess_dir)
 
-        self.vocabularysize=len(self.id2word)
-        args.vocabulary_size=self.vocabularysize
+        self.wordvocabularysize=len(self.id2word)
+        args.word_vocabulary_size=self.wordvocabularysize
+        self.charvocabularysize = len(self.id2char)
+        args.char_vocabulary_size = self.charvocabularysize
         args.word2id=self.word2id
-        self.datasize=len(self.trainx)
+        args.char2id=self.char2id
+        #self.datasize=len(self.trainx)
 
         if bool(args.loginfor):
-            print("dictionary size : "+str(self.vocabularysize))
-            print("train data size : " + str(self.datasize))
+            print("word dictionary size : "+str(self.wordvocabularysize))
+            print("char dictionary size : "+str(self.charvocabularysize))
+            print("train data size : " + str(len(self.trainx)))
             print("dev data size : " + str(len(self.devx)))
             print("test data size : " + str(len(self.testx)))
 
         #Train
-        self.traindataset=GedDataset(self.trainx,self.trainy,self.trainsize,args.batch_size)
-        self.traindataloader=DataLoader(dataset=self.traindataset,batch_size=args.batch_size,shuffle=True,collate_fn=collate_fn)
+        self.traindataset = GedDataset(self.trainx, self.trainy, self.trainsize, self.trainx_char)
+        self.traindataloader = DataLoader(dataset=self.traindataset, batch_size=args.batch_size, shuffle=True,
+                                          collate_fn=collate_fn)
 
         #Dev
-        self.devdataset=GedDataset(self.devx,self.devy,self.devsize,args.batch_size)
-        self.devdataloader=DataLoader(dataset=self.devdataset,batch_size=args.batch_size,shuffle=False,collate_fn=collate_fn)
+        self.devdataset = GedDataset(self.devx, self.devy, self.devsize, self.devx_char)
+        self.devdataloader = DataLoader(dataset=self.devdataset, batch_size=args.batch_size, shuffle=False,
+                                        collate_fn=collate_fn)
 
         #Test
-        self.testdataset=GedDataset(self.testx,self.testy,self.testsize,1)
-        self.testdataloader=DataLoader(dataset=self.testdataset,batch_size=1,shuffle=False,collate_fn=collate_fn)
+        self.testdataset = GedDataset(self.testx, self.testy, self.testsize, self.testx_char)
+        self.testdataloader = DataLoader(dataset=self.testdataset, batch_size=1, shuffle=False, collate_fn=collate_fn)
 
     def save_preprocess(self,dir):
-        f=open(dir,'wb')
+        f = open(dir, 'wb')
         pickle.dump(self.trainx,f)
+        pickle.dump(self.trainx_char,f)
         pickle.dump(self.trainy,f)
         pickle.dump(self.trainsize,f)
         pickle.dump(self.word2id,f)
         pickle.dump(self.id2word,f)
+        pickle.dump(self.char2id, f)
+        pickle.dump(self.id2char,f)
         pickle.dump(self.devx,f)
+        pickle.dump(self.devx_char,f)
         pickle.dump(self.devy,f)
         pickle.dump(self.devsize,f)
         pickle.dump(self.testx,f)
+        pickle.dump(self.testx_char,f)
         pickle.dump(self.testy,f)
         pickle.dump(self.testsize,f)
         f.close()
@@ -95,19 +113,24 @@ class GedCorpus:
     def load_preprocess(self,dir):
         f = open(dir, 'rb')
         self.trainx = pickle.load(f)
+        self.trainx_char = pickle.load(f)
         self.trainy = pickle.load(f)
         self.trainsize = pickle.load(f)
         self.word2id = pickle.load(f)
         self.id2word = pickle.load(f)
+        self.char2id = pickle.load(f)
+        self.id2char = pickle.load(f)
         self.devx = pickle.load(f)
+        self.devx_char = pickle.load(f)
         self.devy = pickle.load(f)
         self.devsize = pickle.load(f)
         self.testx = pickle.load(f)
+        self.testx_char = pickle.load(f)
         self.testy = pickle.load(f)
         self.testsize = pickle.load(f)
         f.close()
 
-    def load(self,fpath):
+    def load(self, fpath):
         if not os.path.exists(fpath):
             raise FileNotFoundError("Can not find the file \""+fpath+"\"")
         templist=open(fpath).read().strip().split("\n\n")
@@ -129,7 +152,7 @@ class GedCorpus:
             size.append(len(wordlist))
         return x,y,size #['Dear', 'Sir', 'or', 'Madam', ',']  ['c', 'c', 'c', 'c', 'c'] 5
 
-    def makeword2veclist(self,datasetlist):
+    def makeword2veclist(self, datasetlist):
         counter = Counter()
         for dataset in datasetlist:
             for instance in dataset:
@@ -147,14 +170,39 @@ class GedCorpus:
             num+=1
         return word2id,id2word
 
-    def preprocess(self,dataset,ispad=False,padwordid=0,unkid=1,padlabel=-1,maxlength=150):
+    def makechar2veclist(self, datasetlist):
+        counter = Counter()
+        for dataset in datasetlist:
+            for instance in dataset:
+                for word in instance:
+                    counter.update(word)
+        char2id={}
+        id2char=[]
+        char2id["<pad>"]=0
+        char2id["<unk>"]=1
+        id2char.append("<pad>")
+        id2char.append("<unk>")
+        num=len(id2char)
+        for k,v in counter.most_common():
+            char2id[k]=num
+            id2char.append(k)
+            num+=1
+        return char2id,id2char
+
+    def preprocess(self, dataset, ispad=False, padwordid=0, unkid=1, padlabel=-1, maxlength=150, maxcharlength=-1):
         x=[]
+        charx = []
         for instance in dataset[0]:
             temp=[self.word2id[w] if w in self.word2id else unkid for w in instance]
+            ctemp=[]
+            for w in instance:
+                cc=[self.char2id[c] if c in self.char2id else unkid for c in w]
+                ctemp.append(cc)
             if ispad:
                 temp=temp[:min(len(temp),maxlength)]
                 temp.extend([padwordid for _ in range(maxlength-len(temp))])
             x.append(temp)
+            charx.append(ctemp)
 
         y=[]
         for instance in dataset[1]:
@@ -164,13 +212,14 @@ class GedCorpus:
                 temp.extend([padlabel for _ in range(maxlength - len(temp))])
             y.append(temp)
 
-        return x,y
+        return x,y,charx
 
 class GedDataset(Dataset):
-    def __init__(self,x,y,size,batchsize):
+    def __init__(self, x, y, size, x_char):
         self.x=x
         self.y=y
         self.size=size
+        self.x_char=x_char
         #self.x,self.y,self.size=self.sort(self.x,self.y,self.size)
         #self.x=self.x[:-(len(x)%batchsize)]
         #self.y=self.y[:-(len(x)%batchsize)]
@@ -183,7 +232,7 @@ class GedDataset(Dataset):
         return (list(i) for i in zip(*temp)) #([1, 2, 4, 3] [4, 4, 2, 1])
 
     def __getitem__(self, index):
-        return self.x[index], self.y[index], self.size[index]
+        return self.x[index], self.y[index], self.size[index], self.x_char[index]
 
     def __len__(self):
         return self.len

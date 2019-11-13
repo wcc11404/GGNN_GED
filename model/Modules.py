@@ -66,7 +66,7 @@ class RnnTemplate(nn.Module):
 
         hidden_dim = hidden_dim // 2 if bidirectional else hidden_dim
         if self.type=="LSTM":
-            self.rnn = nn.LSTM(input_dim, hidden_dim, num_layers=numLayers, bidirectional=bidirectional)
+            self.rnn = nn.LSTM(input_dim, hidden_dim, num_layers=numLayers, bidirectional=bidirectional,batch_first=False)
             if initalizer_type=="normal":
                 self.hidden = (torch.normal(mean=torch.zeros(numLayers * 2 if bidirectional else numLayers, hidden_dim)).to("cuda"),
                           torch.normal(mean=torch.zeros(numLayers * 2 if bidirectional else numLayers, hidden_dim)).to("cuda"))
@@ -91,7 +91,17 @@ class RnnTemplate(nn.Module):
             elif 'weight' in name:
                 nn.init.xavier_uniform_(param)
 
-    def forward(self, batchinput, batchlength): # B * S * E
+    def forward(self, batchinput, batchlength, ischar=False): # B * S * E
+        if ischar:
+            assert len(batchinput.shape)==4
+            wl = batchinput.shape[2]
+            batchinput = batchinput.view(-1, wl, self.input_dim)
+            batchlength = batchlength.view(-1)
+
+        batchlength, itemIdx = batchlength.sort(0, descending=True)
+        _, recoverItemIdx = itemIdx.sort(0, descending=False)
+        batchinput = batchinput[itemIdx]
+
         batchinput = batchinput.permute(1, 0, 2).contiguous() # S * B * E
         mask_input = pack_padded_sequence(batchinput, batchlength, batch_first=False)
 
@@ -100,8 +110,14 @@ class RnnTemplate(nn.Module):
         rnn_ouput, _ = pad_packed_sequence(rnn_ouput, batch_first=False)
         rnn_ouput = rnn_ouput.permute(1, 0, 2).contiguous() # B * S * E
 
+        rnn_ouput = rnn_ouput[recoverItemIdx]
+
         rnn_ouput=self.rnndropout(rnn_ouput)
 
+        if ischar:
+            rnn_ouput = rnn_ouput.view(self.batch_size, -1, wl, self.input_dim)
+            batchlength = batchlength.view(self.batch_size, -1)
+            
         return rnn_ouput # B * S * E
 
 class LinearTemplate(nn.Module):

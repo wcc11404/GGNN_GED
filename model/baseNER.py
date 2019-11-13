@@ -4,13 +4,14 @@ from .Modules import EmbeddingTemplate, RnnTemplate, LinearTemplate
 class baseNER(nn.Module):
     def __init__(self,args):
         super(baseNER, self).__init__()
-        self.wordembedding = EmbeddingTemplate(args.vocabulary_size, args.embed_dim, args.embed_drop)
-        self.rnn = RnnTemplate(args.rnn_type, args.batch_size, args.embed_dim, args.embed_dim, args.rnn_drop)
-        self.hiddenlinear = LinearTemplate(args.embed_dim, args.hidden_dim, activation="tanh")
+        self.wordembedding = EmbeddingTemplate(args.word_vocabulary_size, args.word_embed_dim, args.embed_drop)
+        self.charembedding = EmbeddingTemplate(args.char_vocabulary_size, args.char_embed_dim, args.embed_drop)
+        self.rnn = RnnTemplate(args.rnn_type, args.batch_size, args.word_embed_dim, args.word_embed_dim, args.rnn_drop)
+        self.hiddenlinear = LinearTemplate(args.word_embed_dim, args.hidden_dim, activation="tanh")
         self.linear = LinearTemplate(args.hidden_dim, 2, activation=None)
         #self.logsoftmax=nn.LogSoftmax(dim=2)
 
-        self.load_embedding(args)
+        #self.load_embedding(args)
 
     def load_embedding(self,args):
         if args.w2v_dir is not None:
