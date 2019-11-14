@@ -124,6 +124,7 @@ class LinearTemplate(nn.Module):
     def __init__(self, input_dim, output_dim, activation=None):
         super(LinearTemplate, self).__init__()
         self.linear = nn.Linear(input_dim, output_dim)
+        activation = activation.lower()
         if activation=="sigmoid":
             self.activation=F.sigmoid
         elif activation=="softmax":

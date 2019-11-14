@@ -19,7 +19,14 @@ class SLNER(nn.Module):
             self.charembedding = None
             self.hiddenlinear = LinearTemplate(args.word_embed_dim, args.hidden_dim, activation="tanh")
 
-        self.linear = LinearTemplate(args.hidden_dim, 2, activation=None)
+        self.classification = LinearTemplate(args.hidden_dim, 2, activation=None)
+        self.lm_hiddenlinear = LinearTemplate((args.word_embed_dim + args.char_embed_dim) // 2, args.lm_hidden_dim,
+                                              activation="tanh")
+        if args.lm_vocab_size == -1 or args.lm_vocab_size > args.word_vocabulary_size:
+            args.lm_vocab_size = args.word_vocabulary_size
+        self.lm_softmax = LinearTemplate(args.lm_hidden_dim, args.lm_vocab_size,
+                                              activation=None)
+        self.Loss = nn.CrossEntropyLoss(ignore_index=-1, reduction="sum")
 
         self.load_embedding(args)
 
@@ -41,7 +48,11 @@ class SLNER(nn.Module):
             out = torch.cat([out,charout],2)
 
         out = self.hiddenlinear(out)
-        out = self.linear(out)
+        out = self.classification(out)
 
         return out
+
+    def getLoss(self, input, output, label):
+        #x, xl, xc, xcl = input
+        return self.Loss(output.view(-1, 2), label.view(-1))
 

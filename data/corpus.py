@@ -87,8 +87,8 @@ class GedCorpus:
         else:
             self.load_preprocess(args.preprocess_dir)
 
-        self.wordvocabularysize=len(self.id2word)
-        args.word_vocabulary_size=self.wordvocabularysize
+        self.wordvocabularysize = len(self.id2word)
+        args.word_vocabulary_size = self.wordvocabularysize
         self.charvocabularysize = len(self.id2char)
         args.char_vocabulary_size = self.charvocabularysize
         args.word2id=self.word2id

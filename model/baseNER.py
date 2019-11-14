@@ -19,15 +19,17 @@ class baseNER(nn.Module):
             self.charembedding = None
             self.hiddenlinear = LinearTemplate(args.word_embed_dim, args.hidden_dim, activation="tanh")
 
-        self.linear = LinearTemplate(args.hidden_dim, 2, activation=None)
+        self.classification = LinearTemplate(args.hidden_dim, 2, activation=None)
         #self.logsoftmax=nn.LogSoftmax(dim=2)
+        self.Loss = nn.CrossEntropyLoss(ignore_index=-1, reduction="sum")
 
         self.load_embedding(args)
 
     def load_embedding(self,args):
         if args.mode == "Train" and args.load_dir is None:
             if args.w2v_dir is not None:
-                self.wordembedding.load_from_w2v(args.word2id, True, args.w2v_dir, bool(args.use_lower), bool(args.loginfor))
+                self.wordembedding.load_from_w2v(args.word2id, True, args.w2v_dir, bool(args.use_lower),
+                                                 bool(args.loginfor))
                 del args.word2id
 
     def forward(self, batchinput, batchlength, batchinput_char, batchlength_char):
@@ -39,10 +41,15 @@ class baseNER(nn.Module):
             charout = self.charrnn(charout, batchlength_char, ischar=True) # B S W E
             charout = charout.index_select(2, self.index) # B S 1 E
             charout = charout.squeeze(2)    # B S E
-            out = torch.cat([out,charout],2)
+            out = torch.cat([out, charout], 2)
 
         out = self.hiddenlinear(out)
-        out = self.linear(out)
+        out = self.classification(out)
 
         return out
+
+    def getLoss(self, input, output, label):
+        #x, xl, xc, xcl = input
+        return self.Loss(output.view(-1, 2), label.view(-1))
+
 

@@ -7,11 +7,11 @@ import argparse
 from sklearn.metrics import precision_recall_fscore_support,accuracy_score
 from model.utils import savecheckpoint,loadcheckpoint
 
-def evaluate(args,dataloader,model,Loss=None,mode="average"):
-    loss=0
-    length=0
-    predict=[]
-    groundtruth=[]
+def evaluate(args, dataloader, model, mode="average"):
+    loss = 0
+    length = 0
+    predict = []
+    groundtruth = []
     for (train_x, train_y, train_length, train_x_char, train_length_char) in dataloader:
         if bool(args.use_gpu):
             train_x = train_x.cuda()
@@ -20,20 +20,17 @@ def evaluate(args,dataloader,model,Loss=None,mode="average"):
             train_x_char = train_x_char.cuda()
             train_length_char = train_length_char.cuda()
         out = model(train_x, train_length, train_x_char, train_length_char)
-        if Loss is not None:
-            loss+=Loss(out.view(-1,2),train_y.view(-1)).item()
-        out=out.cpu().detach().numpy()
-        train_y=train_y.cpu().detach().numpy()
-        train_length=train_length.cpu().detach().numpy()
+        loss = model.getLoss((train_x, train_length, train_x_char, train_length_char), out, train_y).item()
+        out = out.cpu().detach().numpy()
+        train_y = train_y.cpu().detach().numpy()
+        train_length = train_length.cpu().detach().numpy()
         for o,y,l in zip(out,train_y,train_length):
-            o=o[:l]
+            o = o[:l]
             predict.extend(o.argmax(axis=-1))
             groundtruth.extend(y[:l])
-            length+=l
+            length += l
 
-    p=0
-    r=0
-    f=0
+    p, r, f = 0, 0, 0
     p, r, f, _ = precision_recall_fscore_support(groundtruth, predict, 0.5, average='binary')
     return loss / length if mode == "average" else loss, p, r, f
 
@@ -45,9 +42,9 @@ def train(args,model,Corpus):
     max_index = 0
     early_stop=0
     summary = []
-    Loss = torch.nn.CrossEntropyLoss(ignore_index=-1, reduction="sum")
     if args.optimizer.lower() == "adam":
-        optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, betas=(0.9, 0.998), eps=1e-08, weight_decay=args.weight_decay)
+        optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, betas=(0.9, 0.998), eps=1e-08,
+                                     weight_decay=args.weight_decay)
     elif args.optimizer.lower() == "adadelta":
         optimizer = torch.optim.Adadelta(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
 
@@ -69,13 +66,13 @@ def train(args,model,Corpus):
 
             optimizer.zero_grad()
             out = model(train_x, train_length, train_x_char, train_length_char)
-            loss = Loss(out.view(-1, 2), train_y.view(-1))
+            loss = model.getLoss((train_x, train_length, train_x_char, train_length_char), out, train_y)
             loss.backward()
             optimizer.step()
 
         model.eval()
-        train_loss, train_p, train_r, train_f0_5 = evaluate(args, Corpus.traindataloader, model, Loss)
-        dev_loss, dev_p, dev_r, dev_f0_5 = evaluate(args, Corpus.devdataloader, model, Loss)
+        train_loss, train_p, train_r, train_f0_5 = evaluate(args, Corpus.traindataloader, model)
+        dev_loss, dev_p, dev_r, dev_f0_5 = evaluate(args, Corpus.devdataloader, model)
         log = {"epoch": epoch,
                "train_loss": train_loss,
                "train_p": train_p,
@@ -110,18 +107,18 @@ def test(args,model,Corpus):
     loadcheckpoint(model,args.load_dir)
     model.eval()
     #_, train_p, train_r, train_f = evaluate(args, Corpus.traindataloader, model, Loss=None)
-    _, dev_p, dev_r, dev_f = evaluate(args, Corpus.devdataloader, model, Loss=None)
-    print("Dev Precision : {:.4f}\tDev Recall : {:.4f}\tDev F0.5 : {:.4f}".format(dev_p,dev_r,dev_f))
+    _, dev_p, dev_r, dev_f = evaluate(args, Corpus.devdataloader, model)
+    print("Dev Precision : {:.4f}\tDev Recall : {:.4f}\tDev F0.5 : {:.4f}".format(dev_p, dev_r, dev_f))
 
-    _, test_p, test_r, test_f = evaluate(args, Corpus.testdataloader, model, Loss=None)
-    print("Test Precision : {:.4f}\tTest Recall : {:.4f}\tTest F0.5 : {:.4f}".format(test_p,test_r,test_f))
+    _, test_p, test_r, test_f = evaluate(args, Corpus.testdataloader, model)
+    print("Test Precision : {:.4f}\tTest Recall : {:.4f}\tTest F0.5 : {:.4f}".format(test_p, test_r, test_f))
 
 def main(args):
     if args.random_seed is not None:
         setup_seed(args.random_seed)
-    corpus=GedCorpus("data",args)
-    if args.arch=="baseNER":
-        model=baseNER(args)
+    corpus = GedCorpus("data", args)
+    if args.arch == "baseNER":
+        model = baseNER(args)
     if bool(args.use_gpu):
         # if args.gpu_list is not None:
         #     os.environ["CUDA_VISIBLE_DEVICES"]=str(args.gpu_list)
@@ -160,11 +157,13 @@ if __name__ == "__main__":
     # parser.add_argument("--vocabulary-size",type=int,default=32)
     parser.add_argument("--word-embed-dim", type=int, default=300)
     parser.add_argument("--char-embed-dim", type=int, default=100)
-    parser.add_argument("--embed-drop", type=float, default=0.5)
+    parser.add_argument("--embed-drop", type=float, default=0.4)
 
     parser.add_argument("--rnn-type", default="LSTM")
-    parser.add_argument("--rnn-drop", type=float, default=0.4)
+    parser.add_argument("--rnn-drop", type=float, default=0.3)
     parser.add_argument("--hidden-dim", type=int, default=50)
+    parser.add_argument("--lm-hidden-dim", type=int, default=50)
+    parser.add_argument("--lm-vocab-size", type=int, default=-1)
 
     parser.add_argument("--save-dir", default="checkpoint")
     parser.add_argument("--load-dir", default=None)
