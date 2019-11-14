@@ -3,16 +3,17 @@ from torch import nn
 from .Modules import EmbeddingTemplate, RnnTemplate, LinearTemplate
 
 class SLNER(nn.Module):
-    def __init__(self,args):
+    def __init__(self, args):
         super(SLNER, self).__init__()
+        assert args.rnn_bidirectional == "True" # 暂时必须是双向lstm
         self.wordembedding = EmbeddingTemplate(args.word_vocabulary_size, args.word_embed_dim, args.embed_drop)
-        self.rnn = RnnTemplate(args.rnn_type, args.batch_size, args.word_embed_dim, args.word_embed_dim, args.rnn_drop)
+        self.rnn = RnnTemplate(args.rnn_type, args.batch_size, args.word_embed_dim, args.word_embed_dim, args.rnn_drop,
+                               bidirectional=bool(args.rnn_bidirectional))
 
         if args.char_embed_dim is not None and args.char_embed_dim > 0:
             self.charembedding = EmbeddingTemplate(args.char_vocabulary_size, args.char_embed_dim, args.embed_drop)
             self.charrnn = RnnTemplate(args.rnn_type, args.batch_size, args.char_embed_dim, args.char_embed_dim,
                                        args.rnn_drop)
-            self.index = torch.LongTensor([0]).cuda() if bool(args.use_gpu) else torch.LongTensor([0])
             self.hiddenlinear = LinearTemplate(args.word_embed_dim + args.char_embed_dim, args.hidden_dim,
                                                activation="tanh")
         else:
@@ -20,12 +21,18 @@ class SLNER(nn.Module):
             self.hiddenlinear = LinearTemplate(args.word_embed_dim, args.hidden_dim, activation="tanh")
 
         self.classification = LinearTemplate(args.hidden_dim, 2, activation=None)
-        self.lm_hiddenlinear = LinearTemplate((args.word_embed_dim + args.char_embed_dim ) // 2, args.lm_hidden_dim,
-                                              activation="tanh")
-        if args.lm_vocab_size == -1 or args.lm_vocab_size > args.word_vocabulary_size:
-            args.lm_vocab_size = args.word_vocabulary_size
-        self.lm_softmax = LinearTemplate(args.lm_hidden_dim, args.lm_vocab_size,
-                                              activation=None)
+
+        ## LM
+        self.fw_lm_hiddenlinear = LinearTemplate((args.word_embed_dim) // 2 + args.char_embed_dim, args.lm_hidden_dim,
+                                                 activation="tanh")
+        self.bw_lm_hiddenlinear = LinearTemplate((args.word_embed_dim) // 2 + args.char_embed_dim, args.lm_hidden_dim,
+                                                 activation="tanh")
+        self.lm_vocab_size = args.lm_vocab_size
+        if self.lm_vocab_size == -1 or self.lm_vocab_size > args.word_vocabulary_size:
+            self.lm_vocab_size = args.word_vocabulary_size
+        self.fw_lm_softmax = LinearTemplate(args.lm_hidden_dim, self.lm_vocab_size, activation=None)
+        self.bw_lm_softmax = LinearTemplate(args.lm_hidden_dim, self.lm_vocab_size, activation=None)
+
         self.Loss = nn.CrossEntropyLoss(ignore_index=-1, reduction="sum")
 
         self.load_embedding(args)
@@ -38,24 +45,31 @@ class SLNER(nn.Module):
 
     def forward(self, batchinput, batchlength, batchinput_char, batchlength_char):
         out = self.wordembedding(batchinput)
-        out = self.rnn(out, batchlength)    # B S E
+        out, _ = self.rnn(out, batchlength)    # B S E
+        lm_input = out.view(-1, out.shape[1], 2, out.shape[2]//2).permute(2, 0, 1,3).contiguous() # 分成双向的
+        lm_fw_input = lm_input[0].permute(1, 2, 0, 3).contiguous().squeeze(2)
+        lm_bw_input = lm_input[1].permute(1, 2, 0, 3).contiguous().squeeze(2)
 
         if self.charembedding is not None:
             charout = self.charembedding(batchinput_char)
-            charout = self.charrnn(charout, batchlength_char, ischar=True) # B S W E
-            charout = charout.index_select(2, self.index) # B S 1 E
-            charout = charout.squeeze(2)    # B S E
-            out = torch.cat([out,charout],2)
+            _, charout = self.charrnn(charout, batchlength_char, ischar=True) # B S 2 E//2
+            charout = charout.view(charout.shape[0], charout.shape[1], -1)
+            out = torch.cat((out, charout), 2)
+            lm_fw_input = torch.cat((lm_fw_input, charout), 2)
+            lm_bw_input = torch.cat((lm_bw_input, charout), 2)
 
-        lmout = out
         out = self.hiddenlinear(out)
         out = self.classification(out)
 
+        lm_fw_output = self.fw_lm_hiddenlinear(lm_fw_input)
+        lm_bw_output = self.bw_lm_hiddenlinear(lm_bw_input)
+        lm_fw_output = self.fw_lm_softmax(lm_fw_output)
+        lm_bw_output = self.bw_lm_softmax(lm_bw_output)
 
-
-        return out
+        return out, (lm_fw_output, lm_bw_output)
 
     def getLoss(self, input, output, label):
         #x, xl, xc, xcl = input
+        output = output[0]
         return self.Loss(output.view(-1, 2), label.view(-1))
 

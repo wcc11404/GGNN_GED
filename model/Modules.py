@@ -120,6 +120,11 @@ class RnnTemplate(nn.Module):
             hidden = hidden.view(-1, sl, 2, self.input_dim//2)  # B * S * 2 * E//2
             batchlength = batchlength.view(-1, sl)
 
+        # 注意: rnn_output为双向lstm，S个时间步骤输出的拼接
+        #    c<-h<-a<-r<-
+        #  ->c->h->a->r
+        # S: 0  1  2  3
+        # hidden为前向lstm的3和后向lstm的0的输出拼接
         return rnn_ouput, hidden # B * S * E , B * 2 * E//2
 
 class LinearTemplate(nn.Module):

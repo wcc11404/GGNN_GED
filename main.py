@@ -19,7 +19,7 @@ def evaluate(args, dataloader, model, mode="average"):
             train_length = train_length.cuda()
             train_x_char = train_x_char.cuda()
             train_length_char = train_length_char.cuda()
-        out = model(train_x, train_length, train_x_char, train_length_char)
+        out = model(train_x, train_length, train_x_char, train_length_char)[0]
         loss += model.getLoss((train_x, train_length, train_x_char, train_length_char), out, train_y).item()
         out = out.cpu().detach().numpy()
         train_y = train_y.cpu().detach().numpy()
@@ -160,6 +160,7 @@ if __name__ == "__main__":
     parser.add_argument("--embed-drop", type=float, default=0.3)
 
     parser.add_argument("--rnn-type", default="LSTM")
+    parser.add_argument("--rnn-bidirectional", default="True")
     parser.add_argument("--rnn-drop", type=float, default=0.3)
     parser.add_argument("--hidden-dim", type=int, default=50)
     parser.add_argument("--lm-hidden-dim", type=int, default=50)

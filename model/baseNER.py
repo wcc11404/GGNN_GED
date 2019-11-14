@@ -6,13 +6,14 @@ class baseNER(nn.Module):
     def __init__(self,args):
         super(baseNER, self).__init__()
         self.wordembedding = EmbeddingTemplate(args.word_vocabulary_size, args.word_embed_dim, args.embed_drop)
-        self.rnn = RnnTemplate(args.rnn_type, args.batch_size, args.word_embed_dim, args.word_embed_dim, args.rnn_drop)
+        self.rnn = RnnTemplate(args.rnn_type, args.batch_size, args.word_embed_dim, args.word_embed_dim, args.rnn_drop,
+                               bidirectional=bool(args.rnn_bidirectional))
 
         if args.char_embed_dim is not None and args.char_embed_dim > 0:
             self.charembedding = EmbeddingTemplate(args.char_vocabulary_size, args.char_embed_dim, args.embed_drop)
             self.charrnn = RnnTemplate(args.rnn_type, args.batch_size, args.char_embed_dim, args.char_embed_dim,
                                        args.rnn_drop)
-            self.index = torch.LongTensor([0]).cuda() if bool(args.use_gpu) else torch.LongTensor([0])
+            #self.index = torch.LongTensor([0]).cuda() if bool(args.use_gpu) else torch.LongTensor([0])
             self.hiddenlinear = LinearTemplate(args.word_embed_dim + args.char_embed_dim, args.hidden_dim,
                                                activation="tanh")
         else:
@@ -23,7 +24,7 @@ class baseNER(nn.Module):
         #self.logsoftmax=nn.LogSoftmax(dim=2)
         self.Loss = nn.CrossEntropyLoss(ignore_index=-1, reduction="sum")
 
-        self.load_embedding(args)
+        #self.load_embedding(args)
 
     def load_embedding(self,args):
         if args.mode == "Train" and args.load_dir is None:
@@ -38,19 +39,18 @@ class baseNER(nn.Module):
 
         if self.charembedding is not None:
             charout = self.charembedding(batchinput_char)
-            _, charout = self.charrnn(charout, batchlength_char, ischar=True) # B S W E
-            #charout = charout.index_select(2, self.index) # B S 1 E
-            #charout = charout.squeeze(2)    # B S E
+            _, charout = self.charrnn(charout, batchlength_char, ischar=True) # B S 2 E//2
             charout = charout.view(charout.shape[0], charout.shape[1], -1)
-            out = torch.cat([out, charout], 2)
+            out = torch.cat((out, charout), 2)
 
         out = self.hiddenlinear(out)
         out = self.classification(out)
 
-        return out
+        return out, ()
 
     def getLoss(self, input, output, label):
         #x, xl, xc, xcl = input
+        output = output[0]
         return self.Loss(output.view(-1, 2), label.view(-1))
 
 
