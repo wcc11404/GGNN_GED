@@ -12,7 +12,7 @@ class baseNER(nn.Module):
             self.charembedding = EmbeddingTemplate(args.char_vocabulary_size, args.char_embed_dim, args.embed_drop)
             self.charrnn = RnnTemplate(args.rnn_type, args.batch_size, args.char_embed_dim, args.char_embed_dim,
                                        args.rnn_drop)
-            self.index = torch.LongTensor([-1]).cuda() if bool(args.use_gpu) else torch.LongTensor([0])
+            self.index = torch.LongTensor([0]).cuda() if bool(args.use_gpu) else torch.LongTensor([0])
             self.hiddenlinear = LinearTemplate(args.word_embed_dim + args.char_embed_dim, args.hidden_dim,
                                                activation="tanh")
         else:
@@ -39,7 +39,8 @@ class baseNER(nn.Module):
         if self.charembedding is not None:
             charout = self.charembedding(batchinput_char)
             charout = self.charrnn(charout, batchlength_char, ischar=True) # B S W E
-            charout = charout.index_select(2, self.index) # B S 1 E
+            index = torch.LongTensor([charout.shape[2]-1]).cuda()
+            charout = charout.index_select(2, index) # B S 1 E
             charout = charout.squeeze(2)    # B S E
             out = torch.cat([out, charout], 2)
 

@@ -92,7 +92,7 @@ class RnnTemplate(nn.Module):
 
     def forward(self, batchinput, batchlength, ischar=False): # B * S * E
         if ischar:
-            assert len(batchinput.shape)==4
+            assert len(batchinput.shape) == 4
             sl = batchinput.shape[1]
             wl = batchinput.shape[2]
             batchinput = batchinput.view(-1, wl, self.input_dim) # (B*S) * W * E
