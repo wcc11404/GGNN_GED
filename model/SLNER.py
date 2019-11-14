@@ -5,7 +5,10 @@ from .Modules import EmbeddingTemplate, RnnTemplate, LinearTemplate
 class SLNER(nn.Module):
     def __init__(self, args):
         super(SLNER, self).__init__()
-        assert args.rnn_bidirectional == "True" # 暂时必须是双向lstm
+        assert args.rnn_bidirectional == "True" and args.lm_cost_weight >= 0  # 暂时必须是双向lstm
+        self.lm_vocab_size = args.lm_vocab_size
+        self.lm_cost_weight = args.lm_cost_weight
+
         self.wordembedding = EmbeddingTemplate(args.word_vocabulary_size, args.word_embed_dim, args.embed_drop)
         self.rnn = RnnTemplate(args.rnn_type, args.batch_size, args.word_embed_dim, args.word_embed_dim, args.rnn_drop,
                                bidirectional=bool(args.rnn_bidirectional))
@@ -27,7 +30,6 @@ class SLNER(nn.Module):
                                                  activation="tanh")
         self.bw_lm_hiddenlinear = LinearTemplate((args.word_embed_dim) // 2 + args.char_embed_dim, args.lm_hidden_dim,
                                                  activation="tanh")
-        self.lm_vocab_size = args.lm_vocab_size
         if self.lm_vocab_size == -1 or self.lm_vocab_size > args.word_vocabulary_size:
             self.lm_vocab_size = args.word_vocabulary_size
         self.fw_lm_softmax = LinearTemplate(args.lm_hidden_dim, self.lm_vocab_size, activation=None)
@@ -48,8 +50,6 @@ class SLNER(nn.Module):
         out, _ = self.rnn(out, batchlength)    # B S E
         lm_input = out.view(-1, out.shape[1], 2, out.shape[2] // 2).permute(2, 0, 1, 3).contiguous()  # 分成双向的
         lm_fw_input, lm_bw_input = lm_input[0], lm_input[1]
-        # lm_fw_input = lm_input[0].permute(1, 2, 0, 3).contiguous().squeeze(2)
-        # lm_bw_input = lm_input[1].permute(1, 2, 0, 3).contiguous().squeeze(2)
 
         if self.charembedding is not None:
             charout = self.charembedding(batchinput_char)
@@ -72,12 +72,12 @@ class SLNER(nn.Module):
     def getLoss(self, input, output, label):
         x, xl, xc, xcl = input
         out,(lm_fw_out,lm_bw_out) = output
-        loss=self.Loss(out.view(-1, 2), label.view(-1))
+        loss = self.Loss(out.view(-1, 2), label.view(-1))
         fw_x = x[:, 1:]
         fw_x = torch.cat((fw_x, torch.zeros(fw_x.shape[0], 1, dtype=torch.long, device=fw_x.device)), dim=-1)
         bw_x = x[:, :-1]
         bw_x = torch.cat((torch.zeros(bw_x.shape[0], 1, dtype=torch.long, device=bw_x.device), bw_x), dim=-1)
-        loss += 0.1 * self.Loss(lm_fw_out.view(-1, self.lm_vocab_size), fw_x.view(-1))
-        loss += 0.1 * self.Loss(lm_bw_out.view(-1, self.lm_vocab_size), bw_x.view(-1))
+        loss += self.lm_cost_weight * self.Loss(lm_fw_out.view(-1, self.lm_vocab_size), fw_x.view(-1))
+        loss += self.lm_cost_weight * self.Loss(lm_bw_out.view(-1, self.lm_vocab_size), bw_x.view(-1))
         return loss
 
