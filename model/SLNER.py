@@ -20,7 +20,7 @@ class SLNER(nn.Module):
             self.hiddenlinear = LinearTemplate(args.word_embed_dim, args.hidden_dim, activation="tanh")
 
         self.classification = LinearTemplate(args.hidden_dim, 2, activation=None)
-        self.lm_hiddenlinear = LinearTemplate((args.word_embed_dim + args.char_embed_dim) // 2, args.lm_hidden_dim,
+        self.lm_hiddenlinear = LinearTemplate((args.word_embed_dim + args.char_embed_dim ) // 2, args.lm_hidden_dim,
                                               activation="tanh")
         if args.lm_vocab_size == -1 or args.lm_vocab_size > args.word_vocabulary_size:
             args.lm_vocab_size = args.word_vocabulary_size
@@ -47,8 +47,11 @@ class SLNER(nn.Module):
             charout = charout.squeeze(2)    # B S E
             out = torch.cat([out,charout],2)
 
+        lmout = out
         out = self.hiddenlinear(out)
         out = self.classification(out)
+
+        lmout =
 
         return out
 

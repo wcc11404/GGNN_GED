@@ -12,7 +12,7 @@ class baseNER(nn.Module):
             self.charembedding = EmbeddingTemplate(args.char_vocabulary_size, args.char_embed_dim, args.embed_drop)
             self.charrnn = RnnTemplate(args.rnn_type, args.batch_size, args.char_embed_dim, args.char_embed_dim,
                                        args.rnn_drop)
-            self.index = torch.LongTensor([0]).cuda() if bool(args.use_gpu) else torch.LongTensor([0])
+            self.index = torch.LongTensor([-1]).cuda() if bool(args.use_gpu) else torch.LongTensor([0])
             self.hiddenlinear = LinearTemplate(args.word_embed_dim + args.char_embed_dim, args.hidden_dim,
                                                activation="tanh")
         else:
@@ -23,7 +23,7 @@ class baseNER(nn.Module):
         #self.logsoftmax=nn.LogSoftmax(dim=2)
         self.Loss = nn.CrossEntropyLoss(ignore_index=-1, reduction="sum")
 
-        self.load_embedding(args)
+        #self.load_embedding(args)
 
     def load_embedding(self,args):
         if args.mode == "Train" and args.load_dir is None:
