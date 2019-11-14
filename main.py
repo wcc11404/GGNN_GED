@@ -157,7 +157,7 @@ if __name__ == "__main__":
     # parser.add_argument("--vocabulary-size",type=int,default=32)
     parser.add_argument("--word-embed-dim", type=int, default=300)
     parser.add_argument("--char-embed-dim", type=int, default=100)
-    parser.add_argument("--embed-drop", type=float, default=0.4)
+    parser.add_argument("--embed-drop", type=float, default=0.3)
 
     parser.add_argument("--rnn-type", default="LSTM")
     parser.add_argument("--rnn-drop", type=float, default=0.3)
