@@ -23,7 +23,7 @@ class baseNER(nn.Module):
         #self.logsoftmax=nn.LogSoftmax(dim=2)
         self.Loss = nn.CrossEntropyLoss(ignore_index=-1, reduction="sum")
 
-        self.load_embedding(args)
+        #self.load_embedding(args)
 
     def load_embedding(self,args):
         if args.mode == "Train" and args.load_dir is None:
@@ -34,14 +34,14 @@ class baseNER(nn.Module):
 
     def forward(self, batchinput, batchlength, batchinput_char, batchlength_char):
         out = self.wordembedding(batchinput)
-        out = self.rnn(out, batchlength)    # B S E
+        out, _ = self.rnn(out, batchlength)    # B S E
 
         if self.charembedding is not None:
             charout = self.charembedding(batchinput_char)
-            charout = self.charrnn(charout, batchlength_char, ischar=True) # B S W E
-            index = torch.LongTensor([charout.shape[2]-1]).cuda()
-            charout = charout.index_select(2, index) # B S 1 E
-            charout = charout.squeeze(2)    # B S E
+            _, charout = self.charrnn(charout, batchlength_char, ischar=True) # B S W E
+            #charout = charout.index_select(2, self.index) # B S 1 E
+            #charout = charout.squeeze(2)    # B S E
+            charout = charout.view(charout.shape[0], charout.shape[1], -1)
             out = torch.cat([out, charout], 2)
 
         out = self.hiddenlinear(out)

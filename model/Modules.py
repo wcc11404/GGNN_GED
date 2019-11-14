@@ -109,16 +109,18 @@ class RnnTemplate(nn.Module):
 
         rnn_ouput, _ = pad_packed_sequence(rnn_ouput, batch_first=False)
         rnn_ouput = rnn_ouput.permute(1, 0, 2).contiguous() # B * S * E
+        hidden = hidden[0].permute(1, 0, 2).contiguous()
 
         rnn_ouput = rnn_ouput[recoverItemIdx]
 
         rnn_ouput=self.rnndropout(rnn_ouput)
 
         if ischar:
-            rnn_ouput = rnn_ouput.view(-1, sl, wl, self.input_dim)
+            rnn_ouput = rnn_ouput.view(-1, sl, wl, self.input_dim) # B * S * W * E
+            hidden = hidden.view(-1, sl, 2, self.input_dim//2)  # B * S * 2 * E//2
             batchlength = batchlength.view(-1, sl)
 
-        return rnn_ouput # B * S * E
+        return rnn_ouput, hidden # B * S * E , B * 2 * E//2
 
 class LinearTemplate(nn.Module):
     def __init__(self, input_dim, output_dim, activation=None):

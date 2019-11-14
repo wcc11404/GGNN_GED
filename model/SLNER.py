@@ -51,7 +51,7 @@ class SLNER(nn.Module):
         out = self.hiddenlinear(out)
         out = self.classification(out)
 
-        lmout =
+
 
         return out
 
