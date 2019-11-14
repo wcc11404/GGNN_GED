@@ -46,9 +46,10 @@ class SLNER(nn.Module):
     def forward(self, batchinput, batchlength, batchinput_char, batchlength_char):
         out = self.wordembedding(batchinput)
         out, _ = self.rnn(out, batchlength)    # B S E
-        lm_input = out.view(-1, out.shape[1], 2, out.shape[2]//2).permute(2, 0, 1,3).contiguous() # 分成双向的
-        lm_fw_input = lm_input[0].permute(1, 2, 0, 3).contiguous().squeeze(2)
-        lm_bw_input = lm_input[1].permute(1, 2, 0, 3).contiguous().squeeze(2)
+        lm_input = out.view(-1, out.shape[1], 2, out.shape[2] // 2).permute(2, 0, 1, 3).contiguous()  # 分成双向的
+        lm_fw_input, lm_bw_input = lm_input[0], lm_input[1]
+        # lm_fw_input = lm_input[0].permute(1, 2, 0, 3).contiguous().squeeze(2)
+        # lm_bw_input = lm_input[1].permute(1, 2, 0, 3).contiguous().squeeze(2)
 
         if self.charembedding is not None:
             charout = self.charembedding(batchinput_char)
@@ -69,7 +70,14 @@ class SLNER(nn.Module):
         return out, (lm_fw_output, lm_bw_output)
 
     def getLoss(self, input, output, label):
-        #x, xl, xc, xcl = input
-        output = output[0]
-        return self.Loss(output.view(-1, 2), label.view(-1))
+        x, xl, xc, xcl = input
+        out,(lm_fw_out,lm_bw_out) = output
+        loss=self.Loss(out.view(-1, 2), label.view(-1))
+        fw_x = x[:, 1:]
+        fw_x = torch.cat((fw_x, torch.zeros(fw_x.shape[0], 1, dtype=torch.long, device=fw_x.device)), dim=-1)
+        bw_x = x[:, :-1]
+        bw_x = torch.cat((torch.zeros(bw_x.shape[0], 1, dtype=torch.long, device=bw_x.device), bw_x), dim=-1)
+        loss += 0.1 * self.Loss(lm_fw_out.view(-1, self.lm_vocab_size), fw_x.view(-1))
+        loss += 0.1 * self.Loss(lm_bw_out.view(-1, self.lm_vocab_size), bw_x.view(-1))
+        return loss
 

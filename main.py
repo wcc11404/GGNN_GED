@@ -2,6 +2,7 @@ import numpy as np
 import torch
 from data.corpus import GedCorpus
 from model.baseNER import baseNER
+from model.SLNER import SLNER
 import os
 import argparse
 from sklearn.metrics import precision_recall_fscore_support,accuracy_score
@@ -119,6 +120,8 @@ def main(args):
     corpus = GedCorpus("data", args)
     if args.arch == "baseNER":
         model = baseNER(args)
+    elif args.arch == "SLNER":
+        model = SLNER(args)
     if bool(args.use_gpu):
         # if args.gpu_list is not None:
         #     os.environ["CUDA_VISIBLE_DEVICES"]=str(args.gpu_list)
@@ -149,7 +152,7 @@ if __name__ == "__main__":
     parser.add_argument("--mode", default="Train")
     parser.add_argument("--use-lower", default="True")
     parser.add_argument("--random-seed", type=int, default=44)
-    parser.add_argument("--arch", default="baseNER")
+    parser.add_argument("--arch", default="SLNER")
 
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--loginfor", default="True")
