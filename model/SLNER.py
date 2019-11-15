@@ -6,8 +6,10 @@ class SLNER(nn.Module):
     def __init__(self, args):
         super(SLNER, self).__init__()
         assert args.rnn_bidirectional == "True" and args.lm_cost_weight >= 0  # 暂时必须是双向lstm
-        self.lm_vocab_size = args.lm_vocab_size
+        self.lm_vocab_size = args.word_vocabulary_size # args.lm_vocab_size
         self.lm_cost_weight = args.lm_cost_weight
+        if self.lm_vocab_size == -1 or self.lm_vocab_size > args.word_vocabulary_size:
+            self.lm_vocab_size = args.word_vocabulary_size
 
         self.wordembedding = EmbeddingTemplate(args.word_vocabulary_size, args.word_embed_dim, args.embed_drop)
         self.rnn = RnnTemplate(args.rnn_type, args.batch_size, args.word_embed_dim, args.word_embed_dim, args.rnn_drop,
@@ -31,8 +33,6 @@ class SLNER(nn.Module):
                                                  activation="tanh", dropout=args.linear_drop)
         self.bw_lm_hiddenlinear = LinearTemplate((args.word_embed_dim) // 2 + args.char_embed_dim, args.lm_hidden_dim,
                                                  activation="tanh", dropout=args.linear_drop)
-        if self.lm_vocab_size == -1 or self.lm_vocab_size > args.word_vocabulary_size:
-            self.lm_vocab_size = args.word_vocabulary_size
         self.fw_lm_softmax = LinearTemplate(args.lm_hidden_dim, self.lm_vocab_size, activation=None)
         self.bw_lm_softmax = LinearTemplate(args.lm_hidden_dim, self.lm_vocab_size, activation=None)
 
