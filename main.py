@@ -3,6 +3,7 @@ import torch
 from data.corpus import GedCorpus
 from model.baseNER import baseNER
 from model.SLNER import SLNER
+from model.GGNNNER import GGNNNER
 import os
 import argparse
 from sklearn.metrics import precision_recall_fscore_support,accuracy_score
@@ -122,6 +123,8 @@ def main(args):
         model = baseNER(args)
     elif args.arch == "SLNER":
         model = SLNER(args)
+    elif args.arch == "GGNNNER":
+        model = GGNNNER(args)
     if bool(args.use_gpu):
         # if args.gpu_list is not None:
         #     os.environ["CUDA_VISIBLE_DEVICES"]=str(args.gpu_list)
