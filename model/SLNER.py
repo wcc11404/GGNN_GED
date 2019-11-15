@@ -71,7 +71,7 @@ class SLNER(nn.Module):
 
     def getLoss(self, input, output, label):
         x, xl, xc, xcl = input
-        out,(lm_fw_out,lm_bw_out) = output
+        out, lm_fw_out, lm_bw_out = output
         loss = self.Loss(out.view(-1, 2), label.view(-1))
         fw_x = x[:, 1:]
         fw_x = torch.cat((fw_x, torch.zeros(fw_x.shape[0], 1, dtype=torch.long, device=fw_x.device)), dim=-1)

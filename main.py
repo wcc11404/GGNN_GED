@@ -20,9 +20,9 @@ def evaluate(args, dataloader, model, mode="average"):
             train_length = train_length.cuda()
             train_x_char = train_x_char.cuda()
             train_length_char = train_length_char.cuda()
-        out = model(train_x, train_length, train_x_char, train_length_char)[0]
+        out = model(train_x, train_length, train_x_char, train_length_char)
         loss += model.getLoss((train_x, train_length, train_x_char, train_length_char), out, train_y).item()
-        out = out.cpu().detach().numpy()
+        out = out[0].cpu().detach().numpy()
         train_y = train_y.cpu().detach().numpy()
         train_length = train_length.cpu().detach().numpy()
         for o, y, l in zip(out, train_y, train_length):
