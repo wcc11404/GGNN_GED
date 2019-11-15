@@ -23,9 +23,9 @@ class EmbeddingTemplate(nn.Module):
                 nn.init.xavier_uniform_(param)
 
     def forward(self, batchinput): # B * S
-        embedout = self.wordembedding(batchinput)
-        embedout = self.wordembeddingdropout(embedout)
-        return embedout # B * S * E
+        embed_out = self.wordembedding(batchinput)
+        embed_out = self.wordembeddingdropout(embed_out)
+        return embed_out # B * S * E
 
     def load_from_w2v(self, word2id, padandunk=True, w2v_dir=None, lower=True, loginfor=True):  # 加载w2v
         if w2v_dir is None or not os.path.exists(w2v_dir):
@@ -33,20 +33,20 @@ class EmbeddingTemplate(nn.Module):
         temp = self.wordembedding.weight.detach().numpy()
         temp[0] = np.zeros(shape=[1, self.embed_dim], dtype=float)
 
-        s=set()
+        s = set()
         num = 0
         with open(w2v_dir,'r') as f:
             for line in f:
-                line=line.strip().split()
-                if len(line)<=2:
+                line = line.strip().split()
+                if len(line) <= 2:
                     continue
-                w=line[0]
+                w = line[0]
                 if lower:
-                    w=w.lower()
+                    w = w.lower()
                 if w in word2id and w not in s:
-                    temp[word2id[w]]=np.array(line[1:])
+                    temp[word2id[w]] = np.array(line[1:])
                     s.add(w)
-                    num+=1
+                    num += 1
 
         self.wordembedding.weight.data.copy_(torch.from_numpy(temp))
 
@@ -98,6 +98,7 @@ class RnnTemplate(nn.Module):
             batchinput = batchinput.view(-1, wl, self.input_dim) # (B*S) * W * E
             batchlength = batchlength.view(-1) # (B*S)
 
+        # rnn的pack_pad需要按照实际长度排序
         batchlength, itemIdx = batchlength.sort(0, descending=True)
         _, recoverItemIdx = itemIdx.sort(0, descending=False)
         batchinput = batchinput[itemIdx]
@@ -105,15 +106,16 @@ class RnnTemplate(nn.Module):
         batchinput = batchinput.permute(1, 0, 2).contiguous() # S * B * E
         mask_input = pack_padded_sequence(batchinput, batchlength, batch_first=False)
 
-        rnn_ouput, hidden = self.rnn(mask_input)#, self.hidden
+        rnn_ouput, hidden = self.rnn(mask_input) #, self.hidden
 
         rnn_ouput, _ = pad_packed_sequence(rnn_ouput, batch_first=False)
         rnn_ouput = rnn_ouput.permute(1, 0, 2).contiguous() # B * S * E
         hidden = hidden[0].permute(1, 0, 2).contiguous()
 
+        # 还原之前的排序
         rnn_ouput = rnn_ouput[recoverItemIdx]
 
-        rnn_ouput=self.rnndropout(rnn_ouput)
+        rnn_ouput = self.rnndropout(rnn_ouput)
 
         if ischar:
             rnn_ouput = rnn_ouput.view(-1, sl, wl, self.input_dim) # B * S * W * E
@@ -131,16 +133,18 @@ class LinearTemplate(nn.Module):
     def __init__(self, input_dim, output_dim, activation=None):
         super(LinearTemplate, self).__init__()
         self.linear = nn.Linear(input_dim, output_dim)
-        if activation=="sigmoid":
-            self.activation=F.sigmoid
-        elif activation=="softmax":
-            self.activation=F.softmax
-        elif activation=="tanh":
-            self.activation=torch.tanh
-        elif activation=="relu":
-            self.activation=F.relu
-        elif activation==None:
-            self.activation=None
+        if activation == "sigmoid":
+            self.activation = F.sigmoid
+        elif activation == "softmax":
+            self.activation = F.softmax
+        elif activation == "tanh":
+            self.activation = torch.tanh
+        elif activation == "relu":
+            self.activation = F.relu
+        elif activation == "None":
+            self.activation = None
+        elif activation is None:
+            self.activation = None
         else:
             raise KeyError("activation has an invaild value: " + activation)
 

@@ -13,7 +13,6 @@ class baseNER(nn.Module):
             self.charembedding = EmbeddingTemplate(args.char_vocabulary_size, args.char_embed_dim, args.embed_drop)
             self.charrnn = RnnTemplate(args.rnn_type, args.batch_size, args.char_embed_dim, args.char_embed_dim,
                                        args.rnn_drop)
-            #self.index = torch.LongTensor([0]).cuda() if bool(args.use_gpu) else torch.LongTensor([0])
             self.hiddenlinear = LinearTemplate(args.word_embed_dim + args.char_embed_dim, args.hidden_dim,
                                                activation="tanh")
         else:
@@ -50,7 +49,7 @@ class baseNER(nn.Module):
 
     def getLoss(self, input, output, label):
         #x, xl, xc, xcl = input
-        output = output[0]
+        output, _ = output
         return self.Loss(output.view(-1, 2), label.view(-1))
 
 

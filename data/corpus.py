@@ -7,19 +7,19 @@ import pickle
 
 def collate_fn(train_data):
     def pad(data, max_length, paditem=0):
-        re=[]
+        re = []
         for d in data:
-            temp=d[:]
+            temp = d[:]
             temp.extend([paditem for _ in range(max_length-len(temp))])
             re.append(temp)
         return re
 
     def padchar(data, max_seq, max_char, paditem=0):
-        re=[]
+        re = []
         for s in data:
-            stemp=[]
+            stemp = []
             for w in s:
-                temp=w[:]
+                temp = w[:]
                 temp.extend([paditem for _ in range(max_char-len(temp))])
                 stemp.append(temp)
             for _ in range(max_seq-len(stemp)):
@@ -57,11 +57,11 @@ def collate_fn(train_data):
     train_x_char = padchar(train_x_char, max(train_length), maxchar, paditem=0) # B * S * W
     train_length_char = pad(train_length_char, max(train_length), paditem=1)   # B * S 必须pad1,长度不能为0
 
-    train_x=torch.from_numpy(np.array(train_x)).long()
-    train_y=torch.from_numpy(np.array(train_y)).long()
-    train_length=torch.from_numpy(np.array(train_length))
-    train_x_char=torch.from_numpy(np.array(train_x_char)).long()
-    train_length_char=torch.from_numpy(np.array(train_length_char))
+    train_x = torch.from_numpy(np.array(train_x)).long()
+    train_y = torch.from_numpy(np.array(train_y)).long()
+    train_length = torch.from_numpy(np.array(train_length))
+    train_x_char = torch.from_numpy(np.array(train_x_char)).long()
+    train_length_char = torch.from_numpy(np.array(train_length_char))
 
     return train_x, train_y, train_length, train_x_char, train_length_char
 
@@ -95,8 +95,8 @@ class GedCorpus:
         # args.char2id=self.char2id
 
         if bool(args.loginfor):
-            print("word dictionary size : "+str(self.wordvocabularysize))
-            print("char dictionary size : "+str(self.charvocabularysize))
+            print("word dictionary size : " + str(self.wordvocabularysize))
+            print("char dictionary size : " + str(self.charvocabularysize))
             print("train data size : " + str(len(self.trainx)))
             print("dev data size : " + str(len(self.devx)))
             print("test data size : " + str(len(self.testx)))
@@ -271,9 +271,6 @@ class GedDataset(Dataset):
         self.x_char = x_char
         self.size_char = size_char
         #self.x,self.y,self.size=self.sort(self.x,self.y,self.size)
-        #self.x=self.x[:-(len(x)%batchsize)]
-        #self.y=self.y[:-(len(x)%batchsize)]
-        #self.size=self.size[:-(len(x)%batchsize)]
         self.len=len(self.x)
 
     def sort(self,*input): # [1,2,3,4] [4,4,1,2]
