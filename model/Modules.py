@@ -130,7 +130,7 @@ class RnnTemplate(nn.Module):
         return rnn_ouput, hidden # B * S * E , B * 2 * E//2
 
 class LinearTemplate(nn.Module):
-    def __init__(self, input_dim, output_dim, activation=None):
+    def __init__(self, input_dim, output_dim, bn=False, activation=None, dropout=0.0):
         super(LinearTemplate, self).__init__()
         self.linear = nn.Linear(input_dim, output_dim)
         if activation == "sigmoid":
@@ -147,6 +147,7 @@ class LinearTemplate(nn.Module):
             self.activation = None
         else:
             raise KeyError("activation has an invaild value: " + activation)
+        self.dropout = nn.Dropout(dropout)
 
         self.init_weight()
 
@@ -164,4 +165,5 @@ class LinearTemplate(nn.Module):
                 out = self.activation(out, dim=-1)
             else:
                 out = self.activation(out)
+        out = self.dropout(out)
         return out

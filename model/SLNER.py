@@ -18,18 +18,19 @@ class SLNER(nn.Module):
             self.charrnn = RnnTemplate(args.rnn_type, args.batch_size, args.char_embed_dim, args.char_embed_dim,
                                        args.rnn_drop)
             self.hiddenlinear = LinearTemplate(args.word_embed_dim + args.char_embed_dim, args.hidden_dim,
-                                               activation="tanh")
+                                               activation="tanh", dropout=args.linear_drop)
         else:
             self.charembedding = None
-            self.hiddenlinear = LinearTemplate(args.word_embed_dim, args.hidden_dim, activation="tanh")
+            self.hiddenlinear = LinearTemplate(args.word_embed_dim, args.hidden_dim, activation="tanh",
+                                               dropout=args.linear_drop)
 
         self.classification = LinearTemplate(args.hidden_dim, 2, activation=None)
 
         ## LM
         self.fw_lm_hiddenlinear = LinearTemplate((args.word_embed_dim) // 2 + args.char_embed_dim, args.lm_hidden_dim,
-                                                 activation="tanh")
+                                                 activation="tanh", dropout=args.linear_drop)
         self.bw_lm_hiddenlinear = LinearTemplate((args.word_embed_dim) // 2 + args.char_embed_dim, args.lm_hidden_dim,
-                                                 activation="tanh")
+                                                 activation="tanh", dropout=args.linear_drop)
         if self.lm_vocab_size == -1 or self.lm_vocab_size > args.word_vocabulary_size:
             self.lm_vocab_size = args.word_vocabulary_size
         self.fw_lm_softmax = LinearTemplate(args.lm_hidden_dim, self.lm_vocab_size, activation=None)

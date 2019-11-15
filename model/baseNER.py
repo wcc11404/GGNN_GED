@@ -14,10 +14,11 @@ class baseNER(nn.Module):
             self.charrnn = RnnTemplate(args.rnn_type, args.batch_size, args.char_embed_dim, args.char_embed_dim,
                                        args.rnn_drop)
             self.hiddenlinear = LinearTemplate(args.word_embed_dim + args.char_embed_dim, args.hidden_dim,
-                                               activation="tanh")
+                                               activation="tanh", dropout=args.linear_drop)
         else:
             self.charembedding = None
-            self.hiddenlinear = LinearTemplate(args.word_embed_dim, args.hidden_dim, activation="tanh")
+            self.hiddenlinear = LinearTemplate(args.word_embed_dim, args.hidden_dim, activation="tanh",
+                                               dropout=args.linear_drop)
 
         self.classification = LinearTemplate(args.hidden_dim, 2, activation=None)
         #self.logsoftmax=nn.LogSoftmax(dim=2)
