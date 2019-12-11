@@ -14,15 +14,15 @@ def evaluate(args, dataloader, model, mode="average"):
     length = 0
     predict = []
     groundtruth = []
-    for (train_x, train_y, train_length, train_x_char, train_length_char) in dataloader:
+    for (train_x, train_y, train_length, extra_data) in dataloader:
         if bool(args.use_gpu):
             train_x = train_x.cuda()
             train_y = train_y.cuda()
             train_length = train_length.cuda()
-            train_x_char = train_x_char.cuda()
-            train_length_char = train_length_char.cuda()
-        out = model(train_x, train_length, train_x_char, train_length_char)
-        loss += model.getLoss((train_x, train_length, train_x_char, train_length_char), out, train_y).item()
+            extra_data = [i.cuda() for i in extra_data]
+
+        out = model(train_x, train_length, extra_data)
+        loss += model.getLoss(train_x, train_length, extra_data, out, train_y).item()
         out = out[0].cpu().detach().numpy() # 只有out[0]参与计算F值
         train_y = train_y.cpu().detach().numpy()
         train_length = train_length.cpu().detach().numpy()
@@ -58,17 +58,16 @@ def train(args,model,Corpus):
 
     for epoch in range(1, args.max_epoch + 1):
         model.train()
-        for (train_x, train_y, train_length, train_x_char, train_length_char) in Corpus.traindataloader:
+        for (train_x, train_y, train_length, extra_data) in Corpus.traindataloader:
             if bool(args.use_gpu):
                 train_x = train_x.cuda()
                 train_y = train_y.cuda()
                 train_length = train_length.cuda()
-                train_x_char = train_x_char.cuda()
-                train_length_char = train_length_char.cuda()
+                extra_data = [i.cuda() for i in extra_data]
 
             optimizer.zero_grad()
-            out = model(train_x, train_length, train_x_char, train_length_char)
-            loss = model.getLoss((train_x, train_length, train_x_char, train_length_char), out, train_y)
+            out = model(train_x, train_length, extra_data)
+            loss = model.getLoss(train_x, train_length, extra_data, out, train_y)
             loss.backward()
             optimizer.step()
 
@@ -103,7 +102,7 @@ def train(args,model,Corpus):
 
     print("epoch {} get the max dev f0.5: {}".format(max_index, max_dev_f0_5))
 
-def test(args,model,Corpus):
+def test(args, model, Corpus):
     if args.load_dir is None:
         raise KeyError("load_dir has an invaild value: None")
     loadcheckpoint(model,args.load_dir)
@@ -155,7 +154,7 @@ if __name__ == "__main__":
     parser.add_argument("--mode", default="Train")
     parser.add_argument("--use-lower", default="True")
     parser.add_argument("--random-seed", type=int, default=44)
-    parser.add_argument("--arch", default="SLNER")
+    parser.add_argument("--arch", default="GGNNNER")
 
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--loginfor", default="True")
@@ -164,6 +163,7 @@ if __name__ == "__main__":
     parser.add_argument("--word-embed-dim", type=int, default=300)
     parser.add_argument("--char-embed-dim", type=int, default=100)
     parser.add_argument("--embed-drop", type=float, default=0.3)
+    parser.add_argument("--gnn-steps", type=int, default=1)
 
     parser.add_argument("--rnn-type", default="LSTM")
     parser.add_argument("--rnn-bidirectional", default="True")

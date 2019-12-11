@@ -6,7 +6,7 @@ import os
 import numpy as np
 
 class EmbeddingTemplate(nn.Module):
-    def __init__(self, vocab_size, embed_dim, embed_drop):
+    def __init__(self, vocab_size, embed_dim, embed_drop=0.0):
         super(EmbeddingTemplate, self).__init__()
         self.vocab_size = vocab_size
         self.embed_dim = embed_dim
@@ -54,7 +54,7 @@ class EmbeddingTemplate(nn.Module):
             print("load {} word embeddings".format(num))
 
 class RnnTemplate(nn.Module):
-    def __init__(self, rnn_type, batch_size, input_dim, hidden_dim, rnn_drop,
+    def __init__(self, rnn_type, batch_size, input_dim, hidden_dim, rnn_drop=0.0,
                  numLayers=1, bidirectional=True, initalizer_type="normal"):
         super(RnnTemplate, self).__init__()
         self.type = rnn_type
@@ -165,5 +165,68 @@ class LinearTemplate(nn.Module):
                 out = self.activation(out, dim=-1)
             else:
                 out = self.activation(out)
+        out = self.dropout(out)
+        return out
+
+class GraphGateTemplate(nn.Module):
+    def __init__(self, input_dim, n_edge_tpyes, n_steps, dropout=0.0):
+        super(GraphGateTemplate, self).__init__()
+        self.input_dim = input_dim
+        self.n_steps = n_steps
+        self.n_edge_tpyes = n_edge_tpyes
+
+        self.edge_in = EmbeddingTemplate(self.n_edge_tpyes, self.input_dim * self.input_dim)
+        self.edge_out = EmbeddingTemplate(self.n_edge_tpyes, self.input_dim * self.input_dim)
+
+        # GRUGate
+        self.reset_gate = LinearTemplate(self.input_dim * 3, self.input_dim, activation="sigmoid")
+        self.update_gate = LinearTemplate(self.input_dim * 3, self.input_dim, activation="sigmoid")
+        self.transform = LinearTemplate(self.input_dim * 3, self.input_dim, activation="tanh")
+
+        self.dropout = nn.Dropout(dropout)
+
+        self.init_weight()
+
+    def init_weight(self):
+        pass
+
+    def GRUUpdater(self, nodein, nodeout, node):
+        temp = torch.cat((nodein, nodeout, node), 2)
+        r = self.reset_gate(temp)
+        z = self.update_gate(temp)
+        joined_input = torch.cat((nodein, nodeout, r * node), 2)
+        h_hat = self.tansform(joined_input)
+
+        output = (1 - z) * node + z * h_hat
+        return output
+
+    def forward(self, batchinput, batchgraphin, batchgraphout):
+        sl = batchinput.shape[1]
+        out = batchinput
+
+        for step in range(self.n_steps):
+            # Aggregater
+            graph_in = self.edge_in(batchgraphin) # B * S * S * E^2
+            graph_in = graph_in.view(-1, sl, self.input_dim, self.input_dim)  # BS * S * E * E
+            graph_in = graph_in.view(-1, sl * self.input_dim, self.input_dim) # BS * SE * E
+            graph_in = graph_in.permute(0, 2, 1).contiguous() # BS * E * SE
+
+            graph_out = self.edge_out(batchgraphout)  # B * S * S * E^2
+            graph_out = graph_out.view(-1, sl, self.input_dim, self.input_dim)  # BS * S * E * E
+            graph_out = graph_out.view(-1, sl * self.input_dim, self.input_dim)  # BS * SE * E
+            graph_out = graph_out.permute(0, 2, 1).contiguous()  # BS * E * SE
+
+            temp_input = out.unsqueeze(1) # B * 1 * S * E
+            temp_input = temp_input.repeat([1, sl, 1, 1])  # B * S * S * E
+            temp_input = temp_input.view(-1, sl * self.input_dim) # BS * SE
+            temp_input = temp_input.unsqueeze(2) # BS * SE * 1
+
+            in_out = torch.bmm(graph_in, temp_input) # BS * E * 1
+            in_out = in_out.view(-1, sl, self.input_dim) # B * S * E
+            out_out = torch.bmm(graph_out, temp_input) # BS * E * 1
+            out_out = out_out.view(-1, sl, self.input_dim) # B * S * E
+
+            out = self.GRUUpdater(in_out, out_out, out)
+
         out = self.dropout(out)
         return out

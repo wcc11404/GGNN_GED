@@ -3,8 +3,9 @@ from torch import nn
 from .Modules import EmbeddingTemplate, RnnTemplate, LinearTemplate
 
 class baseNER(nn.Module):
-    def __init__(self,args):
+    def __init__(self, args):
         super(baseNER, self).__init__()
+        # self.args = args
         self.wordembedding = EmbeddingTemplate(args.word_vocabulary_size, args.word_embed_dim, args.embed_drop)
         self.rnn = RnnTemplate(args.rnn_type, args.batch_size, args.word_embed_dim, args.word_embed_dim, args.rnn_drop,
                                bidirectional=bool(args.rnn_bidirectional))
@@ -24,16 +25,19 @@ class baseNER(nn.Module):
         #self.logsoftmax=nn.LogSoftmax(dim=2)
         self.Loss = nn.CrossEntropyLoss(ignore_index=-1, reduction="sum")
 
-        self.load_embedding(args)
+        # self.load_embedding(args)
 
-    def load_embedding(self,args):
+    def load_embedding(self, args):
         if args.mode == "Train" and args.load_dir is None:
             if args.w2v_dir is not None:
                 self.wordembedding.load_from_w2v(args.word2id, True, args.w2v_dir, bool(args.use_lower),
                                                  bool(args.loginfor))
                 del args.word2id
 
-    def forward(self, batchinput, batchlength, batchinput_char, batchlength_char):
+    def forward(self, batchinput, batchlength, batchextradata):
+        if self.charembedding is not None:
+            batchinput_char, batchlength_char = batchextradata[0], batchextradata[1]
+
         out = self.wordembedding(batchinput)
         out, _ = self.rnn(out, batchlength)    # B S E
 
@@ -48,7 +52,7 @@ class baseNER(nn.Module):
 
         return out, ()
 
-    def getLoss(self, input, output, label):
+    def getLoss(self, input, length, extra_data, output, label):
         #x, xl, xc, xcl = input
         output, _ = output
         return self.Loss(output.view(-1, 2), label.view(-1))
