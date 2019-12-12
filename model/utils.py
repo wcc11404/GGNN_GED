@@ -31,7 +31,7 @@ def parse(deplist):
         else:
             graph[outstr] = [str(tgt) + "," + relation]
             graph[str(src) + "in"] = []
-    return graph, max_index
+    return graph, max_index #这个maxindex不对
 
 def graph_to_file(graph_maxindex, file_path):
     with open(file_path, 'w') as f:
@@ -48,7 +48,7 @@ def graph_to_file(graph_maxindex, file_path):
                 f.write(temp + "\n")
             f.write("\n")
 
-def main():
+def generate_graph():
     from stanfordcorenlp import StanfordCoreNLP
     # sentence = 'Guangdong University of Foreign Studies is located in Guangzhou.'
     nlp = StanfordCoreNLP(r'stanford-corenlp-full-2018-10-05', memory='4g')
@@ -63,7 +63,7 @@ def main():
             temp.append(wordtuple[0])
         dp = nlp.dependency_parse(" ".join(temp))
         g, m = parse(dp)
-        graph_maxindex.append((g, m))
+        graph_maxindex.append((g, len(temp)))
     graph_to_file(graph_maxindex, "temp.txt")
     nlp.close()
 #############

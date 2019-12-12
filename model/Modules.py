@@ -134,7 +134,7 @@ class LinearTemplate(nn.Module):
         super(LinearTemplate, self).__init__()
         self.linear = nn.Linear(input_dim, output_dim)
         if activation == "sigmoid":
-            self.activation = F.sigmoid
+            self.activation = torch.sigmoid
         elif activation == "softmax":
             self.activation = F.softmax
         elif activation == "tanh":

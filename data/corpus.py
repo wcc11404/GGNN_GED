@@ -10,7 +10,7 @@ def collate_fn(train_data):
         re = []
         for d in data:
             temp = d[:]
-            temp.extend([paditem for _ in range(max_length-len(temp))])
+            temp.extend([paditem for _ in range(max_length - len(temp))])
             re.append(temp)
         return re
 
@@ -20,7 +20,7 @@ def collate_fn(train_data):
             stemp = []
             for w in s:
                 temp = w[:]
-                temp.extend([paditem for _ in range(max_char-len(temp))])
+                temp.extend([paditem for _ in range(max_char - len(temp))])
                 stemp.append(temp)
             for _ in range(max_seq-len(stemp)):
                 stemp.append([paditem for _ in range(max_char)])
@@ -29,10 +29,10 @@ def collate_fn(train_data):
 
     def padgraph(data, max_seq, paditem=0):
         re = []
-        for instance in data:
+        for sentence in data:
             stemp = [[paditem for _ in range(max_seq)] for _ in range(max_seq)]
-            for i,word in enumerate(instance):
-                for id,relation in word:
+            for i, word in enumerate(sentence):
+                for id, relation in word:
                     stemp[i][id - 1] = relation
             re.append(stemp)
         return re
@@ -104,6 +104,7 @@ class GedCorpus:
             self.testx, self.testy, self.testsize = self.load(fdir + r"/fce-public.test.original.tsv",
                                                               bool(self.args.use_lower))
             self.train_graph = self.load_graph(fdir + r"/train_graph.txt")
+
             self.dev_graph = self.load_graph(fdir + r"/dev_graph.txt")
             self.test_graph = self.load_graph(fdir + r"/test_graph.txt")
 
@@ -118,6 +119,7 @@ class GedCorpus:
             self.testx_char, self.testsize_char = self.preprocess_char(self.testx, ispad=False)
             self.testx, self.testy = self.preprocess((self.testx, self.testy), ispad=False)
             self.train_graph = self.preprocess_graph(self.train_graph)
+
             self.dev_graph = self.preprocess_graph(self.dev_graph)
             self.test_graph = self.preprocess_graph(self.test_graph)
 
@@ -144,7 +146,7 @@ class GedCorpus:
         #Train
         self.traindataset = GedDataset(self.args.arch, self.trainx, self.trainy, self.trainsize, self.trainx_char,
                                            self.trainsize_char, self.train_graph)
-        self.traindataloader = DataLoader(dataset=self.traindataset, batch_size=args.batch_size, shuffle=False,
+        self.traindataloader = DataLoader(dataset=self.traindataset, batch_size=args.batch_size, shuffle=True,
                                           collate_fn=collate_fn)
 
         #Dev
@@ -394,7 +396,7 @@ class GedDataset(Dataset):
         self.graph_in = graph[0]
         self.graph_out = graph[1]
         #self.x,self.y,self.size=self.sort(self.x,self.y,self.size)
-        self.len=len(self.x)
+        self.len = len(self.x)
 
     def sort(self,*input): # [1,2,3,4] [4,4,1,2]
         temp = list(zip(*input)) #[(1, 4), (2, 4), (3, 1), (4, 2)]
