@@ -53,6 +53,11 @@ class EmbeddingTemplate(nn.Module):
         if loginfor:
             print("load {} word embeddings".format(num))
 
+    def set_pad_zero(self):
+        temp = self.wordembedding.weight.detach().numpy()
+        temp[0] = np.zeros(shape=[1, self.embed_dim], dtype=float)
+        self.wordembedding.weight.data.copy_(torch.from_numpy(temp))
+
 class RnnTemplate(nn.Module):
     def __init__(self, rnn_type, batch_size, input_dim, hidden_dim, rnn_drop=0.0,
                  numLayers=1, bidirectional=True, initalizer_type="normal"):
@@ -189,7 +194,8 @@ class GraphGateTemplate(nn.Module):
         self.init_weight()
 
     def init_weight(self):
-        pass
+        self.edge_in.set_pad_zero()
+        self.edge_out.set_pad_zero()
 
     def GRUUpdater(self, nodein, nodeout, node):
         temp = torch.cat((nodein, nodeout, node), 2)
