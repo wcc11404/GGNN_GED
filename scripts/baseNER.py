@@ -25,7 +25,7 @@ class baseNER(nn.Module):
         #self.logsoftmax=nn.LogSoftmax(dim=2)
         self.Loss = nn.CrossEntropyLoss(ignore_index=-1, reduction="sum")
 
-        # self.load_embedding(args)
+        self.load_embedding(args)
 
     def load_embedding(self, args):
         if args.mode == "Train" and args.load_dir is None:
