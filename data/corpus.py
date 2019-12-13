@@ -65,6 +65,7 @@ def collate_fn(train_data):
         train_length_char.append(data[5]) # B * (S)
         train_graph_in.append(data[6])
         train_graph_out.append(data[7])
+
     #train_x, train_y, train_length, train_x_char, train_length_char = sort(train_x, train_y, train_length,
     #                                                                           train_x_char, train_length_char)
     train_x = pad(train_x, max(train_length), paditem=0)  # B * S
@@ -97,16 +98,16 @@ class GedCorpus:
         self.args = args
         self.label2id = {"c": 0, "i": 1}
         if args.preprocess_dir is None or not os.path.exists(args.preprocess_dir):
-            self.trainx, self.trainy, self.trainsize = self.load(fdir + r"/fce-public.train.original.tsv",
+            self.trainx, self.trainy, self.trainsize = self.load(fdir + r"/process/fce-public.train.preprocess.tsv",
                                                                  bool(self.args.use_lower))
-            self.devx, self.devy, self.devsize = self.load(fdir + r"/fce-public.dev.original.tsv",
+            self.devx, self.devy, self.devsize = self.load(fdir + r"/process/fce-public.dev.preprocess.tsv",
                                                            bool(self.args.use_lower))
-            self.testx, self.testy, self.testsize = self.load(fdir + r"/fce-public.test.original.tsv",
+            self.testx, self.testy, self.testsize = self.load(fdir + r"/process/fce-public.test.preprocess.tsv",
                                                               bool(self.args.use_lower))
-            self.train_graph = self.load_graph(fdir + r"/train_graph.txt")
+            self.train_graph = self.load_graph(fdir + r"/process/train_graph.txt")
 
-            self.dev_graph = self.load_graph(fdir + r"/dev_graph.txt")
-            self.test_graph = self.load_graph(fdir + r"/test_graph.txt")
+            self.dev_graph = self.load_graph(fdir + r"/process/dev_graph.txt")
+            self.test_graph = self.load_graph(fdir + r"/process/test_graph.txt")
 
             self.word2id, self.id2word = self.makeword2veclist([self.trainx, self.devx])
             self.char2id, self.id2char = self.makechar2veclist([self.trainx, self.devx])
@@ -133,7 +134,7 @@ class GedCorpus:
         args.char_vocabulary_size = self.charvocabularysize
         self.edgevocabularysize = len(self.id2edge)
         args.edge_vocabulary_size = self.edgevocabularysize
-        args.word2id=self.word2id
+        args.word2id = self.word2id
 
         if bool(args.loginfor):
             print("word dictionary size : " + str(self.wordvocabularysize))
@@ -151,7 +152,7 @@ class GedCorpus:
 
         #Dev
         self.devdataset = GedDataset(self.args.arch, self.devx, self.devy, self.devsize, self.devx_char, self.devsize_char,
-                                     self.train_graph)
+                                     self.dev_graph)
         self.devdataloader = DataLoader(dataset=self.devdataset, batch_size=args.batch_size, shuffle=False,
                                         collate_fn=collate_fn)
 
@@ -229,32 +230,30 @@ class GedCorpus:
     def load(self, fpath, use_lower=False):
         if not os.path.exists(fpath):
             raise FileNotFoundError("Can not find the file \""+fpath+"\"")
-        templist=open(fpath).read().strip().split("\n\n")
-        x=[]
-        y=[]
-        size=[]
+        templist = open(fpath).read().strip().split("\n\n")
+        x = []
+        y = []
+        size = []
         for sentence in templist:
-            wordlist=[]
-            labellist=[]
-            sentence=sentence.split("\n")
+            wordlist = []
+            labellist = []
+            sentence = sentence.split("\n")
             for wordpair in sentence:
-                wordpair=wordpair.split("\t")
+                wordpair = wordpair.split("\t")
                 if use_lower:
-                    wordpair[0]=wordpair[0].lower()
+                    wordpair[0] = wordpair[0].lower()
                 wordlist.append(wordpair[0])
                 labellist.append(wordpair[1])
             x.append(wordlist)
             y.append(labellist)
             size.append(len(wordlist))
-        return x,y,size #['Dear', 'Sir', 'or', 'Madam', ',']  ['c', 'c', 'c', 'c', 'c'] 5
+        return x, y, size  # ['Dear', 'Sir', 'or', 'Madam', ',']  ['c', 'c', 'c', 'c', 'c'] 5
 
     def load_graph(self, fpath):
-        f = open(fpath, 'r').read().split("\n\n")
+        f = open(fpath, 'r').read().strip().split("\n\n")
         graph_in = []
         graph_out = []
         for line in f:
-            if len(line) == 0 or line == "\n":
-                continue
             line = line.split("\n")
             graph_sen_in = []
             graph_sen_out = []
@@ -395,7 +394,6 @@ class GedDataset(Dataset):
         self.size_char = size_char
         self.graph_in = graph[0]
         self.graph_out = graph[1]
-        #self.x,self.y,self.size=self.sort(self.x,self.y,self.size)
         self.len = len(self.x)
 
     def sort(self,*input): # [1,2,3,4] [4,4,1,2]

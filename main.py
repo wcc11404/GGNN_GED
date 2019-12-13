@@ -1,13 +1,13 @@
 import numpy as np
 import torch
 from data.corpus import GedCorpus
-from model.baseNER import baseNER
-from model.SLNER import SLNER
-from model.GGNNNER import GGNNNER
+from scripts.baseNER import baseNER
+from scripts.SLNER import SLNER
+from scripts.GGNNNER import GGNNNER
 import os
 import argparse
-from sklearn.metrics import precision_recall_fscore_support,accuracy_score
-from model.utils import savecheckpoint,loadcheckpoint
+from sklearn.metrics import precision_recall_fscore_support, accuracy_score
+from scripts.utils import savecheckpoint, loadcheckpoint
 
 def evaluate(args, dataloader, model, mode="average"):
     loss = 0
@@ -107,7 +107,7 @@ def test(args, model, Corpus):
         raise KeyError("load_dir has an invaild value: None")
     loadcheckpoint(model,args.load_dir)
     model.eval()
-    #_, train_p, train_r, train_f = evaluate(args, Corpus.traindataloader, model, Loss=None)
+    #_, train_p, train_r, train_f = evaluate(args, Corpus.traindataloader, scripts, Loss=None)
     _, dev_p, dev_r, dev_f = evaluate(args, Corpus.devdataloader, model)
     print("Dev Precision : {:.4f}\tDev Recall : {:.4f}\tDev F0.5 : {:.4f}".format(dev_p, dev_r, dev_f))
 
@@ -176,7 +176,7 @@ if __name__ == "__main__":
 
     parser.add_argument("--save-dir", default="checkpoint")
     parser.add_argument("--load-dir", default=None)
-    parser.add_argument("--w2v-dir", default="data/w2v_300d.txt")
+    parser.add_argument("--w2v-dir", default="data/process/w2v_300d.txt")
     parser.add_argument("--preprocess-dir", default="data/preprocess.pkl")
     parser.add_argument("--max-epoch", type=int, default=100)
     parser.add_argument("--early-stop", type=int, default=10)
