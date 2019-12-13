@@ -88,5 +88,5 @@ def tokenize_():
     nlp.close()
 
 if __name__ == "__main__":
-    # tokenize_()
+    tokenize_()
     generate_graph(mode=0)
