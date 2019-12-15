@@ -27,13 +27,13 @@ def collate_fn(train_data):
             re.append(stemp)
         return re
 
-    def padgraph(data, max_seq, paditem=0):
+    def padgraph(data, max_seq, edge_num, paditem=0):
         re = []
         for sentence in data:
-            stemp = [[paditem for _ in range(max_seq)] for _ in range(max_seq)]
+            stemp = [[[paditem for _ in range(edge_num)] for _ in range(max_seq)] for _ in range(max_seq)]
             for i, word in enumerate(sentence):
                 for id, relation in word:
-                    stemp[i][id - 1] = relation
+                    stemp[i][id - 1][relation] = 1
             re.append(stemp)
         return re
 
@@ -56,7 +56,9 @@ def collate_fn(train_data):
     train_graph_in = []
     train_graph_out = []
 
-    task = train_data[0][0]
+    tup = train_data[0][0]
+    task, edge_num = tup
+
     for data in train_data:
         train_x.append(data[1]) # B * S
         train_y.append(data[2]) # B
@@ -73,16 +75,16 @@ def collate_fn(train_data):
     maxchar = getmetrixmax(train_length_char)   # B
     train_x_char = padchar(train_x_char, max(train_length), maxchar, paditem=0) # B * S * W
     train_length_char = pad(train_length_char, max(train_length), paditem=1)   # B * S 必须pad1,长度不能为0
-    train_graph_in = padgraph(train_graph_in, max(train_length), paditem=0)
-    train_graph_out = padgraph(train_graph_out, max(train_length), paditem=0)
+    train_graph_in = padgraph(train_graph_in, max(train_length), edge_num, paditem=0) # B * S * S * EN
+    train_graph_out = padgraph(train_graph_out, max(train_length), edge_num, paditem=0) # B * S * S * EN
 
     train_x = torch.from_numpy(np.array(train_x)).long()
     train_y = torch.from_numpy(np.array(train_y)).long()
     train_length = torch.from_numpy(np.array(train_length))
     train_x_char = torch.from_numpy(np.array(train_x_char)).long()
     train_length_char = torch.from_numpy(np.array(train_length_char))
-    train_graph_in = torch.from_numpy(np.array(train_graph_in)).long()
-    train_graph_out = torch.from_numpy(np.array(train_graph_out)).long()
+    train_graph_in = torch.from_numpy(np.array(train_graph_in)).float()
+    train_graph_out = torch.from_numpy(np.array(train_graph_out)).float()
 
     if task == "GGNNNER":
         extra_data = (train_graph_in, train_graph_out)
@@ -141,24 +143,27 @@ class GedCorpus:
             print("char dictionary size : " + str(self.charvocabularysize))
             print("edge dictionary size : " + str(self.edgevocabularysize))
             print("train data size : " + str(len(self.trainx)))
+            print("max train data length : " + str(max(self.trainsize)))
             print("dev data size : " + str(len(self.devx)))
+            print("max dev data length : " + str(max(self.devsize)))
             print("test data size : " + str(len(self.testx)))
+            print("max test data length : " + str(max(self.testsize)))
 
         #Train
-        self.traindataset = GedDataset(self.args.arch, self.trainx, self.trainy, self.trainsize, self.trainx_char,
-                                           self.trainsize_char, self.train_graph)
+        self.traindataset = GedDataset((self.args.arch, self.edgevocabularysize), self.trainx, self.trainy,
+                                       self.trainsize, self.trainx_char, self.trainsize_char, self.train_graph)
         self.traindataloader = DataLoader(dataset=self.traindataset, batch_size=args.batch_size, shuffle=True,
                                           collate_fn=collate_fn)
 
         #Dev
-        self.devdataset = GedDataset(self.args.arch, self.devx, self.devy, self.devsize, self.devx_char, self.devsize_char,
-                                     self.dev_graph)
+        self.devdataset = GedDataset((self.args.arch, self.edgevocabularysize), self.devx, self.devy, self.devsize,
+                                     self.devx_char, self.devsize_char, self.dev_graph)
         self.devdataloader = DataLoader(dataset=self.devdataset, batch_size=args.batch_size, shuffle=False,
                                         collate_fn=collate_fn)
 
         #Test
-        self.testdataset = GedDataset(self.args.arch, self.testx, self.testy, self.testsize, self.testx_char, self.testsize_char,
-                                      self.test_graph)
+        self.testdataset = GedDataset((self.args.arch, self.edgevocabularysize), self.testx, self.testy, self.testsize,
+                                      self.testx_char, self.testsize_char, self.test_graph)
         self.testdataloader = DataLoader(dataset=self.testdataset, batch_size=1, shuffle=False, collate_fn=collate_fn)
 
     def save_preprocess(self,dir):
@@ -322,7 +327,7 @@ class GedCorpus:
                             counter.update([relation])
         edge2id = {}
         id2edge = []
-        edge2id["<pad>"] = 0
+        edge2id["<pad>"] = 0 # 这个pad已经没用了
         edge2id["<unk>"] = 1
         id2edge.append("<pad>")
         id2edge.append("<unk>")
@@ -385,8 +390,8 @@ class GedCorpus:
         return graph
 
 class GedDataset(Dataset):
-    def __init__(self, task, x, y, size, x_char, size_char, graph):
-        self.task = task
+    def __init__(self, tup, x, y, size, x_char, size_char, graph):
+        self.tup = tup
         self.x = x
         self.y = y
         self.size = size
@@ -402,7 +407,7 @@ class GedDataset(Dataset):
         return (list(i) for i in zip(*temp)) #([1, 2, 4, 3] [4, 4, 2, 1])
 
     def __getitem__(self, index):
-        return self.task, self.x[index], self.y[index], self.size[index], self.x_char[index], self.size_char[index], self.graph_in[
+        return self.tup, self.x[index], self.y[index], self.size[index], self.x_char[index], self.size_char[index], self.graph_in[
             index], self.graph_out[index]
 
     def __len__(self):

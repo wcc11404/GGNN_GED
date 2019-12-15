@@ -174,15 +174,19 @@ class LinearTemplate(nn.Module):
         return out
 
 class GraphGateTemplate(nn.Module):
-    def __init__(self, input_dim, n_edge_tpyes, n_steps, dropout=0.0):
+    def __init__(self, input_dim, n_edge_types, n_steps, dropout=0.0):
         super(GraphGateTemplate, self).__init__()
         self.input_dim = input_dim
         self.n_steps = n_steps
-        self.n_edge_tpyes = n_edge_tpyes
+        self.n_edge_types = n_edge_types
 
-        self.edge_in = EmbeddingTemplate(self.n_edge_tpyes, self.input_dim)# * self.input_dim)
-        self.edge_out = EmbeddingTemplate(self.n_edge_tpyes, self.input_dim)# * self.input_dim)
-        self.temp = LinearTemplate(self.input_dim, 1)
+        # self.edge_in = EmbeddingTemplate(self.n_edge_tpyes, self.input_dim)# * self.input_dim)
+        # self.edge_out = EmbeddingTemplate(self.n_edge_tpyes, self.input_dim)# * self.input_dim)
+        # self.temp = LinearTemplate(self.input_dim, 1)
+        self.edge_in = nn.ModuleList(
+            [LinearTemplate(self.input_dim, self.input_dim) for _ in range(self.n_edge_types)])
+        self.edge_out = nn.ModuleList(
+            [LinearTemplate(self.input_dim, self.input_dim) for _ in range(self.n_edge_types)])
 
         # GRUGate
         self.reset_gate = LinearTemplate(self.input_dim * 3, self.input_dim, activation="sigmoid")
@@ -194,17 +198,18 @@ class GraphGateTemplate(nn.Module):
         self.init_weight()
 
     def init_weight(self):
-        self.edge_in.set_pad_zero()
-        self.edge_out.set_pad_zero()
+        # self.edge_in.set_pad_zero()
+        # self.edge_out.set_pad_zero()
+        pass
 
     def GRUUpdater(self, nodein, nodeout, node):
-        temp = torch.cat((nodein, nodeout, node), 2)
+        temp = torch.cat((nodein, nodeout, node), 2)  # B * S * 3E
         r = self.reset_gate(temp)
         z = self.update_gate(temp)
         joined_input = torch.cat((nodein, nodeout, r * node), 2)
         h_hat = self.transform(joined_input)
         output = (1 - z) * node + z * h_hat
-        return output
+        return output  # B * S * E
 
     def bk_forward(self, batchinput, batchgraphin, batchgraphout):
         sl = batchinput.shape[1]
@@ -240,32 +245,46 @@ class GraphGateTemplate(nn.Module):
     def forward(self, batchinput, batchgraphin, batchgraphout):
         sl = batchinput.shape[1]
         out = batchinput
+        batchgraphin = batchgraphin.view(-1, sl, sl * self.n_edge_types)
+        batchgraphout = batchgraphout.view(-1, sl, sl * self.n_edge_types)
 
         for step in range(self.n_steps):
             # Aggregater
-            graph_in = self.edge_in(batchgraphin) # B * S * S * E
-            graph_in = graph_in.view(-1, sl, self.input_dim)  # BS * S * E
-            graph_in = graph_in.permute(0, 2, 1).contiguous() # BS * E * S
+            graph_in = []
+            graph_out = []
+            for i in range(self.n_edge_types):
+                graph_in.append(self.edge_in[i](out))  # EN * B * S * E
+                graph_out.append(self.edge_out[i](out))  # EN * B * S * E
+            graph_in = torch.stack(graph_in).transpose(0, 1).contiguous() # B * EN * S * E
+            graph_in = graph_in.view(-1, sl * self.n_edge_types, self.input_dim) # B * EN S * E
+            graph_in = torch.bmm(batchgraphin, graph_in) # B * S * E
+            graph_out = torch.stack(graph_out).transpose(0, 1).contiguous() # B * EN * S * E
+            graph_out = graph_out.view(-1, sl * self.n_edge_types, self.input_dim) # B * EN S * E
+            graph_out = torch.bmm(batchgraphout, graph_out) # B * S * E
 
-            graph_out = self.edge_out(batchgraphout)  # B * S * S * E
-            graph_out = graph_out.view(-1, sl, self.input_dim)  # BS * S * E
-            graph_out = graph_out.permute(0, 2, 1).contiguous()  # BS * E * S
+            # graph_in = self.edge_in(batchgraphin) # B * S * S * E
+            # graph_in = graph_in.view(-1, sl, self.input_dim)  # BS * S * E
+            # graph_in = graph_in.permute(0, 2, 1).contiguous() # BS * E * S
 
-            temp_input = out.unsqueeze(1) # B * 1 * S * E
-            temp_input = temp_input.repeat([1, sl, 1, 1])  # B * S * S * E
-            temp_input = temp_input.view(-1, sl, self.input_dim) # BS * S * E
+            # graph_out = self.edge_out(batchgraphout)  # B * S * S * E
+            # graph_out = graph_out.view(-1, sl, self.input_dim)  # BS * S * E
+            # graph_out = graph_out.permute(0, 2, 1).contiguous()  # BS * E * S
+
+            # temp_input = out.unsqueeze(1) # B * 1 * S * E
+            # temp_input = temp_input.repeat([1, sl, 1, 1])  # B * S * S * E
+            # temp_input = temp_input.view(-1, sl, self.input_dim) # BS * S * E
             #temp_input = temp_input.unsqueeze(2) # BS * SE * 1
 
-            in_out = torch.bmm(graph_in, temp_input) # BS * E * E
-            in_out = self.temp(in_out)
-            in_out = in_out.unsqueeze(2)
-            in_out = in_out.view(-1, sl, self.input_dim) # B * S * E
-            out_out = torch.bmm(graph_out, temp_input) # BS * E * E
-            out_out = self.temp(out_out)
-            out_out = out_out.unsqueeze(2)
-            out_out = out_out.view(-1, sl, self.input_dim) # B * S * E
+            # in_out = torch.bmm(graph_in, temp_input) # BS * E * E
+            # in_out = self.temp(in_out)
+            # in_out = in_out.unsqueeze(2)
+            # in_out = in_out.view(-1, sl, self.input_dim) # B * S * E
+            # out_out = torch.bmm(graph_out, temp_input) # BS * E * E
+            # out_out = self.temp(out_out)
+            # out_out = out_out.unsqueeze(2)
+            # out_out = out_out.view(-1, sl, self.input_dim) # B * S * E
 
-            out = self.GRUUpdater(in_out, out_out, out)
+            out = self.GRUUpdater(graph_in, graph_out, out)
 
         out = self.dropout(out)
         return out
