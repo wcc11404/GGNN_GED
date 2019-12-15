@@ -88,7 +88,7 @@ def collate_fn(train_data):
 
     if task == "GGNNNER":
         extra_data = (train_graph_in, train_graph_out)
-    elif task == "baseNER" or task == "SLNER":
+    elif task == "BaseNER" or task == "SLNER":
         extra_data = (train_x_char, train_length_char)
     else:
         extra_data = ()
@@ -98,37 +98,37 @@ def collate_fn(train_data):
 class GedCorpus:
     def __init__(self, fdir, args):
         self.args = args
-        self.label2id = {"c": 0, "i": 1}
-        if args.preprocess_dir is None or not os.path.exists(args.preprocess_dir):
-            self.trainx, self.trainy, self.trainsize = self.load(fdir + r"/process/fce-public.train.preprocess.tsv",
-                                                                 bool(self.args.use_lower))
-            self.devx, self.devy, self.devsize = self.load(fdir + r"/process/fce-public.dev.preprocess.tsv",
-                                                           bool(self.args.use_lower))
-            self.testx, self.testy, self.testsize = self.load(fdir + r"/process/fce-public.test.preprocess.tsv",
-                                                              bool(self.args.use_lower))
-            self.train_graph = self.load_graph(fdir + r"/process/train_graph.txt")
-
-            self.dev_graph = self.load_graph(fdir + r"/process/dev_graph.txt")
-            self.test_graph = self.load_graph(fdir + r"/process/test_graph.txt")
-
-            self.word2id, self.id2word = self.makeword2veclist([self.trainx, self.devx])
-            self.char2id, self.id2char = self.makechar2veclist([self.trainx, self.devx])
-            self.edge2id, self.id2edge = self.makeedge2veclist([self.train_graph, self.dev_graph])
-
-            self.trainx_char, self.trainsize_char = self.preprocess_char(self.trainx, ispad=False)
-            self.trainx, self.trainy = self.preprocess((self.trainx, self.trainy), ispad=False)
-            self.devx_char, self.devsize_char = self.preprocess_char(self.devx, ispad=False)
-            self.devx, self.devy = self.preprocess((self.devx, self.devy), ispad=False)
-            self.testx_char, self.testsize_char = self.preprocess_char(self.testx, ispad=False)
-            self.testx, self.testy = self.preprocess((self.testx, self.testy), ispad=False)
-            self.train_graph = self.preprocess_graph(self.train_graph)
-
-            self.dev_graph = self.preprocess_graph(self.dev_graph)
-            self.test_graph = self.preprocess_graph(self.test_graph)
-
-            self.save_preprocess(args.preprocess_dir)
-        else:
-            self.load_preprocess(args.preprocess_dir)
+        # self.label2id = {"c": 0, "i": 1}
+        # if args.preprocess_dir is None or not os.path.exists(args.preprocess_dir):
+        #     self.trainx, self.trainy, self.trainsize = self.load(fdir + r"/process/fce-public.train.preprocess.tsv",
+        #                                                          bool(self.args.use_lower))
+        #     self.devx, self.devy, self.devsize = self.load(fdir + r"/process/fce-public.dev.preprocess.tsv",
+        #                                                    bool(self.args.use_lower))
+        #     self.testx, self.testy, self.testsize = self.load(fdir + r"/process/fce-public.test.preprocess.tsv",
+        #                                                       bool(self.args.use_lower))
+        #     self.train_graph = self.load_graph(fdir + r"/process/train_graph.txt")
+        #
+        #     self.dev_graph = self.load_graph(fdir + r"/process/dev_graph.txt")
+        #     self.test_graph = self.load_graph(fdir + r"/process/test_graph.txt")
+        #
+        #     self.word2id, self.id2word = self.makeword2veclist([self.trainx, self.devx])
+        #     self.char2id, self.id2char = self.makechar2veclist([self.trainx, self.devx])
+        #     self.edge2id, self.id2edge = self.makeedge2veclist([self.train_graph, self.dev_graph])
+        #
+        #     self.trainx_char, self.trainsize_char = self.preprocess_char(self.trainx, ispad=False)
+        #     self.trainx, self.trainy = self.preprocess((self.trainx, self.trainy), ispad=False)
+        #     self.devx_char, self.devsize_char = self.preprocess_char(self.devx, ispad=False)
+        #     self.devx, self.devy = self.preprocess((self.devx, self.devy), ispad=False)
+        #     self.testx_char, self.testsize_char = self.preprocess_char(self.testx, ispad=False)
+        #     self.testx, self.testy = self.preprocess((self.testx, self.testy), ispad=False)
+        #     self.train_graph = self.preprocess_graph(self.train_graph)
+        #
+        #     self.dev_graph = self.preprocess_graph(self.dev_graph)
+        #     self.test_graph = self.preprocess_graph(self.test_graph)
+        #
+        #     self.save_preprocess(args.preprocess_dir)
+        # else:
+        self.load_preprocess(args.preprocess_dir)
 
         self.wordvocabularysize = len(self.id2word)
         args.word_vocabulary_size = self.wordvocabularysize

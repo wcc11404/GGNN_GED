@@ -1,6 +1,6 @@
 import torch
 from torch import nn
-from .Modules import EmbeddingTemplate, RnnTemplate, LinearTemplate
+from .Layers import EmbeddingTemplate, RnnTemplate, LinearTemplate
 
 class baseNER(nn.Module):
     def __init__(self, args):
@@ -22,7 +22,7 @@ class baseNER(nn.Module):
                                                dropout=args.linear_drop)
 
         self.classification = LinearTemplate(args.hidden_dim, 2, activation=None)
-        #self.logsoftmax=nn.LogSoftmax(dim=2)
+        # self.logsoftmax = nn.LogSoftmax(dim=2)
         self.Loss = nn.CrossEntropyLoss(ignore_index=-1, reduction="sum")
 
         self.load_embedding(args)

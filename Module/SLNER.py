@@ -1,6 +1,6 @@
 import torch
 from torch import nn
-from .Modules import EmbeddingTemplate, RnnTemplate, LinearTemplate
+from .Layers import EmbeddingTemplate, RnnTemplate, LinearTemplate
 
 class SLNER(nn.Module):
     def __init__(self, args):
@@ -40,7 +40,7 @@ class SLNER(nn.Module):
 
         self.load_embedding(args)
 
-    def load_embedding(self,args):
+    def load_embedding(self, args):
         if args.mode == "Train" and args.load_dir is None:
             if args.w2v_dir is not None:
                 self.wordembedding.load_from_w2v(args.word2id, True, args.w2v_dir, bool(args.use_lower), bool(args.loginfor))

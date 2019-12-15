@@ -1,4 +1,8 @@
 from stanfordcorenlp import StanfordCoreNLP
+import os
+import argparse
+from collections import Counter
+import pickle
 
 #   生成data/train_graph.txt
 def parse(deplist):
@@ -68,6 +72,7 @@ def generate_graph(mode=0):
     nlp.close()
 #############
 
+# 对原始训练语料进行tokenize
 def tokenize_():
     nlp = StanfordCoreNLP(r'../data/stanford-corenlp-full-2018-10-05', memory='4g')
     in_path = ['../data/orign_data/fce-public.train.original.tsv', '../data/orign_data/fce-public.dev.original.tsv',
@@ -87,6 +92,242 @@ def tokenize_():
                     f2.write(word+"\t"+line[1]+"\n")
     nlp.close()
 
-if __name__ == "__main__":
+# 读取训练数据
+def load(fpath, use_lower=False):
+    # if not os.path.exists(fpath):
+    #     raise FileNotFoundError("Can not find the file \""+fpath+"\"")
+    templist = open(fpath).read().strip().split("\n\n")
+    x = []
+    y = []
+    size = []
+    for sentence in templist:
+        wordlist = []
+        labellist = []
+        sentence = sentence.split("\n")
+        for wordpair in sentence:
+            wordpair = wordpair.split("\t")
+            if use_lower:
+                wordpair[0] = wordpair[0].lower()
+            wordlist.append(wordpair[0])
+            labellist.append(wordpair[1])
+        x.append(wordlist)
+        y.append(labellist)
+        size.append(len(wordlist))
+    return x, y, size  # ['Dear', 'Sir', 'or', 'Madam', ',']  ['c', 'c', 'c', 'c', 'c'] 5
+
+# 读取图数据
+def load_graph(fpath):
+    f = open(fpath, 'r').read().strip().split("\n\n")
+    graph_in = []
+    graph_out = []
+    for line in f:
+        line = line.split("\n")
+        graph_sen_in = []
+        graph_sen_out = []
+        for word in line:
+            word = word.split(";")
+            edge_in = word[1].split()
+            edge_in = [[int(edge.split(',')[0]), edge.split(',')[1]] for edge in edge_in]
+            edge_out = word[2].split()
+            edge_out = [[int(edge.split(',')[0]), edge.split(',')[1]] for edge in edge_out]
+            graph_sen_in.append(edge_in)
+            graph_sen_out.append(edge_out)
+        graph_in.append(graph_sen_in)
+        graph_out.append(graph_sen_out)
+    return [graph_in, graph_out] # in/out , sen , word , [id->relation]
+
+# 生成词表
+def makeword2veclist(datasetlist):
+    counter = Counter()
+    for dataset in datasetlist:
+        for instance in dataset:
+            counter.update(instance)
+    word2id = {}
+    id2word = []
+    word2id["<pad>"] = 0
+    word2id["<unk>"] = 1
+    id2word.append("<pad>")
+    id2word.append("<unk>")
+    num = len(id2word)
+    for k, v in counter.most_common():
+        word2id[k] = num
+        id2word.append(k)
+        num += 1
+    return word2id, id2word
+
+# 生成字符表
+def makechar2veclist(datasetlist):
+    counter = Counter()
+    for dataset in datasetlist:
+        for instance in dataset:
+            for word in instance:
+                counter.update(word)
+    char2id = {}
+    id2char = []
+    char2id["<pad>"] = 0
+    char2id["<unk>"] = 1
+    id2char.append("<pad>")
+    id2char.append("<unk>")
+    num = len(id2char)
+    for k, v in counter.most_common():
+        char2id[k] = num
+        id2char.append(k)
+        num += 1
+    return char2id, id2char
+
+# 生成边表
+def makeedge2veclist(datasetlist):
+    counter = Counter()
+    for dataset in datasetlist:
+        #其实只用统计入度边即可
+        for instance in dataset[0]:
+                for word in instance:
+                    for id_relation in word:
+                        relation = id_relation[1]
+                        counter.update([relation])
+        for instance in dataset[1]:
+                for word in instance:
+                    for id_relation in word:
+                        relation = id_relation[1]
+                        counter.update([relation])
+    edge2id = {}
+    id2edge = []
+    edge2id["<pad>"] = 0 # 这个pad已经没用了
+    edge2id["<unk>"] = 1
+    id2edge.append("<pad>")
+    id2edge.append("<unk>")
+    num = len(id2edge)
+    for k, v in counter.most_common():
+        edge2id[k] = num
+        id2edge.append(k)
+        num += 1
+    return edge2id, id2edge
+
+def lookup_word(dataset, word2id, label2id, ispad=False, padid=0, unkid=1, padlabel=-1, maxlength=150):
+    x = []
+    for instance in dataset[0]:
+        temp = [word2id[w] if w in word2id else unkid for w in instance]
+        if ispad:
+            temp = temp[:min(len(temp), maxlength)]
+            temp.extend([padid for _ in range(maxlength - len(temp))])
+        x.append(temp)
+
+    y = []
+    for instance in dataset[1]:
+        temp = [label2id[w] for w in instance]
+        if ispad:
+            temp = temp[:min(len(temp), maxlength)]
+            temp.extend([padlabel for _ in range(maxlength - len(temp))])
+        y.append(temp)
+
+    return x, y
+
+def lookup_char(dataset, char2id, ispad=False, padid=0, unkid=1, maxcharlength=-1):
+    charx = []
+    charsize = []
+    for instance in dataset:
+        ctemp = []
+        sizetemp = []
+        for w in instance:
+            cc = [char2id[c] if c in char2id else unkid for c in w]
+            ctemp.append(cc)
+            sizetemp.append(len(cc))
+        charx.append(ctemp)
+        charsize.append(sizetemp)
+    return charx, charsize
+
+def lookup_graph(dataset, edge2id, ispad=False, padid=0, unkid=1):
+    graph = []
+    for in_out in dataset:
+        graph_in_out = []
+        for instance in in_out:
+            graph_sen = []
+            for word in instance:
+                graph_word = []
+                for id_relation in word:
+                    if id_relation[1] in edge2id:
+                        graph_word.append([id_relation[0], edge2id[id_relation[1]]])
+                    else:
+                        graph_word.append([id_relation[0], unkid])
+                graph_sen.append(graph_word)
+            graph_in_out.append(graph_sen)
+        graph.append(graph_in_out)
+    return graph
+
+def main(args):
+    def save_preprocess(dir):
+        f = open(dir, 'wb')
+
+        pickle.dump(word2id, f)
+        pickle.dump(id2word, f)
+        pickle.dump(char2id, f)
+        pickle.dump(id2char, f)
+        pickle.dump(edge2id, f)
+        pickle.dump(id2edge, f)
+
+        pickle.dump(trainx, f)
+        pickle.dump(trainy, f)
+        pickle.dump(trainsize, f)
+        pickle.dump(trainx_char, f)
+        pickle.dump(trainsize_char, f)
+        pickle.dump(train_graph, f)
+
+        pickle.dump(devx, f)
+        pickle.dump(devy, f)
+        pickle.dump(devsize, f)
+        pickle.dump(devx_char, f)
+        pickle.dump(devsize_char, f)
+        pickle.dump(dev_graph, f)
+
+        pickle.dump(testx, f)
+        pickle.dump(testy, f)
+        pickle.dump(testsize, f)
+        pickle.dump(testx_char, f)
+        pickle.dump(testsize_char, f)
+        pickle.dump(test_graph, f)
+
+        f.close()
+
+    # 预处理的预处理
     tokenize_()
     generate_graph(mode=0)
+
+    # 读取原始数据
+    trainx, trainy, trainsize = load(args.data_dir + r"/process/fce-public.train.preprocess.tsv", bool(args.use_lower))
+    devx, devy, devsize = load(args.data_dir + r"/process/fce-public.dev.preprocess.tsv", bool(args.use_lower))
+    testx, testy, testsize = load(args.data_dir + r"/process/fce-public.test.preprocess.tsv", bool(args.use_lower))
+
+    train_graph = load_graph(args.data_dir + r"/process/train_graph.txt")
+    dev_graph = load_graph(args.data_dir + r"/process/dev_graph.txt")
+    test_graph = load_graph(args.data_dir + r"/process/test_graph.txt")
+
+    # 统计各种表
+    word2id, id2word = makeword2veclist([trainx, devx])
+    char2id, id2char = makechar2veclist([trainx, devx])
+    edge2id, id2edge = makeedge2veclist([train_graph, dev_graph])
+    label2id = {"c": 0, "i": 1}
+
+    # 查表替换
+    trainx, trainy = lookup_word((trainx, trainy), word2id,label2id, ispad=False)
+    trainx_char, trainsize_char = lookup_char(trainx, char2id, ispad=False)
+    train_graph = lookup_graph(train_graph, edge2id)
+
+    devx, devy = lookup_word((devx, devy), word2id,label2id, ispad=False)
+    devx_char, devsize_char = lookup_char(devx, char2id, ispad=False)
+    dev_graph = lookup_graph(dev_graph, edge2id)
+
+    testx, testy = lookup_word((testx, testy), word2id,label2id, ispad=False)
+    testx_char, testsize_char = lookup_char(testx, char2id, ispad=False)
+    test_graph = lookup_graph(test_graph, edge2id)
+
+    # 序列化
+    save_preprocess(args.save_dir)
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--data-dir", default="data")
+    parser.add_argument("--use-lower", default="True")
+    parser.add_argument("--save-dir", default="data/preprocess.pkl")
+    parser.add_argument("--mode", type=int, default=0)
+    args = parser.parse_args()
+    main(args)
