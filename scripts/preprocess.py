@@ -289,8 +289,8 @@ def main(args):
         f.close()
 
     # 预处理的预处理
-    # tokenize_()
-    # generate_graph(mode=0)
+    tokenize_()
+    generate_graph(mode=0)
 
     # 读取原始数据
     trainx, trainy, trainsize = load(args.data_dir + r"/process/fce-public.train.preprocess.tsv", bool(args.use_lower))
