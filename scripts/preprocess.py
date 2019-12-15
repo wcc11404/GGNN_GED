@@ -289,8 +289,8 @@ def main(args):
         f.close()
 
     # 预处理的预处理
-    tokenize_()
-    generate_graph(mode=0)
+    # tokenize_()
+    # generate_graph(mode=0)
 
     # 读取原始数据
     trainx, trainy, trainsize = load(args.data_dir + r"/process/fce-public.train.preprocess.tsv", bool(args.use_lower))
@@ -308,26 +308,26 @@ def main(args):
     label2id = {"c": 0, "i": 1}
 
     # 查表替换
-    trainx, trainy = lookup_word((trainx, trainy), word2id,label2id, ispad=False)
-    trainx_char, trainsize_char = lookup_char(trainx, char2id, ispad=False)
+    trainx_char, trainsize_char = lookup_char(trainx, char2id, ispad=False) # 一定要先处理
+    trainx, trainy = lookup_word((trainx, trainy), word2id, label2id, ispad=False)
     train_graph = lookup_graph(train_graph, edge2id)
 
-    devx, devy = lookup_word((devx, devy), word2id,label2id, ispad=False)
     devx_char, devsize_char = lookup_char(devx, char2id, ispad=False)
+    devx, devy = lookup_word((devx, devy), word2id,label2id, ispad=False)
     dev_graph = lookup_graph(dev_graph, edge2id)
 
-    testx, testy = lookup_word((testx, testy), word2id,label2id, ispad=False)
     testx_char, testsize_char = lookup_char(testx, char2id, ispad=False)
+    testx, testy = lookup_word((testx, testy), word2id,label2id, ispad=False)
     test_graph = lookup_graph(test_graph, edge2id)
 
     # 序列化
-    save_preprocess(args.save_dir)
+    save_preprocess(args.preprocess_dir)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data-dir", default="data")
+    parser.add_argument("--data-dir", default="../data")
     parser.add_argument("--use-lower", default="True")
-    parser.add_argument("--save-dir", default="data/preprocess.pkl")
+    parser.add_argument("--preprocess-dir", default="../data/preprocess.pkl")
     parser.add_argument("--mode", type=int, default=0)
     args = parser.parse_args()
     main(args)
