@@ -325,9 +325,9 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data-dir", default="../data")
+    parser.add_argument("--data-dir", default="data")
     parser.add_argument("--use-lower", default="True")
-    parser.add_argument("--preprocess-dir", default="../data/preprocess.pkl")
+    parser.add_argument("--preprocess-dir", default="data/preprocess.pkl")
     parser.add_argument("--mode", type=int, default=0)
     args = parser.parse_args()
     main(args)
