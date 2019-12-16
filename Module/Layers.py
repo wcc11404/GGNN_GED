@@ -280,16 +280,17 @@ class GraphGateTemplate(nn.Module):
         for step in range(self.n_steps):
             # Aggregater
             temp_out = out.unsqueeze(2)  # B * S * 1 * E
-            temp_out = temp_out.expand(-1, -1, self.n_edge_types, -1).contiguous()  # B * S * EN * E
+            temp_out = temp_out.repeat([1, 1, self.n_edge_types, 1])
+            # temp_out = temp_out.expand(-1, -1, self.n_edge_types, -1).contiguous()  # B * S * EN * E
             temp_out = temp_out.view(-1, sl, self.n_edge_types * self.input_dim) # B * S * EN E
 
             graph_in = self.edge_in(temp_out)  # B * S * EN E
-            graph_in = graph_in.view(-1, sl, self.n_edge_types, self.input_dim)  # B * S * EN * E
+            # graph_in = graph_in.view(-1, sl, self.n_edge_types, self.input_dim)  # B * S * EN * E
             graph_in = graph_in.view(-1, sl * self.n_edge_types, self.input_dim)  # B * S EN * E
             graph_in = torch.bmm(batchgraphin, graph_in) # B * S * E
 
             graph_out = self.edge_out(temp_out)  # B * S * EN E
-            graph_out = graph_out.view(-1, sl, self.n_edge_types, self.input_dim)  # B * S * EN * E
+            # graph_out = graph_out.view(-1, sl, self.n_edge_types, self.input_dim)  # B * S * EN * E
             graph_out = graph_out.view(-1, sl * self.n_edge_types, self.input_dim)  # B * S EN * E
             graph_out = torch.bmm(batchgraphout, graph_out) # B * S * E
 
