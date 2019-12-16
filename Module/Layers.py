@@ -259,10 +259,10 @@ class GraphGateTemplate(nn.Module):
             for i in range(self.n_edge_types):
                 graph_in.append(self.edge_in[i](out))  # EN * B * S * E
                 graph_out.append(self.edge_out[i](out))  # EN * B * S * E
-            graph_in = torch.stack(graph_in).permute(1, 2, 0).contiguous()  # B * S * EN * E
+            graph_in = torch.stack(graph_in).permute(1, 2, 0, 3).contiguous()  # B * S * EN * E
             graph_in = graph_in.view(-1, sl * self.n_edge_types, self.input_dim) # B * S EN * E
             graph_in = torch.bmm(batchgraphin, graph_in) # B * S * E
-            graph_out = torch.stack(graph_out).permute(1, 2, 0).contiguous()  # B * S * EN * E
+            graph_out = torch.stack(graph_out).permute(1, 2, 0, 3).contiguous()  # B * S * EN * E
             graph_out = graph_out.view(-1, sl * self.n_edge_types, self.input_dim) # B * S EN * E
             graph_out = torch.bmm(batchgraphout, graph_out) # B * S * E
 
