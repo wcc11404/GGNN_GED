@@ -192,9 +192,9 @@ def makeedge2veclist(datasetlist):
                         counter.update([relation])
     edge2id = {}
     id2edge = []
-    edge2id["<pad>"] = 0 # 这个pad已经没用了
-    edge2id["<unk>"] = 1
-    id2edge.append("<pad>")
+    # edge2id["<pad>"] = 0 # 这个pad已经没用了
+    edge2id["<unk>"] = 0#1
+    # id2edge.append("<pad>")
     id2edge.append("<unk>")
     num = len(id2edge)
     for k, v in counter.most_common():

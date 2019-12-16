@@ -30,8 +30,12 @@ def main(args):
 
     if torch.cuda.is_available() and bool(args.use_gpu):
         model.to("cuda")
+        if bool(args.use_fpp16):
+            model.half()
     else:
         model.to("cpu")
+
+
 
     if args.mode == "Train":
         train(args, model, corpus)
@@ -56,6 +60,7 @@ if __name__ == "__main__":
     parser.add_argument("--mode", default="Train")
     parser.add_argument("--random-seed", type=int, default=44)
     parser.add_argument("--loginfor", default="True")
+    parser.add_argument("--use-fpp16", default="False")
 
     parser.add_argument("--arch", default="GGNNNER")
     parser.add_argument("--batch-size", type=int, default=32)

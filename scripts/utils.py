@@ -52,6 +52,8 @@ def train(args, model, Corpus):
                 train_y = train_y.cuda()
                 train_length = train_length.cuda()
                 extra_data = [i.cuda() for i in extra_data]
+                if bool(args.use_fpp16):
+                    extra_data = [i.half() for i in extra_data if i.dtype == torch.float]
 
             optimizer.zero_grad()
             out = model(train_x, train_length, extra_data)
@@ -60,21 +62,23 @@ def train(args, model, Corpus):
             optimizer.step()
 
         model.eval()
-        train_loss, train_p, train_r, train_f0_5 = evaluate(args, Corpus.traindataloader, model)
+        # train_loss, train_p, train_r, train_f0_5 = evaluate(args, Corpus.traindataloader, model)
         dev_loss, dev_p, dev_r, dev_f0_5 = evaluate(args, Corpus.devdataloader, model)
         log = {"epoch": epoch,
-               "train_loss": train_loss,
-               "train_p": train_p,
-               "train_r": train_r,
-               "train_f0.5": train_f0_5,
+               #"train_loss": train_loss,
+               #"train_p": train_p,
+               #"train_r": train_r,
+               #"train_f0.5": train_f0_5,
                "dev_loss": dev_loss,
                "dev_p": dev_p,
                "dev_r": dev_r,
                "dev_f0.5": dev_f0_5
                }
         if bool(args.loginfor):
-            print("epoch {}  dev loss: {:.4f}  dev p: {:.4f}  dev r: {:.4f}  dev f0.5: {:.4f}  train f0.5: {:.4f}"
-                  .format(log["epoch"],log["dev_loss"],log["dev_p"],log["dev_r"],log["dev_f0.5"],log["train_f0.5"]))
+            # print("epoch {}  dev loss: {:.4f}  dev p: {:.4f}  dev r: {:.4f}  dev f0.5: {:.4f}  train f0.5: {:.4f}"
+            #       .format(log["epoch"],log["dev_loss"],log["dev_p"],log["dev_r"],log["dev_f0.5"],log["train_f0.5"]))
+            print("epoch {}  dev loss: {:.4f}  dev p: {:.4f}  dev r: {:.4f}  dev f0.5: {:.4f}"
+                  .format(log["epoch"],log["dev_loss"],log["dev_p"],log["dev_r"],log["dev_f0.5"]))
         summary.append(log)
 
         if args.save_dir is not None:
