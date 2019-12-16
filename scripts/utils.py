@@ -11,14 +11,14 @@ def load_checkpoint(model, dir):
         raise KeyError("checkpoint is not exist")
     model.load_state_dict(torch.load(dir))
 
-def save_args(args, dir):
+def save_args(dic, dir):
     with open(dir, 'w') as f:
-        json.dump(args, f)
+        json.dump(dic, f)
 
 def load_args(dir):
     with open(dir, 'r') as f:
-        args = json.load(f)
-    return args
+        dic = json.load(f)
+    return dic
 
 def train(args, model, Corpus):
     max_dev_f0_5 = 0
@@ -38,7 +38,7 @@ def train(args, model, Corpus):
             os.makedirs(args.save_dir)
 
     # 先存储参数
-    save_args(args, args.save_dir + "/args,json")
+    save_args(args.__dict__, args.save_dir + "/args.json")
 
     for epoch in range(1, args.max_epoch + 1):
         model.train()

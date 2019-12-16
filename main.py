@@ -11,7 +11,7 @@ from Module.GGNNNER import GGNNNER
 
 def main(args):
     if args.mode == "Test": # 如果是测试,直接读取超参数
-        args = load_args(args.save_dir + "/args,json")
+        args.__dict__ = load_args(args.save_dir + "/args.json")
         args.mode = "Test"
 
     if args.random_seed is not None:
