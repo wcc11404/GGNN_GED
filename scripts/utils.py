@@ -42,6 +42,9 @@ def train(args, model, Corpus):
     save_args(args.__dict__, args.save_dir + "/args.json")
 
     for epoch in range(1, args.max_epoch + 1):
+        if bool(args.loginfor):
+            print("epoch {} training".format(epoch))
+
         model.train()
         for (train_x, train_y, train_length, extra_data) in tqdm(Corpus.traindataloader):
             if bool(args.use_gpu):
