@@ -2,6 +2,7 @@ import torch
 import os
 import json
 from sklearn.metrics import precision_recall_fscore_support
+from tqdm import tqdm
 
 def save_checkpoint(model, dir):
     torch.save(model.state_dict(), dir)
@@ -42,7 +43,7 @@ def train(args, model, Corpus):
 
     for epoch in range(1, args.max_epoch + 1):
         model.train()
-        for (train_x, train_y, train_length, extra_data) in Corpus.traindataloader:
+        for (train_x, train_y, train_length, extra_data) in tqdm(Corpus.traindataloader):
             if bool(args.use_gpu):
                 train_x = train_x.cuda()
                 train_y = train_y.cuda()
