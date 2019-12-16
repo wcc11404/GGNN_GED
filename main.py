@@ -9,10 +9,18 @@ from Module.BaseNER import BaseNER
 from Module.SLNER import SLNER
 from Module.GGNNNER import GGNNNER
 
+def merage_args(user_args, load_args):
+    load_args.mode = user_args.mode
+    load_args.load_dir = user_args.load_dir
+    load_args.use_gpu = user_args.use_gpu
+    load_args.gpu_list = user_args.gpu_list
+    return load_args
+
 def main(args):
     if args.mode == "Test": # 如果是测试,直接读取超参数
-        args.__dict__ = load_args(args.save_dir + "/args.json")
-        args.mode = "Test"
+        loadargs = load_args(args.save_dir + "/args.json")
+        merageargs = merage_args(args.__dict__, loadargs)
+        args.__dict__ = merageargs
 
     if args.random_seed is not None:
         setup_seed(args.random_seed)
@@ -58,7 +66,7 @@ if __name__ == "__main__":
     parser.add_argument("--mode", default="Train")
     parser.add_argument("--random-seed", type=int, default=44)
     parser.add_argument("--loginfor", default="True")
-    parser.add_argument("--use-fpp16", default="False")
+    parser.add_argument("--use-fpp16", default="True")
 
     parser.add_argument("--arch", default="GGNNNER")
     parser.add_argument("--batch-size", type=int, default=32)
