@@ -119,6 +119,8 @@ def evaluate(args, dataloader, model, mode="average"):
             train_y = train_y.cuda()
             train_length = train_length.cuda()
             extra_data = [i.cuda() for i in extra_data]
+            if bool(args.use_fpp16):
+                extra_data = [i.half() for i in extra_data if i.dtype == torch.float]
 
         out = model(train_x, train_length, extra_data)
         loss += model.getLoss(train_x, train_length, extra_data, out, train_y).item()

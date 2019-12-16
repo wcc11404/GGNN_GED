@@ -35,8 +35,6 @@ def main(args):
     else:
         model.to("cpu")
 
-
-
     if args.mode == "Train":
         train(args, model, corpus)
     elif args.mode == "Test":
