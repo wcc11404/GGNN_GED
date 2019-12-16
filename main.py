@@ -59,6 +59,7 @@ if __name__ == "__main__":
 
     parser.add_argument("--arch", default="GGNNNER")
     parser.add_argument("--batch-size", type=int, default=32)
+    parser.add_argument("--use-lower", default="True")
     # parser.add_argument("--vocabulary-size",type=int,default=32)
     parser.add_argument("--word-embed-dim", type=int, default=300)
     parser.add_argument("--char-embed-dim", type=int, default=100)
