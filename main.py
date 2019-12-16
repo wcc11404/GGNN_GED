@@ -2,33 +2,37 @@ import argparse
 import numpy as np
 import torch
 
-from Module.BaseNER import baseNER
+from data.corpus import GedCorpus
+from scripts.utils import train, test, load_args
+
+from Module.BaseNER import BaseNER
 from Module.SLNER import SLNER
 from Module.GGNNNER import GGNNNER
 
-from data.corpus import GedCorpus
-from scripts.utils import train, test
-
 def main(args):
+    if args.mode == "Test": # 如果是测试,直接读取超参数
+        args = load_args(args.save_dir + "/args,json")
+        args.mode = "Test"
+
     if args.random_seed is not None:
         setup_seed(args.random_seed)
+    # if torch.cuda.is_available() and bool(args.use_gpu):
+    #     torch.cuda.set_device(args.gpu_list)
+
     corpus = GedCorpus("data", args)
+
     if args.arch == "BaseNER":
-        model = baseNER(args)
+        model = BaseNER(args)
     elif args.arch == "SLNER":
         model = SLNER(args)
     elif args.arch == "GGNNNER":
         model = GGNNNER(args)
-    if bool(args.use_gpu):
-        # if args.gpu_list is not None:
-        #     os.environ["CUDA_VISIBLE_DEVICES"]=str(args.gpu_list)
-        #     if bool(args.loginfor):
-        #         print("use {} gpu".format(args.gpu_list))
+
+    if torch.cuda.is_available() and bool(args.use_gpu):
         model.to("cuda")
     else:
         model.to("cpu")
 
-    #Train
     if args.mode == "Train":
         train(args, model, corpus)
     elif args.mode == "Test":
@@ -42,18 +46,19 @@ def setup_seed(seed):
     # torch.backends.cudnn.deterministic = True  #cpu/gpu结果一致
     # torch.backends.cudnn.benchmark = True   #训练集变化不大时使训练加速
 
+def init_args(args):
+    pass
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--use-gpu", default="True")
     parser.add_argument("--gpu-list", default="0")
     parser.add_argument("--mode", default="Train")
-    parser.add_argument("--use-lower", default="True")
     parser.add_argument("--random-seed", type=int, default=44)
-    parser.add_argument("--arch", default="GGNNNER")
-
-    parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--loginfor", default="True")
 
+    parser.add_argument("--arch", default="GGNNNER")
+    parser.add_argument("--batch-size", type=int, default=32)
     # parser.add_argument("--vocabulary-size",type=int,default=32)
     parser.add_argument("--word-embed-dim", type=int, default=300)
     parser.add_argument("--char-embed-dim", type=int, default=100)

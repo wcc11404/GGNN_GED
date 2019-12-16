@@ -1,19 +1,26 @@
 import torch
 import os
+import json
 from sklearn.metrics import precision_recall_fscore_support
 
-def savecheckpoint(model, dir):
+def save_checkpoint(model, dir):
     torch.save(model.state_dict(), dir)
 
-def loadcheckpoint(model, dir):
+def load_checkpoint(model, dir):
     if not os.path.exists(dir):
         raise KeyError("checkpoint is not exist")
     model.load_state_dict(torch.load(dir))
 
-def train(args, model, Corpus):
-    if args.load_dir is not None:
-        loadcheckpoint(model, args.load_dir)
+def save_args(args, dir):
+    with open(dir, 'w') as f:
+        json.dump(args, f)
 
+def load_args(dir):
+    with open(dir, 'r') as f:
+        args = json.load(f)
+    return args
+
+def train(args, model, Corpus):
     max_dev_f0_5 = 0
     max_index = 0
     early_stop=0
@@ -25,10 +32,13 @@ def train(args, model, Corpus):
         optimizer = torch.optim.Adadelta(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
 
     if args.load_dir is not None:
-        loadcheckpoint(model, args.load_dir)
+        load_checkpoint(model, args.load_dir)
     if args.save_dir is not None:
         if not os.path.exists(args.save_dir):
             os.makedirs(args.save_dir)
+
+    # 先存储参数
+    save_args(args, args.save_dir + "/args,json")
 
     for epoch in range(1, args.max_epoch + 1):
         model.train()
@@ -64,14 +74,14 @@ def train(args, model, Corpus):
         summary.append(log)
 
         if args.save_dir is not None:
-            savecheckpoint(model, dir=args.save_dir + "/checkpoint" + str(epoch) + ".pt")
+            save_checkpoint(model, dir=args.save_dir + "/checkpoint" + str(epoch) + ".pt")
         if max_dev_f0_5 < dev_f0_5:
             max_dev_f0_5 = dev_f0_5
             max_index = epoch
-            early_stop=0
+            early_stop = 0
         else:
-            early_stop+=1
-            if early_stop>= args.early_stop:
+            early_stop += 1
+            if early_stop >= args.early_stop:
                 break
 
     print("epoch {} get the max dev f0.5: {}".format(max_index, max_dev_f0_5))
@@ -79,7 +89,9 @@ def train(args, model, Corpus):
 def test(args, model, Corpus):
     if args.load_dir is None:
         raise KeyError("load_dir has an invaild value: None")
-    loadcheckpoint(model,args.load_dir)
+
+    load_checkpoint(model, args.load_dir)
+
     model.eval()
     #_, train_p, train_r, train_f = evaluate(args, Corpus.traindataloader, scripts, Loss=None)
     _, dev_p, dev_r, dev_f = evaluate(args, Corpus.devdataloader, model)

@@ -2,9 +2,9 @@ import torch
 from torch import nn
 from .Layers import EmbeddingTemplate, RnnTemplate, LinearTemplate
 
-class baseNER(nn.Module):
+class BaseNER(nn.Module):
     def __init__(self, args):
-        super(baseNER, self).__init__()
+        super(BaseNER, self).__init__()
         # self.args = args
         self.wordembedding = EmbeddingTemplate(args.word_vocabulary_size, args.word_embed_dim, args.embed_drop)
         self.rnn = RnnTemplate(args.rnn_type, args.batch_size, args.word_embed_dim, args.word_embed_dim, args.rnn_drop,
