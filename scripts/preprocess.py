@@ -26,6 +26,9 @@ def parse(deplist):
         else:
             graph[outstr] = [str(tgt) + "," + relation]
             graph[str(src) + "in"] = []
+
+    # graph的形状 dict["idin"]= ["sid,relation",...]
+    # 表明第id个单词有一条从sid指过来的边，边的关系为relation
     return graph, max_index #这个maxindex不对
 
 def graph_to_file(graph_maxindex, file_path):
@@ -53,6 +56,7 @@ def generate_graph(mode=0):
         in_path = ['../data/orign_data/fce-public.train.original.tsv', '../data/orign_data/fce-public.dev.original.tsv',
                    '../data/orign_data/fce-public.test.original.tsv']
     out_path = ['../data/process/train_graph.txt', '../data/process/dev_graph.txt', '../data/process/test_graph.txt']
+
     for ip, op in zip(in_path, out_path):
         f = open(ip, 'r').read().strip().split('\n\n')
         graph_maxindex = []
@@ -66,7 +70,34 @@ def generate_graph(mode=0):
                 wordtuple = wordtuple.split("\t")
                 temp.append(wordtuple[0])
             dp = nlp.dependency_parse(" ".join(temp))
-            g, m = parse(dp)
+            g, _ = parse(dp)
+
+            ### 加入语序边,每个单词（除首尾）都有一个出边和一个入边
+            # id 从1-len(temp)
+            outstr = str(1) + "out"
+            if outstr in g:
+                g[outstr] = g[outstr][:] + [str(2) + ",nextout"]
+            else:
+                g[outstr] = [str(2) + ",nextout"]
+
+            for num in range(2, len(temp)):
+                instr = str(num) + "in"
+                if instr in g:
+                    g[instr] = g[instr][:] + [str(num - 1) + ",nextin"]
+                else:
+                    g[instr] = [str(num - 1) + ",nextin"]
+                outstr = str(num) + "out"
+                if outstr in g:
+                    g[outstr] = g[outstr][:] + [str(num + 1) + ",nextout"]
+                else:
+                    g[outstr] = [str(num + 1) + ",nextout"]
+
+            instr = str(len(temp)) + "in"
+            if instr in g:
+                g[instr] = g[instr][:] + [str(len(temp) - 1) + ",nextin"]
+            else:
+                g[instr] = [str(len(temp) - 1) + ",nextin"]
+
             graph_maxindex.append((g, len(temp)))
         graph_to_file(graph_maxindex, op)
     nlp.close()
@@ -289,8 +320,8 @@ def main(args):
         f.close()
 
     # 预处理的预处理
-    tokenize_()
-    generate_graph(mode=0)
+    # tokenize_()
+    # generate_graph(mode=0)
 
     # 读取原始数据
     trainx, trainy, trainsize = load(args.data_dir + r"/process/fce-public.train.preprocess.tsv", bool(args.use_lower))
@@ -325,9 +356,9 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data-dir", default="data")
+    parser.add_argument("--data-dir", default="../data")
     parser.add_argument("--use-lower", default="True")
-    parser.add_argument("--preprocess-dir", default="data/preprocess.pkl")
+    parser.add_argument("--preprocess-dir", default="../data/preprocess.pkl")
     parser.add_argument("--mode", type=int, default=0)
     args = parser.parse_args()
     main(args)
