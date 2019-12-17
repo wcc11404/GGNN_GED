@@ -51,7 +51,7 @@ class GGNNNER(nn.Module):
         graph_in, graph_out = batchextradata[0], batchextradata[1]
 
         out = self.wordembedding(batchinput)
-        # out = self.gnn(out, graph_in, graph_out)
+        out = self.gnn(out, graph_in, graph_out)
         # out, _ = self.rnn(out_graph, batchlength)    # B S E
         # lm_input = out.view(-1, out.shape[1], 2, out.shape[2] // 2).permute(2, 0, 1, 3).contiguous()  # 分成双向的
         # lm_fw_input, lm_bw_input = lm_input[0], lm_input[1]

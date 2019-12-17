@@ -184,13 +184,13 @@ class GraphGateTemplate(nn.Module):
         # self.edge_out = EmbeddingTemplate(self.n_edge_tpyes, self.input_dim)# * self.input_dim)
         # self.temp = LinearTemplate(self.input_dim, 1)
 
-        self.edge_in = nn.ModuleList(
-            [LinearTemplate(self.input_dim, self.input_dim) for _ in range(self.n_edge_types)])
-        self.edge_out = nn.ModuleList(
-            [LinearTemplate(self.input_dim, self.input_dim) for _ in range(self.n_edge_types)])
+        # self.edge_in = nn.ModuleList(
+        #     [LinearTemplate(self.input_dim, self.input_dim) for _ in range(self.n_edge_types)])
+        # self.edge_out = nn.ModuleList(
+        #     [LinearTemplate(self.input_dim, self.input_dim) for _ in range(self.n_edge_types)])
 
-        # self.edge_in = LinearTemplate(self.n_edge_types * self.input_dim, self.n_edge_types * self.input_dim)
-        # self.edge_out = LinearTemplate(self.n_edge_types * self.input_dim, self.n_edge_types * self.input_dim)
+        self.edge_in = LinearTemplate(self.n_edge_types * self.input_dim, self.n_edge_types * self.input_dim)
+        self.edge_out = LinearTemplate(self.n_edge_types * self.input_dim, self.n_edge_types * self.input_dim)
 
         # GRUGate
         self.reset_gate = LinearTemplate(self.input_dim * 3, self.input_dim, activation="sigmoid")
@@ -246,7 +246,7 @@ class GraphGateTemplate(nn.Module):
         out = self.dropout(out)
         return out
 
-    def forward(self, batchinput, batchgraphin, batchgraphout):
+    def bk2_forward(self, batchinput, batchgraphin, batchgraphout):
         sl = batchinput.shape[1]
         out = batchinput
         batchgraphin = batchgraphin.view(-1, sl, sl * self.n_edge_types)
@@ -271,7 +271,7 @@ class GraphGateTemplate(nn.Module):
         out = self.dropout(out)
         return out
 
-    def bk3_forward(self, batchinput, batchgraphin, batchgraphout):
+    def forward(self, batchinput, batchgraphin, batchgraphout):
         sl = batchinput.shape[1]
         out = batchinput
         batchgraphin = batchgraphin.view(-1, sl, sl * self.n_edge_types)
