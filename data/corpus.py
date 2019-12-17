@@ -123,18 +123,19 @@ class GedCorpus:
         self.traindataset = GedDataset((self.args.arch, self.edgevocabularysize), self.trainx, self.trainy,
                                        self.trainsize, self.trainx_char, self.trainsize_char, self.train_graph)
         self.traindataloader = DataLoader(dataset=self.traindataset, batch_size=args.batch_size, shuffle=True,
-                                          collate_fn=collate_fn)
+                                          collate_fn=collate_fn, num_workers=args.num_workers)
 
         #Dev
         self.devdataset = GedDataset((self.args.arch, self.edgevocabularysize), self.devx, self.devy, self.devsize,
                                      self.devx_char, self.devsize_char, self.dev_graph)
         self.devdataloader = DataLoader(dataset=self.devdataset, batch_size=args.batch_size, shuffle=False,
-                                        collate_fn=collate_fn)
+                                        collate_fn=collate_fn, num_workers=args.num_workers)
 
         #Test
         self.testdataset = GedDataset((self.args.arch, self.edgevocabularysize), self.testx, self.testy, self.testsize,
                                       self.testx_char, self.testsize_char, self.test_graph)
-        self.testdataloader = DataLoader(dataset=self.testdataset, batch_size=1, shuffle=False, collate_fn=collate_fn)
+        self.testdataloader = DataLoader(dataset=self.testdataset, batch_size=1, shuffle=False, collate_fn=collate_fn,
+                                         num_workers=args.num_workers)
 
     def load_preprocess(self,dir):
         f = open(dir, 'rb')
