@@ -66,8 +66,8 @@ if __name__ == "__main__":
     parser.add_argument("--mode", default="Train")
     parser.add_argument("--random-seed", type=int, default=44)
     parser.add_argument("--loginfor", default="True")
-    parser.add_argument("--use-fpp16", default="True")
-    parser.add_argument("--num-workers", type=int, default=2)
+    parser.add_argument("--use-fpp16", default="False")
+    parser.add_argument("--num-workers", type=int, default=1)
 
     parser.add_argument("--arch", default="GGNNNER")
     parser.add_argument("--batch-size", type=int, default=32)
