@@ -14,14 +14,14 @@ class GGNNNER(nn.Module):
         self.rnn = RnnTemplate(args.rnn_type, args.batch_size, args.word_embed_dim, args.word_embed_dim, args.rnn_drop,
                                bidirectional=bool(args.rnn_bidirectional))
 
-        # if args.char_embed_dim is not None and args.char_embed_dim > 0:
-        #     self.charembedding = EmbeddingTemplate(args.char_vocabulary_size, args.char_embed_dim, args.embed_drop)
-        #     self.charrnn = RnnTemplate(args.rnn_type, args.batch_size, args.char_embed_dim, args.char_embed_dim,
-        #                                args.rnn_drop)
-        #     self.hiddenlinear = LinearTemplate(args.word_embed_dim + args.char_embed_dim, args.hidden_dim,
-        #                                        activation="tanh", dropout=args.linear_drop)
-        # else:
-        #     self.charembedding = None
+        if args.char_embed_dim is not None and args.char_embed_dim > 0:
+            self.charembedding = EmbeddingTemplate(args.char_vocabulary_size, args.char_embed_dim, args.embed_drop)
+            self.charrnn = RnnTemplate(args.rnn_type, args.batch_size, args.char_embed_dim, args.char_embed_dim,
+                                       args.rnn_drop)
+            self.mergelinear = LinearTemplate(args.word_embed_dim + args.char_embed_dim, args.word_embed_dim,
+                                              activation="tanh")
+        else:
+            self.charembedding = None
         self.hiddenlinear = LinearTemplate(args.word_embed_dim, args.hidden_dim, activation="tanh",
                                                dropout=args.linear_drop)
 
@@ -48,22 +48,24 @@ class GGNNNER(nn.Module):
                 del args.word2id
 
     def forward(self, batchinput, batchlength, batchextradata):
-        graph_in, graph_out = batchextradata[0], batchextradata[1]
+        batchinput_char, batchlength_char, graph_in, graph_out = batchextradata
 
         out = self.wordembedding(batchinput)
+
+        if self.charembedding is not None:
+            charout = self.charembedding(batchinput_char)
+            _, charout = self.charrnn(charout, batchlength_char, ischar=True) # B S 2 E//2
+            charout = charout.view(charout.shape[0], charout.shape[1], -1)
+            out = torch.cat((out, charout), 2)
+            out = self.mergelinear(out)
+            # lm_fw_input = torch.cat((lm_fw_input, charout), 2)
+            # lm_bw_input = torch.cat((lm_bw_input, charout), 2)
+
         out = self.gnn(out, graph_in, graph_out)
-        # out, _ = self.rnn(out, batchlength)    # B S E
+        out, _ = self.rnn(out, batchlength)    # B S E
 
         # lm_input = out.view(-1, out.shape[1], 2, out.shape[2] // 2).permute(2, 0, 1, 3).contiguous()  # 分成双向的
         # lm_fw_input, lm_bw_input = lm_input[0], lm_input[1]
-
-        # if self.charembedding is not None:
-        #     charout = self.charembedding(batchinput_char)
-        #     _, charout = self.charrnn(charout, batchlength_char, ischar=True) # B S 2 E//2
-        #     charout = charout.view(charout.shape[0], charout.shape[1], -1)
-        #     out = torch.cat((out, charout), 2)
-        #     lm_fw_input = torch.cat((lm_fw_input, charout), 2)
-        #     lm_bw_input = torch.cat((lm_bw_input, charout), 2)
 
         out = self.hiddenlinear(out)
         out = self.classification(out)

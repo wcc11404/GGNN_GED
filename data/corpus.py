@@ -87,7 +87,7 @@ def collate_fn(train_data):
     train_graph_out = torch.from_numpy(np.array(train_graph_out)).float()
 
     if task == "GGNNNER":
-        extra_data = (train_graph_in, train_graph_out)
+        extra_data = (train_x_char, train_length_char, train_graph_in, train_graph_out)
     elif task == "BaseNER" or task == "SLNER":
         extra_data = (train_x_char, train_length_char)
     else:
