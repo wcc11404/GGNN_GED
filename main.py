@@ -12,7 +12,7 @@ from Module.GGNNNER import GGNNNER
 def merage_args(user_args, load_args):
     load_args["mode"] = user_args["mode"]
     load_args["load_dir"] = user_args["load_dir"]
-    load_args["use_gpu"] = user_args["use_gpu"]
+    load_args["use_cpu"] = user_args["use_cpu"]
     load_args["gpu_list"] = user_args["gpu_list"]
     return load_args
 
