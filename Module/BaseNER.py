@@ -31,7 +31,7 @@ class BaseNER(nn.Module):
         if args.mode == "Train" and args.load_dir is None:
             if args.w2v_dir is not None:
                 self.wordembedding.load_from_w2v(args.word2id, True, args.w2v_dir, args.use_lower, args.loginfor)
-                del args.word2id
+        del args.word2id
 
     def forward(self, batchinput, batchlength, batchextradata):
         if self.charembedding is not None:
