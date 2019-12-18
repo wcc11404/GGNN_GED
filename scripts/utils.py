@@ -42,18 +42,21 @@ def train(args, model, Corpus):
     save_args(args.__dict__, args.save_dir + "/args.json")
 
     for epoch in range(1, args.max_epoch + 1):
-        if bool(args.loginfor):
-            print("epoch {} training".format(epoch))
+        print("epoch {} training".format(epoch))
 
         model.train()
-        for (train_x, train_y, train_length, extra_data) in tqdm(Corpus.traindataloader):
-            if bool(args.use_gpu):
+        if args.loginfor:
+            trainer = tqdm(Corpus.traindataloader)
+        else:
+            trainer = Corpus.traindataloader
+        for (train_x, train_y, train_length, extra_data) in trainer:
+            if not args.use_cpu:
                 train_x = train_x.cuda()
                 train_y = train_y.cuda()
                 train_length = train_length.cuda()
                 extra_data = [i.cuda() for i in extra_data]
-                if bool(args.use_fpp16):
-                    extra_data = [i.half() for i in extra_data if i.dtype == torch.float]
+                if args.use_fpp16:
+                    extra_data = [i.half() if i.dtype == torch.float else i for i in extra_data]
 
             optimizer.zero_grad()
             out = model(train_x, train_length, extra_data)
@@ -74,11 +77,10 @@ def train(args, model, Corpus):
                "dev_r": dev_r,
                "dev_f0.5": dev_f0_5
                }
-        if bool(args.loginfor):
-            # print("epoch {}  dev loss: {:.4f}  dev p: {:.4f}  dev r: {:.4f}  dev f0.5: {:.4f}  train f0.5: {:.4f}"
-            #       .format(log["epoch"],log["dev_loss"],log["dev_p"],log["dev_r"],log["dev_f0.5"],log["train_f0.5"]))
-            print("epoch {}  dev loss: {:.4f}  dev p: {:.4f}  dev r: {:.4f}  dev f0.5: {:.4f}"
-                  .format(log["epoch"],log["dev_loss"],log["dev_p"],log["dev_r"],log["dev_f0.5"]))
+        # print("epoch {}  dev loss: {:.4f}  dev p: {:.4f}  dev r: {:.4f}  dev f0.5: {:.4f}  train f0.5: {:.4f}"
+        #       .format(log["epoch"],log["dev_loss"],log["dev_p"],log["dev_r"],log["dev_f0.5"],log["train_f0.5"]))
+        print("epoch {}  dev loss: {:.4f}  dev p: {:.4f}  dev r: {:.4f}  dev f0.5: {:.4f}"
+              .format(log["epoch"],log["dev_loss"],log["dev_p"],log["dev_r"],log["dev_f0.5"]))
         summary.append(log)
 
         if args.save_dir is not None:
@@ -114,13 +116,13 @@ def evaluate(args, dataloader, model, mode="average"):
     predict = []
     groundtruth = []
     for (train_x, train_y, train_length, extra_data) in dataloader:
-        if bool(args.use_gpu):
+        if not args.use_cpu:
             train_x = train_x.cuda()
             train_y = train_y.cuda()
             train_length = train_length.cuda()
             extra_data = [i.cuda() for i in extra_data]
-            if bool(args.use_fpp16):
-                extra_data = [i.half() for i in extra_data if i.dtype == torch.float]
+            if args.use_fpp16:
+                extra_data = [i.half() if i.dtype == torch.float else i for i in extra_data ]
 
         out = model(train_x, train_length, extra_data)
         loss += model.getLoss(train_x, train_length, extra_data, out, train_y).item()

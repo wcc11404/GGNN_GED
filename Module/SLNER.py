@@ -5,7 +5,7 @@ from .Layers import EmbeddingTemplate, RnnTemplate, LinearTemplate
 class SLNER(nn.Module):
     def __init__(self, args):
         super(SLNER, self).__init__()
-        assert args.rnn_bidirectional == "True" and args.lm_cost_weight >= 0  # 暂时必须是双向lstm
+        assert args.rnn_bidirectional and args.lm_cost_weight >= 0  # 暂时必须是双向lstm
         self.lm_vocab_size = args.word_vocabulary_size # args.lm_vocab_size
         self.lm_cost_weight = args.lm_cost_weight
         if self.lm_vocab_size == -1 or self.lm_vocab_size > args.word_vocabulary_size:
@@ -13,7 +13,7 @@ class SLNER(nn.Module):
 
         self.wordembedding = EmbeddingTemplate(args.word_vocabulary_size, args.word_embed_dim, args.embed_drop)
         self.rnn = RnnTemplate(args.rnn_type, args.batch_size, args.word_embed_dim, args.word_embed_dim, args.rnn_drop,
-                               bidirectional=bool(args.rnn_bidirectional))
+                               bidirectional=args.rnn_bidirectional)
 
         if args.char_embed_dim is not None and args.char_embed_dim > 0:
             self.charembedding = EmbeddingTemplate(args.char_vocabulary_size, args.char_embed_dim, args.embed_drop)
@@ -43,7 +43,7 @@ class SLNER(nn.Module):
     def load_embedding(self, args):
         if args.mode == "Train" and args.load_dir is None:
             if args.w2v_dir is not None:
-                self.wordembedding.load_from_w2v(args.word2id, True, args.w2v_dir, bool(args.use_lower), bool(args.loginfor))
+                self.wordembedding.load_from_w2v(args.word2id, True, args.w2v_dir, args.use_lower, args.loginfor)
                 del args.word2id
 
     def forward(self, batchinput, batchlength, batchextradata):

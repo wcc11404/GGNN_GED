@@ -108,7 +108,7 @@ class GedCorpus:
         args.edge_vocabulary_size = self.edgevocabularysize
         args.word2id = self.word2id
 
-        if bool(args.loginfor):
+        if args.loginfor:
             print("word dictionary size : " + str(self.wordvocabularysize))
             print("char dictionary size : " + str(self.charvocabularysize))
             print("edge dictionary size : " + str(self.edgevocabularysize))
