@@ -118,6 +118,7 @@ class GedCorpus:
             print("max dev data length : " + str(max(self.devsize)))
             print("test data size : " + str(len(self.testx)))
             print("max test data length : " + str(max(self.testsize)))
+            print()
 
         #Train
         self.traindataset = GedDataset((self.args.arch, self.edgevocabularysize), self.trainx, self.trainy,

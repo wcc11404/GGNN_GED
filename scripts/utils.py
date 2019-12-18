@@ -32,7 +32,12 @@ def train(args, model, Corpus):
     elif args.optimizer.lower() == "adadelta":
         optimizer = torch.optim.Adadelta(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
 
+    if args.loginfor:
+        print(model)
+        print()
     if args.load_dir is not None:
+        print("load checkpoint from" + args.load_dir)
+        print()
         load_checkpoint(model, args.load_dir)
     if args.save_dir is not None:
         if not os.path.exists(args.save_dir):
