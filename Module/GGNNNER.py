@@ -52,7 +52,6 @@ class GGNNNER(nn.Module):
         batchinput_char, batchlength_char, graph_in, graph_out = batchextradata
 
         out = self.wordembedding(batchinput)
-        out = self.gnn(out, graph_in, graph_out)
 
         if self.charembedding is not None:
             charout = self.charembedding(batchinput_char)
@@ -64,6 +63,7 @@ class GGNNNER(nn.Module):
             # lm_bw_input = torch.cat((lm_bw_input, charout), 2)
 
         out, _ = self.rnn(out, batchlength)    # B S E
+        out = self.gnn(out, graph_in, graph_out)
 
         # lm_input = out.view(-1, out.shape[1], 2, out.shape[2] // 2).permute(2, 0, 1, 3).contiguous()  # 分成双向的
         # lm_fw_input, lm_bw_input = lm_input[0], lm_input[1]
