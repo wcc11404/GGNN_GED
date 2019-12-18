@@ -35,7 +35,7 @@ class EmbeddingTemplate(nn.Module):
 
         s = set()
         num = 0
-        with open(w2v_dir,'r') as f:
+        with open(w2v_dir, 'r') as f:
             for line in f:
                 line = line.strip().split()
                 if len(line) <= 2:
@@ -69,7 +69,7 @@ class RnnTemplate(nn.Module):
         self.rnndropout = nn.Dropout(rnn_drop)
 
         hidden_dim = hidden_dim // 2 if bidirectional else hidden_dim
-        if self.type=="LSTM":
+        if self.type == "LSTM":
             self.rnn = nn.LSTM(input_dim, hidden_dim, num_layers=numLayers, bidirectional=bidirectional,batch_first=False)
             if initalizer_type=="normal":
                 self.hidden = (torch.normal(mean=torch.zeros(numLayers * 2 if bidirectional else numLayers, hidden_dim)).to("cuda"),
@@ -80,7 +80,7 @@ class RnnTemplate(nn.Module):
                 raise KeyError("initalizer_type has an invaild value: " + initalizer_type)
             else:
                 raise KeyError("initalizer_type has an invaild value: " + initalizer_type)
-        elif self.type=="GRU":
+        elif self.type == "GRU":
             #ToDo
             raise KeyError("rnn_type has an invaild value: " + rnn_type)
         else:

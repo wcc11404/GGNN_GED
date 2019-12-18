@@ -1,8 +1,6 @@
 import numpy as np
 from torch.utils.data import Dataset, DataLoader
 import torch
-import os
-from collections import Counter
 import pickle
 
 def collate_fn(train_data):
@@ -76,12 +74,7 @@ def collate_fn(train_data):
     train_x_char = padchar(train_x_char, max(train_length), maxchar, paditem=0) # B * S * W
     train_length_char = pad(train_length_char, max(train_length), paditem=1)   # B * S 必须pad1,长度不能为0
     train_graph_in = padgraph(train_graph_in, max(train_length), edge_num, paditem=0) # B * S * S * EN
-    try:
-        train_graph_out = padgraph(train_graph_out, max(train_length), edge_num, paditem=0) # B * S * S * EN
-    except:
-        print(len(train_graph_out))
-        print(max(train_length))
-        exit()
+    train_graph_out = padgraph(train_graph_out, max(train_length), edge_num, paditem=0) # B * S * S * EN
 
     train_x = torch.from_numpy(np.array(train_x)).long()
     train_y = torch.from_numpy(np.array(train_y)).long()

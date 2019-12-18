@@ -35,7 +35,7 @@ class BaseNER(nn.Module):
 
     def forward(self, batchinput, batchlength, batchextradata):
         if self.charembedding is not None:
-            batchinput_char, batchlength_char = batchextradata[0], batchextradata[1]
+            batchinput_char, batchlength_char = batchextradata
 
         out = self.wordembedding(batchinput)
         out, _ = self.rnn(out, batchlength)    # B S E

@@ -74,11 +74,13 @@ def generate_graph(mode=0):
 
             ### 加入语序边,每个单词（除首尾）都有一个出边和一个入边
             # id 从1-len(temp)
-            outstr = str(1) + "out"
-            if outstr in g:
-                g[outstr] = g[outstr][:] + [str(2) + ",nextout"]
-            else:
-                g[outstr] = [str(2) + ",nextout"]
+            # 注test集会有只有一个单词存在的情况
+            if len(temp) > 1:
+                outstr = str(1) + "out"
+                if outstr in g:
+                    g[outstr] = g[outstr][:] + [str(2) + ",nextout"]
+                else:
+                    g[outstr] = [str(2) + ",nextout"]
 
             for num in range(2, len(temp)):
                 instr = str(num) + "in"
@@ -92,11 +94,12 @@ def generate_graph(mode=0):
                 else:
                     g[outstr] = [str(num + 1) + ",nextout"]
 
-            instr = str(len(temp)) + "in"
-            if instr in g:
-                g[instr] = g[instr][:] + [str(len(temp) - 1) + ",nextin"]
-            else:
-                g[instr] = [str(len(temp) - 1) + ",nextin"]
+            if len(temp) > 1:
+                instr = str(len(temp)) + "in"
+                if instr in g:
+                    g[instr] = g[instr][:] + [str(len(temp) - 1) + ",nextin"]
+                else:
+                    g[instr] = [str(len(temp) - 1) + ",nextin"]
 
             graph_maxindex.append((g, len(temp)))
         graph_to_file(graph_maxindex, op)
@@ -344,11 +347,11 @@ def main(args):
     train_graph = lookup_graph(train_graph, edge2id)
 
     devx_char, devsize_char = lookup_char(devx, char2id, ispad=False)
-    devx, devy = lookup_word((devx, devy), word2id,label2id, ispad=False)
+    devx, devy = lookup_word((devx, devy), word2id, label2id, ispad=False)
     dev_graph = lookup_graph(dev_graph, edge2id)
 
     testx_char, testsize_char = lookup_char(testx, char2id, ispad=False)
-    testx, testy = lookup_word((testx, testy), word2id,label2id, ispad=False)
+    testx, testy = lookup_word((testx, testy), word2id, label2id, ispad=False)
     test_graph = lookup_graph(test_graph, edge2id)
 
     # 序列化
@@ -357,7 +360,7 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--data-dir", default="data")
-    parser.add_argument("--use-lower", default="True")
+    parser.add_argument("--use-lower", action='store_true', default=True)
     parser.add_argument("--preprocess-dir", default="data/preprocess.pkl")
     parser.add_argument("--mode", type=int, default=0)
     args = parser.parse_args()

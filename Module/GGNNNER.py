@@ -53,7 +53,6 @@ class GGNNNER(nn.Module):
 
         out = self.wordembedding(batchinput)
 
-
         if self.charembedding is not None:
             charout = self.charembedding(batchinput_char)
             _, charout = self.charrnn(charout, batchlength_char, ischar=True) # B S 2 E//2
