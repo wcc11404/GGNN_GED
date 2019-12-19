@@ -52,7 +52,7 @@ class GGNNNER(nn.Module):
         batchinput_char, batchlength_char, graph_in, graph_out = batchextradata
 
         out = self.wordembedding(batchinput)
-        out = self.gnn(out, graph_in, graph_out)
+        # out = self.gnn(out, graph_in, graph_out)
 
         if self.charembedding is not None:
             charout = self.charembedding(batchinput_char)
