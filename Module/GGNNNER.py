@@ -59,7 +59,7 @@ class GGNNNER(nn.Module):
             _, charout = self.charrnn(charout, batchlength_char, ischar=True) # B S 2 E//2
             charout = charout.view(charout.shape[0], charout.shape[1], -1)
             out = torch.cat((out, charout), 2)
-            # out = self.mergelinear(out)
+            out = self.mergelinear(out)
             # lm_fw_input = torch.cat((lm_fw_input, charout), 2)
             # lm_bw_input = torch.cat((lm_bw_input, charout), 2)
 
