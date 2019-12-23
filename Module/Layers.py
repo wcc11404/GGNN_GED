@@ -60,13 +60,17 @@ class EmbeddingTemplate(nn.Module):
 
 class RnnTemplate(nn.Module):
     def __init__(self, rnn_type, batch_size, input_dim, hidden_dim, rnn_drop=0.0,
-                 numLayers=1, bidirectional=True, initalizer_type="normal"):
+                 numLayers=1, bidirectional=True, initalizer_type="normal", residual=False, layernorm=False):
         super(RnnTemplate, self).__init__()
         self.type = rnn_type
         self.batch_size = batch_size
         self.input_dim = input_dim
         self.hidden_dim = hidden_dim
         self.rnndropout = nn.Dropout(rnn_drop)
+        self.residual = residual
+        self.use_layernorm = layernorm
+        if self.use_layernorm:
+            self.layernorm = nn.LayerNorm(self.hidden_dim)
 
         hidden_dim = hidden_dim // 2 if bidirectional else hidden_dim
         if self.type == "LSTM":
@@ -96,6 +100,7 @@ class RnnTemplate(nn.Module):
                 nn.init.xavier_uniform_(param)
 
     def forward(self, batchinput, batchlength, ischar=False): # B * S * E
+        residual = batchinput
         if ischar:
             assert len(batchinput.shape) == 4
             sl = batchinput.shape[1]
@@ -127,6 +132,11 @@ class RnnTemplate(nn.Module):
             hidden = hidden.view(-1, sl, 2, self.input_dim//2)  # B * S * 2 * E//2
             batchlength = batchlength.view(-1, sl)
 
+        if self.residual:
+            rnn_ouput = rnn_ouput + residual
+        if self.use_layernorm:
+            rnn_ouput = self.layernorm(rnn_ouput)
+
         # 注意: rnn_output为双向lstm，S个时间步骤输出的拼接
         #    c<-h<-a<-r<-
         #  ->c->h->a->r
@@ -135,7 +145,7 @@ class RnnTemplate(nn.Module):
         return rnn_ouput, hidden # B * S * E , B * 2 * E//2
 
 class LinearTemplate(nn.Module):
-    def __init__(self, input_dim, output_dim, bn=False, activation=None, dropout=0.0):
+    def __init__(self, input_dim, output_dim, bn=False, activation=None, dropout=0.0, residual=False, layernorm=False):
         super(LinearTemplate, self).__init__()
         self.linear = nn.Linear(input_dim, output_dim)
         if activation == "sigmoid":
@@ -174,7 +184,7 @@ class LinearTemplate(nn.Module):
         return out
 
 class GraphGateTemplate(nn.Module):
-    def __init__(self, input_dim, n_edge_types, n_steps, dropout=0.0):
+    def __init__(self, input_dim, n_edge_types, n_steps, dropout=0.0, residual=False, layernorm=False):
         super(GraphGateTemplate, self).__init__()
         self.input_dim = input_dim
         self.n_steps = n_steps
@@ -194,7 +204,10 @@ class GraphGateTemplate(nn.Module):
         self.transform = LinearTemplate(self.input_dim * 3, self.input_dim, activation="tanh")
 
         self.dropout = nn.Dropout(dropout)
-
+        self.residual = residual
+        self.use_layernorm = layernorm
+        if self.use_layernorm:
+            self.layernorm = nn.LayerNorm(self.input_dim)
         self.init_weight()
 
     def init_weight(self):
@@ -214,6 +227,7 @@ class GraphGateTemplate(nn.Module):
     def forward(self, batchinput, batchgraphin, batchgraphout):
         sl = batchinput.shape[1]
         out = batchinput
+        residual = batchinput
         batchgraphin = batchgraphin.view(-1, sl, sl * self.n_edge_types)
         batchgraphout = batchgraphout.view(-1, sl, sl * self.n_edge_types)
 
@@ -234,6 +248,11 @@ class GraphGateTemplate(nn.Module):
             out = self.GRUUpdater(graph_in, graph_out, out)
 
         out = self.dropout(out)
+
+        if self.residual:
+            out = out + residual
+        if self.use_layernorm:
+            out = self.layernorm(out)
         return out
 
     def bk_forward(self, batchinput, batchgraphin, batchgraphout):
