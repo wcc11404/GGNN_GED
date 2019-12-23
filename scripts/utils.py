@@ -94,6 +94,7 @@ def train(args, model, Corpus):
             max_dev_f0_5 = dev_f0_5
             max_index = epoch
             early_stop = 0
+            #update_best_checkpoint(epoch)
         else:
             early_stop += 1
             if early_stop >= args.early_stop:
