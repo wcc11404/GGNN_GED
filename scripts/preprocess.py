@@ -63,7 +63,7 @@ def generate_graph(mode=0):
         for line in f:
             line = line.strip()
             if len(line) == 0:
-                continue
+                break
             line = line.split("\n")
             temp = []
             for wordtuple in line:
@@ -327,9 +327,9 @@ def main(args):
     # generate_graph(mode=0)
 
     # 读取原始数据
-    trainx, trainy, trainsize = load(args.data_dir + r"/process/fce-public.train.preprocess.tsv", bool(args.use_lower))
-    devx, devy, devsize = load(args.data_dir + r"/process/fce-public.dev.preprocess.tsv", bool(args.use_lower))
-    testx, testy, testsize = load(args.data_dir + r"/process/fce-public.test.preprocess.tsv", bool(args.use_lower))
+    trainx, trainy, trainsize = load(args.data_dir + r"/process/fce-public.train.preprocess.tsv", args.use_lower)
+    devx, devy, devsize = load(args.data_dir + r"/process/fce-public.dev.preprocess.tsv", args.use_lower)
+    testx, testy, testsize = load(args.data_dir + r"/process/fce-public.test.preprocess.tsv", args.use_lower)
 
     train_graph = load_graph(args.data_dir + r"/process/train_graph.txt")
     dev_graph = load_graph(args.data_dir + r"/process/dev_graph.txt")
