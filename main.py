@@ -27,7 +27,7 @@ def main(args):
     # if torch.cuda.is_available() and bool(args.use_gpu):
     #     torch.cuda.set_device(args.gpu_list)
 
-    corpus = GedCorpus("data", args)
+    corpus = GedCorpus(args)
 
     if args.arch == "BaseNER":
         model = BaseNER(args)

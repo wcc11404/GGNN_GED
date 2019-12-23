@@ -30,8 +30,15 @@ def collate_fn(train_data):
         for sentence in data:
             stemp = [[[paditem for _ in range(edge_num)] for _ in range(max_seq)] for _ in range(max_seq)]
             for i, word in enumerate(sentence):
-                for id, relation in word:
-                    stemp[i][id - 1][relation] = 1
+                try:
+                    for id, relation in word:
+                        stemp[i][id - 1][relation] = 1
+                except:
+                    print(max_seq)
+                    print(i)
+                    print(id)
+                    print(relation)
+                    exit()
             re.append(stemp)
         return re
 
@@ -94,7 +101,7 @@ def collate_fn(train_data):
     return train_x, train_y, train_length, extra_data
 
 class GedCorpus:
-    def __init__(self, fdir, args):
+    def __init__(self, args):
         self.args = args
         self.load_preprocess(args.preprocess_dir)
 
@@ -121,7 +128,7 @@ class GedCorpus:
         #Train
         self.traindataset = GedDataset((self.args.arch, self.edgevocabularysize), self.trainx, self.trainy,
                                        self.trainsize, self.trainx_char, self.trainsize_char, self.train_graph)
-        self.traindataloader = DataLoader(dataset=self.traindataset, batch_size=args.batch_size, shuffle=True,
+        self.traindataloader = DataLoader(dataset=self.traindataset, batch_size=args.batch_size, shuffle=False,
                                           collate_fn=collate_fn, num_workers=args.num_workers)
 
         #Dev
@@ -181,14 +188,14 @@ class GedDataset(Dataset):
         self.graph_out = graph[1]
         self.len = len(self.x)
 
-    def sort(self,*input): # [1,2,3,4] [4,4,1,2]
+    def sort(self, *input):  # [1,2,3,4] [4,4,1,2]
         temp = list(zip(*input)) #[(1, 4), (2, 4), (3, 1), (4, 2)]
         temp = sorted(temp, key=lambda x: x[2], reverse=True) #第三维是size
         return (list(i) for i in zip(*temp)) #([1, 2, 4, 3] [4, 4, 2, 1])
 
     def __getitem__(self, index):
-        return self.tup, self.x[index], self.y[index], self.size[index], self.x_char[index], self.size_char[index], self.graph_in[
-            index], self.graph_out[index]
+        return self.tup, self.x[index], self.y[index], self.size[index], self.x_char[index], self.size_char[index],\
+               self.graph_in[index], self.graph_out[index]
 
     def __len__(self):
         return self.len
