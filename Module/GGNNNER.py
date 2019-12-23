@@ -11,7 +11,7 @@ class GGNNNER(nn.Module):
 
         self.wordembedding = EmbeddingTemplate(args.word_vocabulary_size, args.word_embed_dim, args.embed_drop)
         self.gnn = GraphGateTemplate(args.word_embed_dim, args.edge_vocabulary_size, args.gnn_steps, args.gnn_drop,
-                                     residual=False, layernorm=False)
+                                     residual=True, layernorm=True)
         self.rnn = RnnTemplate(args.rnn_type, args.batch_size, args.word_embed_dim, args.word_embed_dim, args.rnn_drop,
                                bidirectional=args.rnn_bidirectional, residual=False, layernorm=False)
 
