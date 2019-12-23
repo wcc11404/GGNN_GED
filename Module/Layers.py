@@ -74,16 +74,17 @@ class RnnTemplate(nn.Module):
 
         hidden_dim = hidden_dim // 2 if bidirectional else hidden_dim
         if self.type == "LSTM":
-            self.rnn = nn.LSTM(input_dim, hidden_dim, num_layers=numLayers, bidirectional=bidirectional,batch_first=False)
-            if initalizer_type=="normal":
-                self.hidden = (torch.normal(mean=torch.zeros(numLayers * 2 if bidirectional else numLayers, hidden_dim)).to("cuda"),
-                          torch.normal(mean=torch.zeros(numLayers * 2 if bidirectional else numLayers, hidden_dim)).to("cuda"))
-            elif initalizer_type=="xavier":
-                # ToDo
-                #self.hidden = (nn.init.xavier_normal_(),)
-                raise KeyError("initalizer_type has an invaild value: " + initalizer_type)
-            else:
-                raise KeyError("initalizer_type has an invaild value: " + initalizer_type)
+            self.rnn = nn.LSTM(input_dim, hidden_dim, num_layers=numLayers, bidirectional=bidirectional,
+                               batch_first=False)
+            # if initalizer_type=="normal":
+            #     self.hidden = (torch.normal(mean=torch.zeros(numLayers * 2 if bidirectional else numLayers, hidden_dim)).to("cuda"),
+            #               torch.normal(mean=torch.zeros(numLayers * 2 if bidirectional else numLayers, hidden_dim)).to("cuda"))
+            # elif initalizer_type=="xavier":
+            #     # ToDo
+            #     #self.hidden = (nn.init.xavier_normal_(),)
+            #     raise KeyError("initalizer_type has an invaild value: " + initalizer_type)
+            # else:
+            #     raise KeyError("initalizer_type has an invaild value: " + initalizer_type)
         elif self.type == "GRU":
             #ToDo
             raise KeyError("rnn_type has an invaild value: " + rnn_type)
