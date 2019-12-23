@@ -2,7 +2,8 @@ import numpy as np
 from torch.utils.data import Dataset, DataLoader
 import torch
 import pickle
-
+global shitnum
+shitnum=0
 def collate_fn(train_data):
     def pad(data, max_length, paditem=0):
         re = []
@@ -34,11 +35,8 @@ def collate_fn(train_data):
                     for id, relation in word:
                         stemp[i][id - 1][relation] = 1
                 except:
-                    print(max_seq)
-                    print(i)
-                    print(id)
-                    print(relation)
-                    exit()
+                    global shitnum
+                    print(shitnum)
             re.append(stemp)
         return re
 
@@ -90,6 +88,8 @@ def collate_fn(train_data):
     train_length_char = torch.from_numpy(np.array(train_length_char))
     train_graph_in = torch.from_numpy(np.array(train_graph_in)).float()
     train_graph_out = torch.from_numpy(np.array(train_graph_out)).float()
+    global shitnum
+    shitnum+=1
 
     if task == "GGNNNER":
         extra_data = (train_x_char, train_length_char, train_graph_in, train_graph_out)
