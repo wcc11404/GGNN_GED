@@ -113,17 +113,25 @@ def tokenize_():
                '../data/orign_data/fce-public.test.original.tsv']
     out_path = ['../data/process/fce-public.train.preprocess.tsv', '../data/process/fce-public.dev.preprocess.tsv',
                 '../data/process/fce-public.test.preprocess.tsv']
+
+    special_pattern = {"gonna": ["gon", "na"], "wanna": ["wan", "na"]}
     for ip, op in zip(in_path, out_path):
         with open(ip, 'r') as f1, open(op, 'w') as f2:
-            for line in f1:
+            lines = f1.readlines()
+            for num, line in enumerate(lines):
                 line = line.strip()
                 if len(line) == 0:
                     f2.write("\n")
                     continue
                 line = line.split("\t")
-                wordlist = nlp.word_tokenize(line[0])
-                for word in wordlist:
-                    f2.write(word+"\t"+line[1]+"\n")
+                if line[0].lower() in special_pattern and len(lines[num+1].strip()) != 0:
+                    # 斯坦福那个tokenize竟然是按照上下文切词的，导致有一些特例
+                    for word in special_pattern[line[0].lower()]:
+                        f2.write(word + "\t" + line[1] + "\n")
+                else:
+                    wordlist = nlp.word_tokenize(line[0])
+                    for word in wordlist:
+                        f2.write(word+"\t"+line[1]+"\n")
     nlp.close()
 
 # 读取训练数据
@@ -324,7 +332,7 @@ def main(args):
 
     # 预处理的预处理
     # tokenize_()
-    # generate_graph(mode=0)
+    generate_graph(mode=0)
 
     # 读取原始数据
     trainx, trainy, trainsize = load(args.data_dir + r"/process/fce-public.train.preprocess.tsv", args.use_lower)
@@ -359,9 +367,9 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data-dir", default="data")
+    parser.add_argument("--data-dir", default="../data")
     parser.add_argument("--use-lower", action='store_true', default=True)
-    parser.add_argument("--preprocess-dir", default="data/preprocess.pkl")
+    parser.add_argument("--preprocess-dir", default="../data/preprocess.pkl")
     parser.add_argument("--mode", type=int, default=0)
     args = parser.parse_args()
     main(args)

@@ -2,8 +2,7 @@ import numpy as np
 from torch.utils.data import Dataset, DataLoader
 import torch
 import pickle
-global shitnum
-shitnum=0
+
 def collate_fn(train_data):
     def pad(data, max_length, paditem=0):
         re = []
@@ -31,12 +30,8 @@ def collate_fn(train_data):
         for sentence in data:
             stemp = [[[paditem for _ in range(edge_num)] for _ in range(max_seq)] for _ in range(max_seq)]
             for i, word in enumerate(sentence):
-                try:
-                    for id, relation in word:
-                        stemp[i][id - 1][relation] = 1
-                except:
-                    global shitnum
-                    print(shitnum)
+                for id, relation in word:
+                    stemp[i][id - 1][relation] = 1
             re.append(stemp)
         return re
 
@@ -88,8 +83,6 @@ def collate_fn(train_data):
     train_length_char = torch.from_numpy(np.array(train_length_char))
     train_graph_in = torch.from_numpy(np.array(train_graph_in)).float()
     train_graph_out = torch.from_numpy(np.array(train_graph_out)).float()
-    global shitnum
-    shitnum+=1
 
     if task == "GGNNNER":
         extra_data = (train_x_char, train_length_char, train_graph_in, train_graph_out)
@@ -128,7 +121,7 @@ class GedCorpus:
         #Train
         self.traindataset = GedDataset((self.args.arch, self.edgevocabularysize), self.trainx, self.trainy,
                                        self.trainsize, self.trainx_char, self.trainsize_char, self.train_graph)
-        self.traindataloader = DataLoader(dataset=self.traindataset, batch_size=args.batch_size, shuffle=False,
+        self.traindataloader = DataLoader(dataset=self.traindataset, batch_size=args.batch_size, shuffle=True,
                                           collate_fn=collate_fn, num_workers=args.num_workers)
 
         #Dev
