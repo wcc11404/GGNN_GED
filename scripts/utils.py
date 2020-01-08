@@ -117,7 +117,7 @@ def test(args, model, Corpus):
     if args.load_dir is not None:
         load_checkpoint(model, args.load_dir)
     elif args.save_dir is not None and os.path.exists(args.save_dir):
-        d = open(args.save_dir + "/save.log").readline().strip()
+        d = open(args.save_dir + "/save.log", 'r').readline().strip()
         load_checkpoint(model, d)
     else:
         raise KeyError("load_dir has an invaild value: None")
