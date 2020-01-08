@@ -85,7 +85,7 @@ if __name__ == "__main__":
     parser.add_argument("--hidden-dim", type=int, default=50)
     parser.add_argument("--lm-hidden-dim", type=int, default=50)
     parser.add_argument("--lm-vocab-size", type=int, default=-1)
-    parser.add_argument("--lm-cost-weight", type=float, default=0.15)
+    parser.add_argument("--lm-cost-weight", type=float, default=0.10)
 
     parser.add_argument("--save-dir", default="checkpoint/test") # 模型权重参数存储基地址
     parser.add_argument("--load-dir", default=None) # 模型加载地址

@@ -5,7 +5,7 @@ from sklearn.metrics import precision_recall_fscore_support
 from tqdm import tqdm
 
 def update_best_checkpoint(save_dir, epoch):
-    with open(save_dir+"/save.log") as f:
+    with open(save_dir+"/save.log",'w') as f:
         f.write(save_dir+"/checkpoint"+str(epoch)+".pt")
 
 def save_checkpoint(model, dir):
