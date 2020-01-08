@@ -4,6 +4,10 @@ import json
 from sklearn.metrics import precision_recall_fscore_support
 from tqdm import tqdm
 
+def update_best_checkpoint(save_dir, epoch):
+    with open(save_dir+"/save.log") as f:
+        f.write(save_dir+"/checkpoint"+str(epoch)+".pt")
+
 def save_checkpoint(model, dir):
     torch.save(model.state_dict(), dir)
 
@@ -49,6 +53,7 @@ def train(args, model, Corpus):
     for epoch in range(1, args.max_epoch + 1):
         print("epoch {} training".format(epoch))
 
+        # 训练
         model.train()
         if args.loginfor:
             trainer = tqdm(Corpus.traindataloader)
@@ -56,12 +61,12 @@ def train(args, model, Corpus):
             trainer = Corpus.traindataloader
         for (train_x, train_y, train_length, extra_data) in trainer:
             if not args.use_cpu:
-                train_x = train_x.cuda()
-                train_y = train_y.cuda()
-                train_length = train_length.cuda()
-                extra_data = [i.cuda() for i in extra_data]
+                train_x = train_x.cuda(non_blocking=True)
+                train_y = train_y.cuda(non_blocking=True)
+                train_length = train_length.cuda(non_blocking=True)
+                extra_data = [i.cuda(non_blocking=True) for i in extra_data]
                 if args.use_fpp16:
-                    extra_data = [i.half() if i.dtype == torch.float else i for i in extra_data]
+                    extra_data = [i.half(non_blocking=True) if i.dtype == torch.float else i for i in extra_data]
 
             optimizer.zero_grad()
             out = model(train_x, train_length, extra_data)
@@ -69,6 +74,7 @@ def train(args, model, Corpus):
             loss.backward()
             optimizer.step()
 
+        # 每个epoch评估
         model.eval()
         # train_loss, train_p, train_r, train_f0_5 = evaluate(args, Corpus.traindataloader, model)
         dev_loss, dev_p, dev_r, dev_f0_5 = evaluate(args, Corpus.devdataloader, model)
@@ -88,13 +94,14 @@ def train(args, model, Corpus):
               .format(log["epoch"],log["dev_loss"],log["dev_p"],log["dev_r"],log["dev_f0.5"]))
         summary.append(log)
 
+        # 存储策略
         if args.save_dir is not None:
             save_checkpoint(model, dir=args.save_dir + "/checkpoint" + str(epoch) + ".pt")
         if max_dev_f0_5 < dev_f0_5:
             max_dev_f0_5 = dev_f0_5
             max_index = epoch
             early_stop = 0
-            #update_best_checkpoint(epoch)
+            update_best_checkpoint(args.save_dir, epoch) # 更新最好模型权重路径
         else:
             early_stop += 1
             if early_stop >= args.early_stop:
@@ -103,10 +110,17 @@ def train(args, model, Corpus):
     print("epoch {} get the max dev f0.5: {}".format(max_index, max_dev_f0_5))
 
 def test(args, model, Corpus):
-    if args.load_dir is None:
-        raise KeyError("load_dir has an invaild value: None")
+    # if args.load_dir is None:
+    #     raise KeyError("load_dir has an invaild value: None")
 
-    load_checkpoint(model, args.load_dir)
+    # 如果load地址给定且合法则加载该地址，否则加载best地址
+    if args.load_dir is not None:
+        load_checkpoint(model, args.load_dir)
+    elif args.save_dir is not None and os.path.exists(args.save_dir):
+        d = open(args.save_dir + "/save.log").readline().strip()
+        load_checkpoint(model, d)
+    else:
+        raise KeyError("load_dir has an invaild value: None")
 
     model.eval()
     #_, train_p, train_r, train_f = evaluate(args, Corpus.traindataloader, scripts, Loss=None)
@@ -123,12 +137,12 @@ def evaluate(args, dataloader, model, mode="average"):
     groundtruth = []
     for (train_x, train_y, train_length, extra_data) in dataloader:
         if not args.use_cpu:
-            train_x = train_x.cuda()
-            train_y = train_y.cuda()
-            train_length = train_length.cuda()
-            extra_data = [i.cuda() for i in extra_data]
+            train_x = train_x.cuda(non_blocking=True)
+            train_y = train_y.cuda(non_blocking=True)
+            train_length = train_length.cuda(non_blocking=True)
+            extra_data = [i.cuda(non_blocking=True) for i in extra_data]
             if args.use_fpp16:
-                extra_data = [i.half() if i.dtype == torch.float else i for i in extra_data ]
+                extra_data = [i.half(non_blocking=True) if i.dtype == torch.float else i for i in extra_data ]
 
         out = model(train_x, train_length, extra_data)
         loss += model.getLoss(train_x, train_length, extra_data, out, train_y).item()

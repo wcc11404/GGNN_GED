@@ -87,8 +87,8 @@ if __name__ == "__main__":
     parser.add_argument("--lm-vocab-size", type=int, default=-1)
     parser.add_argument("--lm-cost-weight", type=float, default=0.15)
 
-    parser.add_argument("--save-dir", default="checkpoint")
-    parser.add_argument("--load-dir", default=None)
+    parser.add_argument("--save-dir", default="checkpoint/test") # 模型权重参数存储基地址
+    parser.add_argument("--load-dir", default=None) # 模型加载地址
     parser.add_argument("--w2v-dir", default="data/process/glove.840B.300d.txt")# glove.840B.300d.txt w2v_300d.txt
     parser.add_argument("--preprocess-dir", default="data/preprocess.pkl")
     parser.add_argument("--max-epoch", type=int, default=100)

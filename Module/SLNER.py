@@ -36,8 +36,10 @@ class SLNER(nn.Module):
         self.fw_lm_softmax = LinearTemplate(args.lm_hidden_dim, self.lm_vocab_size, activation=None)
         self.bw_lm_softmax = LinearTemplate(args.lm_hidden_dim, self.lm_vocab_size, activation=None)
 
+        # 损失函数
         self.Loss = nn.CrossEntropyLoss(ignore_index=-1, reduction="sum")
 
+        # 加载词表权重
         self.load_embedding(args)
 
     def load_embedding(self, args):
