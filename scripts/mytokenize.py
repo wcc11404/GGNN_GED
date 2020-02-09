@@ -38,32 +38,33 @@ def tokenize_(args):
 
 # 对单语语料进行tokenize
 def tokenize__(args):
-    f1 = open(args.input, 'r')
+    f1 = open(args.input, 'r', encoding='utf-8')    # 包含非ascii码的需要这样打开文件
     f2 = open(args.output, 'w')
     lines = f1.read().strip().split("\n")
     for num, line in tqdm.tqdm(enumerate(lines)):
         line = line.strip()
         if len(line) == 0:  #空行
             continue
+
+        line = line.encode("utf-8") # str -> bytes
+        try:
+            line.decode("ascii")
+        except UnicodeDecodeError:
+            continue
+        line = bytes.decode(line)   # bytes -> str
+
         line = line.split()
         if len(line)>100 or len(line)<=1:   # 长度不符合
             continue
 
-        sign=True
-        for word in line:
-            if not word.encode('utf-8').isalpha(): #不是全英文
-                sign=False
-                break
-
-        if sign==True:
-            f2.write(" ".join(line))
-            f2.write("\n")
+        f2.write(" ".join(line))
+        f2.write("\n")
     f1.close()
     f2.close()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--input", default="../data/orign_data/tetetete")
+    parser.add_argument("--input", default="../data/orign_data/tete")
     parser.add_argument("--output", default="../data/process/te")
     parser.add_argument("--stanford", default="../data/stanford-corenlp-full-2018-10-05")
     parser.add_argument("--mode", type=int, default=1) # 0==BIO 1==parallel
