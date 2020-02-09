@@ -169,7 +169,6 @@ def generate_graph_(args, addcontextedge=False):
 
         graph_maxindex.append((g, len(sen)))
     graph_to_file(graph_maxindex, out_path)
-    f.close()
     process.close()
     nlp.close()
 
