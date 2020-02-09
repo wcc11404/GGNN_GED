@@ -54,7 +54,7 @@ def tokenize__(args):
         line = bytes.decode(line)   # bytes -> str
 
         line = line.split()
-        if len(line)>80 or len(line)<=1:   # 长度不符合
+        if len(line)>60 or len(line)<=4:   # 长度不符合
             continue
 
         f2.write(" ".join(line))
