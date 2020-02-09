@@ -18,7 +18,7 @@ def tokenize_(args):
     f1 = open(args.input,'r')
     f2 = open(args.output, 'w')
     lines = f1.readlines()
-    for num,line in tqdm.tqdm(enumerate(lines)):
+    for num,line in enumerate(lines):
         line = line.strip()
         if len(line) == 0:
             f2.write("\n")
@@ -41,7 +41,7 @@ def tokenize__(args):
     f1 = open(args.input, 'r', encoding='utf-8')    # 包含非ascii码的需要这样打开文件
     f2 = open(args.output, 'w')
     lines = f1.read().strip().split("\n")
-    for num, line in tqdm.tqdm(enumerate(lines)):
+    for line in tqdm.tqdm(lines):
         line = line.strip()
         if len(line) == 0:  #空行
             continue
