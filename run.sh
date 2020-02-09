@@ -1,8 +1,8 @@
-#python scripts/mytokenize.py --mode 1 --input data/orign_data/1b.train.txt --output data/process/pretrain.train --stanford data/stanford-corenlp-full-2018-10-05
-#python scripts/mytokenize.py --mode 1 --input data/orign_data/1b.dev.txt --output data/process/pretrain.dev --stanford data/stanford-corenlp-full-2018-10-05
+python scripts/mytokenize.py --mode 1 --input data/orign_data/1b.train.txt --output data/process/pretrain.train --stanford data/stanford-corenlp-full-2018-10-05
+python scripts/mytokenize.py --mode 1 --input data/orign_data/1b.dev.txt --output data/process/pretrain.dev --stanford data/stanford-corenlp-full-2018-10-05
 
-python scripts/genGraph.py --mode 1 --input data/process/pretrain.train --output data/process/pretrain.train.graph --stanford data/stanford-corenlp-full-2018-10-05
-python scripts/genGraph.py --mode 1 --input data/process/pretrain.dev --output data/process/pretrain.dev.graph --stanford data/stanford-corenlp-full-2018-10-05
+python scripts/genGraph.py --mode 1 --input data/process/pretrain.train --output data/process/pretrain.train.graph --process data/process.pretrain.train.ic --stanford data/stanford-corenlp-full-2018-10-05
+python scripts/genGraph.py --mode 1 --input data/process/pretrain.dev --output data/process/pretrain.dev.graph --process data/process.pretrain.dev.ic --stanford data/stanford-corenlp-full-2018-10-05
 
 # 预处理的预处理
 # tokenize_()
