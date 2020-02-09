@@ -38,8 +38,6 @@ def tokenize_(args):
 
 # 对单语语料进行tokenize
 def tokenize__(args):
-    nlp = StanfordCoreNLP(args.stanford, memory='4g')
-
     f1 = open(args.input, 'r')
     f2 = open(args.output, 'w')
     lines = f1.read().strip().split("\n")
@@ -55,6 +53,8 @@ def tokenize__(args):
 
         f2.write(" ".join(line))
         f2.write("\n")
+    f1.close()
+    f2.close()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
