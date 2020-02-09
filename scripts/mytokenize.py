@@ -4,7 +4,7 @@ import tqdm
 
 # 对原始训练语料进行tokenize
 def tokenize_(args):
-    nlp = StanfordCoreNLP(r'../data/stanford-corenlp-full-2018-10-05', memory='4g')
+    nlp = StanfordCoreNLP(args.stanford, memory='4g')
     # in_path = ['../data/orign_data/fce-public.train.original.tsv', '../data/orign_data/fce-public.dev.original.tsv',
     #            '../data/orign_data/fce-public.test.original.tsv']
     # out_path = ['../data/process/fce-public.train.preprocess.tsv', '../data/process/fce-public.dev.preprocess.tsv',
@@ -38,7 +38,7 @@ def tokenize_(args):
 
 # 对单语语料进行tokenize
 def tokenize__(args):
-    nlp = StanfordCoreNLP(r'../data/stanford-corenlp-full-2018-10-05', memory='4g')
+    nlp = StanfordCoreNLP(args.stanford, memory='4g')
 
     f1 = open(args.input, 'r')
     f2 = open(args.output, 'w')
