@@ -121,11 +121,12 @@ def mergewordvocab(addtional_data, maxnum, w2i, i2w):
         counter.update(instance)
     num = len(i2w)
     for k, v in counter.most_common():
-        if num>= maxnum:
+        if num >= maxnum:
             break
-        w2i[k] = num
-        i2w.append(k)
-        num += 1
+        if k not in w2i:
+            w2i[k] = num
+            i2w.append(k)
+            num += 1
     return w2i, i2w
 
 if __name__ == "__main__":
@@ -145,8 +146,8 @@ if __name__ == "__main__":
             input.append(x)
         w2i, i2w = makeword2veclist(input)
         addtional_data, _, _ = load(args.mergeinput, args.use_lower)
-        w2i, i2w = mergewordvocab(addtional_data,args.mergemaxnum, w2i,i2w)
-        print("word vocabulary: " + str(len(w2i)))
+        w2i, i2w = mergewordvocab(addtional_data, args.mergemaxnum, w2i, i2w)
+        print("word vocabulary: " + str(len(i2w)))
         pickle.dump(w2i, out)
         pickle.dump(i2w, out)
     elif args.mode == 1:
@@ -155,7 +156,7 @@ if __name__ == "__main__":
             x, _, _ = load(item, args.use_lower)
             input.append(x)
         c2i, i2c = makechar2veclist(input)
-        print("char vocabulary: " + str(len(c2i)))
+        print("char vocabulary: " + str(len(i2c)))
         pickle.dump(c2i, out)
         pickle.dump(i2c, out)
     else:
@@ -164,7 +165,7 @@ if __name__ == "__main__":
             x = load_graph(item)
             input.append(x)
         e2i, i2e = makeedge2veclist(input)
-        print("edge vocabulary: " + str(len(e2i)))
+        print("edge vocabulary: " + str(len(i2e)))
         pickle.dump(e2i, out)
         pickle.dump(i2e, out)
     out.close()
