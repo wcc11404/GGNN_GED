@@ -6,7 +6,7 @@
 #python scripts/genGraph.py --mode 1 --input data/process/pretrain.train.1M --output data/process/pretrain.train.1M.graph --process data/process/pretrain.train.1M.ic --stanford data/stanford-corenlp-full-2018-10-05
 #python scripts/genGraph.py --mode 1 --input data/process/pretrain.dev.20K --output data/process/pretrain.dev.20K.graph --process data/process/pretrain.dev.20K.ic --stanford data/stanford-corenlp-full-2018-10-05
 
-python scripts/genVocab.py --mode 0 --input data/process/pretrain.train.1M data/process/fce-public.train.preprocess.tsv data/process/fce-public.dev.preprocess.tsv --output data/prepare/wordvocab.pkl
+python scripts/genVocab.py --mode 0 --input data/process/pretrain.train.1M.ic data/process/fce-public.train.preprocess.tsv data/process/fce-public.dev.preprocess.tsv --output data/prepare/wordvocab.pkl
 # 预处理的预处理
 # tokenize_()
 # generate_graph(mode=0)
