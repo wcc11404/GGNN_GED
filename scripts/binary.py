@@ -203,7 +203,7 @@ def main(args):
         print("test data finish")
 
     # 序列化
-    save_preprocess(args.preprocess_dir)
+    save_preprocess(args.output)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
