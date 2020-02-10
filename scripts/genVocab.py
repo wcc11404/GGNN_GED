@@ -114,9 +114,23 @@ def makeedge2veclist(datasetlist):
         num += 1
     return edge2id, id2edge
 
+def mergewordvocab(addtional_data, maxnum, w2i, i2w):
+    counter = Counter()
+    for instance in addtional_data:
+        counter.update(instance)
+    num = len(i2w)
+    n = maxnum-num
+    for k, v in counter.most_common(n):
+        w2i[k] = num
+        i2w.append(k)
+        num += 1
+    return w2i, i2w
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--input", nargs='+', required=True)
+    parser.add_argument("--mergeinput", default=None)
+    parser.add_argument("--mergemaxnum", type=int, default=50000)
     parser.add_argument("--use-lower", action='store_true', default=True)
     parser.add_argument("--output", default="../data/preprocess.pkl")
     parser.add_argument("--mode", type=int, default=0)
@@ -128,7 +142,9 @@ if __name__ == "__main__":
             x, _, _ = load(item, args.use_lower)
             input.append(x)
         w2i, i2w = makeword2veclist(input)
-        print("word vocabulary: "+ str(len(w2i)))
+        addtional_data, _, _ = load(args.mergeinput, args.use_lower)
+        w2i, i2w = mergewordvocab(addtional_data,args.mergemaxnum, w2i,i2w)
+        print("word vocabulary: " + str(len(w2i)))
         pickle.dump(w2i, out)
         pickle.dump(i2w, out)
     elif args.mode == 1:
