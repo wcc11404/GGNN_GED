@@ -136,7 +136,7 @@ if __name__ == "__main__":
         for item in args.input:
             x, _, _ = load(item, args.use_lower)
             input.append(x)
-        c2i, i2c = makechar2veclist(args.input)
+        c2i, i2c = makechar2veclist(input)
         print("char vocabulary: " + str(len(c2i)))
         pickle.dump(c2i, out)
         pickle.dump(i2c, out)
@@ -145,7 +145,7 @@ if __name__ == "__main__":
         for item in args.input:
             x = load_graph(item)
             input.append(x)
-        e2i, i2e = makeedge2veclist(args.input)
+        e2i, i2e = makeedge2veclist(input)
         print("edge vocabulary: " + str(len(e2i)))
         pickle.dump(e2i, out)
         pickle.dump(i2e, out)
