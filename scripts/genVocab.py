@@ -114,13 +114,15 @@ def makeedge2veclist(datasetlist):
         num += 1
     return edge2id, id2edge
 
+# 在原有词表基础上融合新的数据中最常用的词，凑够maxnum个词表
 def mergewordvocab(addtional_data, maxnum, w2i, i2w):
     counter = Counter()
     for instance in addtional_data:
         counter.update(instance)
     num = len(i2w)
-    n = maxnum-num
-    for k, v in counter.most_common(n):
+    for k, v in counter.most_common():
+        if num>= maxnum:
+            break
         w2i[k] = num
         i2w.append(k)
         num += 1
