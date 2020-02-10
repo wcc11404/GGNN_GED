@@ -128,6 +128,7 @@ if __name__ == "__main__":
             x, _, _ = load(item, args.use_lower)
             input.append(x)
         w2i, i2w = makeword2veclist(input)
+        print("word vocabulary: "+ len(w2i))
         pickle.dump(w2i, out)
         pickle.dump(i2w, out)
     elif args.mode == 1:
@@ -136,6 +137,7 @@ if __name__ == "__main__":
             x, _, _ = load(item, args.use_lower)
             input.append(x)
         c2i, i2c = makechar2veclist(args.input)
+        print("char vocabulary: " + len(c2i))
         pickle.dump(c2i, out)
         pickle.dump(i2c, out)
     else:
@@ -144,6 +146,7 @@ if __name__ == "__main__":
             x = load_graph(item)
             input.append(x)
         e2i, i2e = makeedge2veclist(args.input)
+        print("edge vocabulary: " + len(e2i))
         pickle.dump(e2i, out)
         pickle.dump(i2e, out)
     out.close()
