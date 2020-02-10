@@ -142,7 +142,13 @@ def main(args):
     devx, devy, devsize = load(args.dev_dir, args.use_lower)
     if args.test_dir is not None:
         testx, testy, testsize = load(args.test_dir, args.use_lower)
+    else:
+        testx, testy, testsize = None, None, None
 
+    trainx_char, trainsize_char = None, None
+    devx_char, devsize_char = None, None
+    testx_char, testsize_char = None, None
+    train_graph, dev_graph, test_graph = None, None, None
     if args.edge_vocab_dir is not None:
         if args.train_graph_dir is not None:
             train_graph = load_graph(args.train_graph_dir)
