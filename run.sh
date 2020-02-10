@@ -10,7 +10,7 @@
 #python scripts/genVocab.py --mode 1 --input data/process/pretrain.train.1M.ic data/process/fce-public.train.preprocess.tsv data/process/fce-public.dev.preprocess.tsv --output data/prepare/charvocab.pkl
 #python scripts/genVocab.py --mode 2 --input data/process/pretrain.train.1M.graph data/process/train_graph.txt data/process/dev_graph.txt --output data/prepare/edgevocab.pkl
 
-python scripts/binary.py --train-dir data/process/pretrain.train.1M.ic --dev-dir pretrain.dev.20K.ic --train-graph-dir data/process/pretrain.train.1M.graph --dev-graph-dir data/process/pretrain.dev.20K.graph \
+python scripts/binary.py --train-dir data/process/pretrain.train.1M.ic --dev-dir data/process/pretrain.dev.20K.ic --train-graph-dir data/process/pretrain.train.1M.graph --dev-graph-dir data/process/pretrain.dev.20K.graph \
 --word-vocab-dir data/prepare/wordvocab.pkl --char-vocab-dir data/prepare/charvocab.pkl --edge-vocab-dir data/prepare/edgevocab.pkl --output data/prepare/pretrain.pkl
 # 预处理的预处理
 # tokenize_()

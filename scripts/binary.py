@@ -180,6 +180,7 @@ def main(args):
     if args.edge_vocab_dir is not None and args.train_graph_dir is not None:
         train_graph = lookup_graph(train_graph, edge2id)
         sign[2] = 1
+    print("train data finish")
 
     if args.char_vocab_dir is not None:
         devx_char, devsize_char = lookup_char(devx, char2id, ispad=False)
@@ -188,6 +189,7 @@ def main(args):
     if args.edge_vocab_dir is not None and args.dev_graph_dir is not None:
         dev_graph = lookup_graph(dev_graph, edge2id)
         sign[5] = 1
+    print("dev data finish")
 
     if args.test_dir is not None:
         if args.char_vocab_dir is not None:
@@ -198,6 +200,7 @@ def main(args):
         if args.edge_vocab_dir is not None and args.test_graph_dir is not None:
             test_graph = lookup_graph(test_graph, edge2id)
             sign[8] = 1
+        print("test data finish")
 
     # 序列化
     save_preprocess(args.preprocess_dir)
