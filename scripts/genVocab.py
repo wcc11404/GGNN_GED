@@ -125,21 +125,24 @@ if __name__ == "__main__":
     if args.mode == 0:
         input = []
         for item in args.input:
-            input.append(load(item, args.use_lower))
+            x, _, _ = load(item, args.use_lower)
+            input.append(x)
         w2i, i2w = makeword2veclist(input)
         pickle.dump(w2i, out)
         pickle.dump(i2w, out)
     elif args.mode == 1:
         input = []
         for item in args.input:
-            input.append(load(item, args.use_lower))
+            x, _, _ = load(item, args.use_lower)
+            input.append(x)
         c2i, i2c = makechar2veclist(args.input)
         pickle.dump(c2i, out)
         pickle.dump(i2c, out)
     else:
         input = []
         for item in args.input:
-            input.append(load_graph(item, args.use_lower))
+            x = load_graph(item)
+            input.append(x)
         e2i, i2e = makeedge2veclist(args.input)
         pickle.dump(e2i, out)
         pickle.dump(i2e, out)
