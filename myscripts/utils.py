@@ -142,7 +142,7 @@ def test(args, model, Corpus):
     #     raise KeyError("load_dir has an invaild value: None")
 
     model.eval()
-    #_, train_p, train_r, train_f = evaluate(args, Corpus.traindataloader, scripts, Loss=None)
+    #_, train_p, train_r, train_f = evaluate(args, Corpus.traindataloader, myscripts, Loss=None)
     dev_loss, dev_p, dev_r, dev_f = evaluate(args, Corpus.devdataloader, model)
     print("Dev Loss : {:.4f}\tDev Precision : {:.4f}\tDev Recall : {:.4f}\tDev F0.5 : {:.4f}"
           .format(dev_loss, dev_p, dev_r, dev_f))

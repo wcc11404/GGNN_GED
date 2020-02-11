@@ -3,7 +3,7 @@ import numpy as np
 import torch
 
 from data.corpus import GedCorpus
-from scripts.utils import train, test, load_args, load_checkpoint
+from myscripts.utils import train, test, load_args, load_checkpoint
 
 from Module.BaseNER import BaseNER
 from Module.SLNER import SLNER
