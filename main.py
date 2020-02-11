@@ -44,7 +44,8 @@ def main(args):
         load_checkpoint(model, args.load_dir)
 
     if torch.cuda.is_available() and not args.use_cpu:
-        torch.cuda.set_device(args.gpu_list)
+        temp = [int(i) for i in args.gpu_list]
+        torch.cuda.set_device(temp)
         model.to("cuda")
         if args.use_fpp16:
             model.half()
@@ -67,7 +68,7 @@ def setup_seed(seed):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--use-cpu", action='store_true', default=False)
-    parser.add_argument("--gpu-list", default="0")
+    parser.add_argument("--gpu-list", nargs="+", default="0")
     parser.add_argument("--mode", default="Train")
     parser.add_argument("--random-seed", type=int, default=44)
     parser.add_argument("--loginfor", action='store_true', default=True)
