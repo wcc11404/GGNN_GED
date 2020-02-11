@@ -200,24 +200,24 @@ class GedCorpus:
         if self.sign[2] == 1:
             self.train_graph = pickle.load(f)
 
-        if self.sign[0] == 1:
+        if self.sign[3] == 1:
             self.devx = pickle.load(f)
             self.devy = pickle.load(f)
             self.devsize = pickle.load(f)
-        if self.sign[1] == 1:
+        if self.sign[4] == 1:
             self.devx_char = pickle.load(f)
             self.devsize_char = pickle.load(f)
-        if self.sign[2] == 1:
+        if self.sign[5] == 1:
             self.dev_graph = pickle.load(f)
 
-        if self.sign[0] == 1:
+        if self.sign[6] == 1:
             self.testx = pickle.load(f)
             self.testy = pickle.load(f)
             self.testsize = pickle.load(f)
-        if self.sign[1] == 1:
+        if self.sign[7] == 1:
             self.testx_char = pickle.load(f)
             self.testsize_char = pickle.load(f)
-        if self.sign[2] == 1:
+        if self.sign[8] == 1:
             self.test_graph = pickle.load(f)
 
         f.close()
