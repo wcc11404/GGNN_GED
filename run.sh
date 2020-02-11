@@ -21,7 +21,8 @@ script_dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 python $script_dir/main.py --gpu-id 0 --mode Train --arch GGNNNER --train-lm \
  --char-embed-dim 0 --gnn-steps 1 --save-dir checkpoint/LM_GGNN \
  --w2v-dir data/process/w2v_300d.txt --data-dir data/prepare/pretrain.pkl \
- --optimizer adam --lr 1e-3 --evaluation loss --batch-size 80 --early-stop 5
+ --optimizer adam --lr 1e-3 --evaluation loss --batch-size 64 --early-stop 5 \
+ --max-epoch 10
 
 
 # 预处理的预处理
