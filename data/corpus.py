@@ -189,38 +189,38 @@ class GedCorpus:
         self.devx_char, self.devsize_char, self.dev_graph = None, None, None
         self.testx, self.testy, self.testsize = None, None, None
         self.testx_char, self.testsize_char, self.test_graph = None, None, None
-        m = [[self.trainx, self.trainy, self.trainsize], [self.trainx_char, self.trainsize_char], [self.train_graph],
-             [self.devx, self.devy, self.devsize], [self.devx_char, self.devsize_char], [self.dev_graph],
-             [self.testx, self.testy, self.testsize], [self.testx_char, self.testsize_char], [self.test_graph]]
 
-        for i, j in enumerate(self.sign):
-            if j == 1:
-                for item in m[i]:
-                    item[i] = pickle.load(f)
+        if self.sign[0] == 1:
+            self.trainx = pickle.load(f)
+            self.trainy = pickle.load(f)
+            self.trainsize = pickle.load(f)
+        if self.sign[1] == 1:
+            self.trainx_char = pickle.load(f)
+            self.trainsize_char = pickle.load(f)
+        if self.sign[2] == 1:
+            self.train_graph = pickle.load(f)
+
+        if self.sign[0] == 1:
+            self.devx = pickle.load(f)
+            self.devy = pickle.load(f)
+            self.devsize = pickle.load(f)
+        if self.sign[1] == 1:
+            self.devx_char = pickle.load(f)
+            self.devsize_char = pickle.load(f)
+        if self.sign[2] == 1:
+            self.dev_graph = pickle.load(f)
+
+        if self.sign[0] == 1:
+            self.testx = pickle.load(f)
+            self.testy = pickle.load(f)
+            self.testsize = pickle.load(f)
+        if self.sign[1] == 1:
+            self.testx_char = pickle.load(f)
+            self.testsize_char = pickle.load(f)
+        if self.sign[2] == 1:
+            self.test_graph = pickle.load(f)
 
         f.close()
-        # self.trainx = pickle.load(f)
-        # self.trainy = pickle.load(f)
-        # self.trainsize = pickle.load(f)
-        # self.trainx_char = pickle.load(f)
-        # self.trainsize_char = pickle.load(f)
-        # self.train_graph = pickle.load(f)
-        #
-        # self.devx = pickle.load(f)
-        # self.devy = pickle.load(f)
-        # self.devsize = pickle.load(f)
-        # self.devx_char = pickle.load(f)
-        # self.devsize_char = pickle.load(f)
-        # self.dev_graph = pickle.load(f)
-        #
-        # self.testx = pickle.load(f)
-        # self.testy = pickle.load(f)
-        # self.testsize = pickle.load(f)
-        # self.testx_char = pickle.load(f)
-        # self.testsize_char = pickle.load(f)
-        # self.test_graph = pickle.load(f)
-        #
-        # f.close()
 
 class GedDataset(Dataset):
     def __init__(self, tup, x, y, size, x_char, size_char, graph):
