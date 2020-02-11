@@ -27,8 +27,6 @@ def main(args):
 
     # 初始化数据
     corpus = GedCorpus(args)
-    if args.loginfor:
-        print("Loading corpus finished")
 
     # TODO
     # 初始化模型，后期会把optimizer初始化也放过来，解耦，而且load权重也会少加载优化器的部分权重！！！
@@ -38,8 +36,8 @@ def main(args):
         model = SLNER(args)
     elif args.arch == "GGNNNER":
         model = GGNNNER(args)
-    if args.loginfor:
-        print("Model established successfully")
+    else:
+        raise KeyError("model arch parameter illegal : " + args.arch)
 
     # load 权重
     if args.load_dir is not None:
