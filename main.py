@@ -44,7 +44,7 @@ def main(args):
         load_checkpoint(model, args.load_dir)
 
     if torch.cuda.is_available() and not args.use_cpu:
-        torch.cuda.set_device(args.device_id)
+        torch.cuda.set_device(args.gpu_list)
         model.to("cuda")
         if args.use_fpp16:
             model.half()
