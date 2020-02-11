@@ -17,6 +17,11 @@
 #--train-graph-dir data/process/train_graph.txt --dev-graph-dir data/process/dev_graph.txt --test-graph-dir data/process/test_graph.txt \
 #--word-vocab-dir data/prepare/wordvocab.pkl --char-vocab-dir data/prepare/charvocab.pkl --edge-vocab-dir data/prepare/edgevocab.pkl --output data/prepare/train.pkl
 
+python main.py --gpu-list 0 --mode Train --arch GGNN --train-lm \
+ --char-embed-dim 0 --gnn-steps 1 --save-dir checkpoint/LM_GGNN \
+ --w2v-dir data/process/w2v_300d.txt --data-dir data/prepare/pretrain.pkl \
+ --optimizer adam --lr 1e-3 --evaluation loss
+
 
 # 预处理的预处理
 # tokenize_()
