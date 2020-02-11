@@ -84,15 +84,15 @@ class GGNNNER(nn.Module):
         # output, _ = output
         # return self.Loss(output.view(-1, 2), label.view(-1))
         if self.args.train_lm:
-            return self.getLMLoss(output)
+            return self.getLMLoss(input, output)
 
         out, (lm_fw_out, lm_bw_out) = output
         loss = self.Loss(out.view(-1, 2), label.view(-1))
-        loss += self.lm_cost_weight * self.getLMLoss()
+        loss += self.lm_cost_weight * self.getLMLoss(input, output)
 
         return loss
 
-    def getLMLoss(self, output):
+    def getLMLoss(self, input, output):
         loss = 0
         out, (lm_fw_out, lm_bw_out) = output
         fw_x = input[:, 1:]
