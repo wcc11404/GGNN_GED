@@ -65,6 +65,9 @@ def train(args, model, Corpus):
 
         # 训练
         model.train()
+        #清理GPU缓存？？
+        if not args.use_cpu:
+            torch.cuda.empty_cache()
         if args.loginfor:
             trainer = tqdm(Corpus.traindataloader)
         else:

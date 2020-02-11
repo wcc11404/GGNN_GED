@@ -76,7 +76,6 @@ if __name__ == "__main__":
 
     parser.add_argument("--arch", default="GGNNNER")
     parser.add_argument("--train-lm", action='store_true', default=False)
-    parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--use-lower", action='store_true', default=True)
     parser.add_argument("--word-embed-dim", type=int, default=300)
     parser.add_argument("--char-embed-dim", type=int, default=100)
@@ -98,6 +97,7 @@ if __name__ == "__main__":
     parser.add_argument("--w2v-dir", default=None)# glove.840B.300d.txt w2v_300d.txt
     parser.add_argument("--data-dir", default="data/prepare/train.pkl")
     parser.add_argument("--vocab-dir", default="data/prepare")
+    parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--max-epoch", type=int, default=100)
     parser.add_argument("--early-stop", type=int, default=10)
     parser.add_argument("--lr", type=float, default=1)
