@@ -6,6 +6,7 @@ class GGNNNER(nn.Module):
     def __init__(self, args):
         super(GGNNNER, self).__init__()
         assert args.rnn_bidirectional and args.lm_cost_weight >= 0  # 暂时必须是双向lstm
+        self.args = args
         self.lm_vocab_size = args.lm_vocab_size
         self.lm_cost_weight = args.lm_cost_weight
 
@@ -82,16 +83,22 @@ class GGNNNER(nn.Module):
     def getLoss(self, input, length, extra_data, output, label):
         # output, _ = output
         # return self.Loss(output.view(-1, 2), label.view(-1))
+        if self.args.train_lm:
+            return self.getLMLoss(output)
 
         out, (lm_fw_out, lm_bw_out) = output
         loss = self.Loss(out.view(-1, 2), label.view(-1))
+        loss += self.lm_cost_weight * self.getLMLoss()
 
+        return loss
+
+    def getLMLoss(self, output):
+        loss = 0
+        out, (lm_fw_out, lm_bw_out) = output
         fw_x = input[:, 1:]
         fw_x = torch.cat((fw_x, torch.zeros(fw_x.shape[0], 1, dtype=torch.long, device=fw_x.device)), dim=-1)
         bw_x = input[:, :-1]
         bw_x = torch.cat((torch.zeros(bw_x.shape[0], 1, dtype=torch.long, device=bw_x.device), bw_x), dim=-1)
-        loss += self.lm_cost_weight * self.Loss(lm_fw_out.view(-1, self.lm_vocab_size), fw_x.view(-1))
-        loss += self.lm_cost_weight * self.Loss(lm_bw_out.view(-1, self.lm_vocab_size), bw_x.view(-1))
-
+        loss += self.Loss(lm_fw_out.view(-1, self.lm_vocab_size), fw_x.view(-1))
+        loss += self.Loss(lm_bw_out.view(-1, self.lm_vocab_size), bw_x.view(-1))
         return loss
-

@@ -70,19 +70,23 @@ def collate_fn(train_data):
     #                                                                           train_x_char, train_length_char)
     train_x = pad(train_x, max(train_length), paditem=0)  # B * S
     train_y = pad(train_y, max(train_length), paditem=-1)  # B * S , y pad -1是为了计算loss时候忽略用
-    maxchar = getmetrixmax(train_length_char)   # B
-    train_x_char = padchar(train_x_char, max(train_length), maxchar, paditem=0) # B * S * W
-    train_length_char = pad(train_length_char, max(train_length), paditem=1)   # B * S 必须pad1,长度不能为0
-    train_graph_in = padgraph(train_graph_in, max(train_length), edge_num, paditem=0) # B * S * S * EN
-    train_graph_out = padgraph(train_graph_out, max(train_length), edge_num, paditem=0) # B * S * S * EN
+    if train_length_char[0] is not None:
+        maxchar = getmetrixmax(train_length_char)   # B
+        train_x_char = padchar(train_x_char, max(train_length), maxchar, paditem=0) # B * S * W
+        train_length_char = pad(train_length_char, max(train_length), paditem=1)   # B * S 必须pad1,长度不能为0
+    if train_graph_in[0] is not None:
+        train_graph_in = padgraph(train_graph_in, max(train_length), edge_num, paditem=0) # B * S * S * EN
+        train_graph_out = padgraph(train_graph_out, max(train_length), edge_num, paditem=0) # B * S * S * EN
 
     train_x = torch.from_numpy(np.array(train_x)).long()
     train_y = torch.from_numpy(np.array(train_y)).long()
     train_length = torch.from_numpy(np.array(train_length))
-    train_x_char = torch.from_numpy(np.array(train_x_char)).long()
-    train_length_char = torch.from_numpy(np.array(train_length_char))
-    train_graph_in = torch.from_numpy(np.array(train_graph_in)).float()
-    train_graph_out = torch.from_numpy(np.array(train_graph_out)).float()
+    if train_length_char[0] is not None:
+        train_x_char = torch.from_numpy(np.array(train_x_char)).long()
+        train_length_char = torch.from_numpy(np.array(train_length_char))
+    if train_graph_in[0] is not None:
+        train_graph_in = torch.from_numpy(np.array(train_graph_in)).float()
+        train_graph_out = torch.from_numpy(np.array(train_graph_out)).float()
 
     if task == "GGNNNER":
         extra_data = (train_x_char, train_length_char, train_graph_in, train_graph_out)
@@ -96,26 +100,35 @@ def collate_fn(train_data):
 class GedCorpus:
     def __init__(self, args):
         self.args = args
-        self.load_preprocess(args.preprocess_dir)
+        self.load_preprocess(args)
 
         self.wordvocabularysize = len(self.id2word)
         args.word_vocabulary_size = self.wordvocabularysize
-        self.charvocabularysize = len(self.id2char)
+        if self.id2char is not None:
+            self.charvocabularysize = len(self.id2char)
+        else:
+            self.charvocabularysize = 0
         args.char_vocabulary_size = self.charvocabularysize
-        self.edgevocabularysize = len(self.id2edge)
+        if self.id2edge is not None:
+            self.edgevocabularysize = len(self.id2edge)
+        else:
+            self.edgevocabularysize = 0
         args.edge_vocabulary_size = self.edgevocabularysize
         args.word2id = self.word2id
 
         if args.loginfor:
             print("word dictionary size : " + str(self.wordvocabularysize))
-            print("char dictionary size : " + str(self.charvocabularysize))
-            print("edge dictionary size : " + str(self.edgevocabularysize))
+            if self.id2edge is not None:
+                print("char dictionary size : " + str(self.charvocabularysize))
+            if self.id2edge is not None:
+                print("edge dictionary size : " + str(self.edgevocabularysize))
             print("train data size : " + str(len(self.trainx)))
             print("max train data length : " + str(max(self.trainsize)))
             print("dev data size : " + str(len(self.devx)))
             print("max dev data length : " + str(max(self.devsize)))
-            print("test data size : " + str(len(self.testx)))
-            print("max test data length : " + str(max(self.testsize)))
+            if self.testx is not None:
+                print("test data size : " + str(len(self.testx)))
+                print("max test data length : " + str(max(self.testsize)))
             print()
 
         #Train
@@ -131,43 +144,83 @@ class GedCorpus:
                                         collate_fn=collate_fn, num_workers=args.num_workers)
 
         #Test
-        self.testdataset = GedDataset((self.args.arch, self.edgevocabularysize), self.testx, self.testy, self.testsize,
-                                      self.testx_char, self.testsize_char, self.test_graph)
-        self.testdataloader = DataLoader(dataset=self.testdataset, batch_size=1, shuffle=False, collate_fn=collate_fn,
-                                         num_workers=args.num_workers)
+        if self.testx is not None:
+            self.testdataset = GedDataset((self.args.arch, self.edgevocabularysize), self.testx, self.testy, self.testsize,
+                                          self.testx_char, self.testsize_char, self.test_graph)
+            self.testdataloader = DataLoader(dataset=self.testdataset, batch_size=1, shuffle=False, collate_fn=collate_fn,
+                                             num_workers=args.num_workers)
+        else:
+            self.testdataloader = None
 
-    def load_preprocess(self,dir):
-        f = open(dir, 'rb')
+    def load_preprocess(self, args):
+        f = open(args.data_dir, 'rb')
 
-        self.word2id = pickle.load(f)
-        self.id2word = pickle.load(f)
-        self.char2id = pickle.load(f)
-        self.id2char = pickle.load(f)
-        self.edge2id = pickle.load(f)
-        self.id2edge = pickle.load(f)
+        self.sign = pickle.load(f)
+        assert self.sign[0] == 1 and self.sign[3] == 1
+        item0 = self.sign[0] + self.sign[3] + self.sign[6]
+        item1 = self.sign[1] + self.sign[4] + self.sign[7]
+        item2 = self.sign[2] + self.sign[5] + self.sign[8]
+        assert item0 == item1 and item1 == item2
 
-        self.trainx = pickle.load(f)
-        self.trainy = pickle.load(f)
-        self.trainsize = pickle.load(f)
-        self.trainx_char = pickle.load(f)
-        self.trainsize_char = pickle.load(f)
-        self.train_graph = pickle.load(f)
+        f1 = open(args.vocab_dir + "/wordvocab.pkl", "rb")
+        self.word2id = pickle.load(f1)
+        self.id2word = pickle.load(f1)
+        f1.close()
+        if self.sign[1] == 1:
+            f1 = open(args.vocab_dir + "/charvocab.pkl", "rb")
+            self.char2id = pickle.load(f1)
+            self.id2char = pickle.load(f1)
+            f1.close()
+        else:
+            self.char2id = None
+            self.id2char = None
+        if self.sign[2] == 1:
+            f1 = open(args.vocab_dir + "/edgevocab.pkl", "rb")
+            self.edge2id = pickle.load(f1)
+            self.id2edge = pickle.load(f1)
+            f1.close()
+        else:
+            self.edge2id = None
+            self.id2edge = None
 
-        self.devx = pickle.load(f)
-        self.devy = pickle.load(f)
-        self.devsize = pickle.load(f)
-        self.devx_char = pickle.load(f)
-        self.devsize_char = pickle.load(f)
-        self.dev_graph = pickle.load(f)
+        self.trainx, self.trainy, self.trainsize = None, None, None
+        self.trainx_char, self.trainsize_char, self.train_graph = None, None, None
+        self.devx, self.devy, self.devsize = None, None, None
+        self.devx_char, self.devsize_char, self.dev_graph = None, None, None
+        self.testx, self.testy, self.testsize = None, None, None
+        self.testx_char, self.testsize_char, self.test_graph = None, None, None
+        m = [[self.trainx, self.trainy, self.trainsize], [self.trainx_char, self.trainsize_char], [self.train_graph],
+             [self.devx, self.devy, self.devsize], [self.devx_char, self.devsize_char], [self.dev_graph],
+             [self.testx, self.testy, self.testsize], [self.testx_char, self.testsize_char], [self.test_graph]]
 
-        self.testx = pickle.load(f)
-        self.testy = pickle.load(f)
-        self.testsize = pickle.load(f)
-        self.testx_char = pickle.load(f)
-        self.testsize_char = pickle.load(f)
-        self.test_graph = pickle.load(f)
+        for i, j in enumerate(self.sign):
+            if j == 1:
+                for item in m[i]:
+                    item[i] = pickle.load(f)
 
         f.close()
+        # self.trainx = pickle.load(f)
+        # self.trainy = pickle.load(f)
+        # self.trainsize = pickle.load(f)
+        # self.trainx_char = pickle.load(f)
+        # self.trainsize_char = pickle.load(f)
+        # self.train_graph = pickle.load(f)
+        #
+        # self.devx = pickle.load(f)
+        # self.devy = pickle.load(f)
+        # self.devsize = pickle.load(f)
+        # self.devx_char = pickle.load(f)
+        # self.devsize_char = pickle.load(f)
+        # self.dev_graph = pickle.load(f)
+        #
+        # self.testx = pickle.load(f)
+        # self.testy = pickle.load(f)
+        # self.testsize = pickle.load(f)
+        # self.testx_char = pickle.load(f)
+        # self.testsize_char = pickle.load(f)
+        # self.test_graph = pickle.load(f)
+        #
+        # f.close()
 
 class GedDataset(Dataset):
     def __init__(self, tup, x, y, size, x_char, size_char, graph):
@@ -177,8 +230,8 @@ class GedDataset(Dataset):
         self.size = size
         self.x_char = x_char
         self.size_char = size_char
-        self.graph_in = graph[0]
-        self.graph_out = graph[1]
+        self.graph_in = graph[0] if graph is not None else None
+        self.graph_out = graph[1] if graph is not None else None
         self.len = len(self.x)
 
     def sort(self, *input):  # [1,2,3,4] [4,4,1,2]
@@ -187,8 +240,11 @@ class GedDataset(Dataset):
         return (list(i) for i in zip(*temp)) #([1, 2, 4, 3] [4, 4, 2, 1])
 
     def __getitem__(self, index):
-        return self.tup, self.x[index], self.y[index], self.size[index], self.x_char[index], self.size_char[index],\
-               self.graph_in[index], self.graph_out[index]
+        return self.tup, self.x[index], self.y[index], self.size[index], \
+               self.x_char[index] if self.x_char is not None else None, \
+               self.size_char[index] if self.size_char is not None else None,\
+               self.graph_in[index] if self.graph_in is not None else None, \
+               self.graph_out[index] if self.graph_out is not None else None
 
     def __len__(self):
         return self.len
