@@ -8,9 +8,10 @@ import numpy as np
 class EmbeddingTemplate(nn.Module):
     def __init__(self, vocab_size, embed_dim, embed_drop=0.0, requires_grad=True):
         super(EmbeddingTemplate, self).__init__()
+        self.requires_grad = requires_grad
         self.vocab_size = vocab_size
         self.embed_dim = embed_dim
-        self.wordembedding = nn.Embedding(vocab_size, embed_dim, requires_grad=requires_grad)
+        self.wordembedding = nn.Embedding(vocab_size, embed_dim)
         self.wordembeddingdropout = nn.Dropout(embed_drop)
 
         self.init_weight()
@@ -21,6 +22,7 @@ class EmbeddingTemplate(nn.Module):
                 nn.init.constant_(param, 0.0)
             elif 'weight' in name:
                 nn.init.xavier_uniform_(param)
+            param.requires_grad = self.requires_grad
 
     def forward(self, batchinput): # B * S
         embed_out = self.wordembedding(batchinput)
@@ -63,6 +65,7 @@ class RnnTemplate(nn.Module):
                  numLayers=1, bidirectional=True, initalizer_type="normal", residual=False,
                  layernorm=False, requires_grad=True):
         super(RnnTemplate, self).__init__()
+        self.requires_grad = requires_grad
         self.type = rnn_type
         self.batch_size = batch_size
         self.input_dim = input_dim
@@ -75,8 +78,7 @@ class RnnTemplate(nn.Module):
 
         hidden_dim = hidden_dim // 2 if bidirectional else hidden_dim
         if self.type == "LSTM":
-            self.rnn = nn.LSTM(input_dim, hidden_dim, num_layers=numLayers, bidirectional=bidirectional,
-                               batch_first=False, requires_grad=requires_grad)
+            self.rnn = nn.LSTM(input_dim, hidden_dim, num_layers=numLayers, bidirectional=bidirectional,batch_first=False)
             # if initalizer_type=="normal":
             #     self.hidden = (torch.normal(mean=torch.zeros(numLayers * 2 if bidirectional else numLayers, hidden_dim)).to("cuda"),
             #               torch.normal(mean=torch.zeros(numLayers * 2 if bidirectional else numLayers, hidden_dim)).to("cuda"))
@@ -100,6 +102,7 @@ class RnnTemplate(nn.Module):
                 nn.init.constant_(param, 0.0)
             elif 'weight' in name:
                 nn.init.xavier_uniform_(param)
+            param.requires_grad = self.requires_grad
 
     def forward(self, batchinput, batchlength, ischar=False): # B * S * E
         residual = batchinput
@@ -150,7 +153,8 @@ class LinearTemplate(nn.Module):
     def __init__(self, input_dim, output_dim, bn=False, activation=None, dropout=0.0,
                  residual=False, layernorm=False, requires_grad=True):
         super(LinearTemplate, self).__init__()
-        self.linear = nn.Linear(input_dim, output_dim, requires_grad=requires_grad)
+        self.requires_grad = requires_grad
+        self.linear = nn.Linear(input_dim, output_dim)
         if activation == "sigmoid":
             self.activation = torch.sigmoid
         elif activation == "softmax":
@@ -175,6 +179,7 @@ class LinearTemplate(nn.Module):
                 nn.init.constant_(param, 0.0)
             elif 'weight' in name:
                 nn.init.xavier_uniform_(param)
+            param.requires_grad = self.requires_grad
 
     def forward(self, batchinput):
         out = self.linear(batchinput)
