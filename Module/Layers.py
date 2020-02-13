@@ -6,11 +6,11 @@ import os
 import numpy as np
 
 class EmbeddingTemplate(nn.Module):
-    def __init__(self, vocab_size, embed_dim, embed_drop=0.0):
+    def __init__(self, vocab_size, embed_dim, embed_drop=0.0, requires_grad=True):
         super(EmbeddingTemplate, self).__init__()
         self.vocab_size = vocab_size
         self.embed_dim = embed_dim
-        self.wordembedding = nn.Embedding(vocab_size, embed_dim)
+        self.wordembedding = nn.Embedding(vocab_size, embed_dim, requires_grad=requires_grad)
         self.wordembeddingdropout = nn.Dropout(embed_drop)
 
         self.init_weight()
@@ -60,7 +60,8 @@ class EmbeddingTemplate(nn.Module):
 
 class RnnTemplate(nn.Module):
     def __init__(self, rnn_type, batch_size, input_dim, hidden_dim, rnn_drop=0.0,
-                 numLayers=1, bidirectional=True, initalizer_type="normal", residual=False, layernorm=False):
+                 numLayers=1, bidirectional=True, initalizer_type="normal", residual=False,
+                 layernorm=False, requires_grad=True):
         super(RnnTemplate, self).__init__()
         self.type = rnn_type
         self.batch_size = batch_size
@@ -75,7 +76,7 @@ class RnnTemplate(nn.Module):
         hidden_dim = hidden_dim // 2 if bidirectional else hidden_dim
         if self.type == "LSTM":
             self.rnn = nn.LSTM(input_dim, hidden_dim, num_layers=numLayers, bidirectional=bidirectional,
-                               batch_first=False)
+                               batch_first=False, requires_grad=requires_grad)
             # if initalizer_type=="normal":
             #     self.hidden = (torch.normal(mean=torch.zeros(numLayers * 2 if bidirectional else numLayers, hidden_dim)).to("cuda"),
             #               torch.normal(mean=torch.zeros(numLayers * 2 if bidirectional else numLayers, hidden_dim)).to("cuda"))
@@ -146,9 +147,10 @@ class RnnTemplate(nn.Module):
         return rnn_ouput, hidden # B * S * E , B * 2 * E//2
 
 class LinearTemplate(nn.Module):
-    def __init__(self, input_dim, output_dim, bn=False, activation=None, dropout=0.0, residual=False, layernorm=False):
+    def __init__(self, input_dim, output_dim, bn=False, activation=None, dropout=0.0,
+                 residual=False, layernorm=False, requires_grad=True):
         super(LinearTemplate, self).__init__()
-        self.linear = nn.Linear(input_dim, output_dim)
+        self.linear = nn.Linear(input_dim, output_dim, requires_grad=requires_grad)
         if activation == "sigmoid":
             self.activation = torch.sigmoid
         elif activation == "softmax":
@@ -185,24 +187,25 @@ class LinearTemplate(nn.Module):
         return out
 
 class GraphGateTemplate(nn.Module):
-    def __init__(self, input_dim, n_edge_types, n_steps, dropout=0.0, residual=False, layernorm=False):
+    def __init__(self, input_dim, n_edge_types, n_steps, dropout=0.0, residual=False,
+                 layernorm=False, requires_grad=True):
         super(GraphGateTemplate, self).__init__()
         self.input_dim = input_dim
         self.n_steps = n_steps
         self.n_edge_types = n_edge_types
 
         self.edge_in = nn.ModuleList(
-            [LinearTemplate(self.input_dim, self.input_dim) for _ in range(self.n_edge_types)])
+            [LinearTemplate(self.input_dim, self.input_dim, requires_grad=requires_grad) for _ in range(self.n_edge_types)])
         self.edge_out = nn.ModuleList(
-            [LinearTemplate(self.input_dim, self.input_dim) for _ in range(self.n_edge_types)])
+            [LinearTemplate(self.input_dim, self.input_dim, requires_grad=requires_grad) for _ in range(self.n_edge_types)])
 
         # self.edge_in = LinearTemplate(self.n_edge_types * self.input_dim, self.n_edge_types * self.input_dim)
         # self.edge_out = LinearTemplate(self.n_edge_types * self.input_dim, self.n_edge_types * self.input_dim)
 
         # GRUGate
-        self.reset_gate = LinearTemplate(self.input_dim * 3, self.input_dim, activation="sigmoid")
-        self.update_gate = LinearTemplate(self.input_dim * 3, self.input_dim, activation="sigmoid")
-        self.transform = LinearTemplate(self.input_dim * 3, self.input_dim, activation="tanh")
+        self.reset_gate = LinearTemplate(self.input_dim * 3, self.input_dim, activation="sigmoid", requires_grad=requires_grad)
+        self.update_gate = LinearTemplate(self.input_dim * 3, self.input_dim, activation="sigmoid", requires_grad=requires_grad)
+        self.transform = LinearTemplate(self.input_dim * 3, self.input_dim, activation="tanh", requires_grad=requires_grad)
 
         self.dropout = nn.Dropout(dropout)
         self.residual = residual

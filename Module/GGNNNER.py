@@ -10,9 +10,10 @@ class GGNNNER(nn.Module):
         self.lm_vocab_size = args.lm_vocab_size
         self.lm_cost_weight = args.lm_cost_weight
 
-        self.wordembedding = EmbeddingTemplate(args.word_vocabulary_size, args.word_embed_dim, args.embed_drop)
+        self.wordembedding = EmbeddingTemplate(args.word_vocabulary_size, args.word_embed_dim, args.embed_drop,
+                                               requires_grad=False if not args.train_lm else True)
         self.gnn = GraphGateTemplate(args.word_embed_dim, args.edge_vocabulary_size, args.gnn_steps, args.gnn_drop,
-                                     residual=False, layernorm=False)
+                                     residual=False, layernorm=False, requires_grad=False if not args.train_lm else True)
         self.rnn = RnnTemplate(args.rnn_type, args.batch_size, args.word_embed_dim, args.word_embed_dim, args.rnn_drop,
                                bidirectional=args.rnn_bidirectional, residual=False, layernorm=False)
 
