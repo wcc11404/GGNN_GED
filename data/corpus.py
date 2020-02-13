@@ -46,7 +46,7 @@ def collate_fn(train_data):
             temp.append(max(m))
         return max(temp)
 
-    def bakwardlabel(data, max_length, paditem=0):
+    def forwardlabel(data, max_length, paditem=0):
         re = []
         for d in data:
             temp = d[1:]
@@ -55,7 +55,7 @@ def collate_fn(train_data):
             re.append(temp)
         return re
 
-    def forwardlabel(data, max_length, paditem=0):
+    def bakwardlabel(data, max_length, paditem=0):
         re = []
         for d in data:
             temp = [0]
