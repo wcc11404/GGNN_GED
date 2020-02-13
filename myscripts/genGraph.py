@@ -106,7 +106,6 @@ def generate_graph(args, addcontextedge=False):
 
         graph_maxindex.append((g, len(temp)))
     graph_to_file(graph_maxindex, out_path)
-    f.close()
     nlp.close()
 
 # 生成data/pretrain_graph.txt
