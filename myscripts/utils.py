@@ -23,12 +23,12 @@ def load_checkpoint(model, dir):
         load_checkpoint = torch.load(best_dir)  # 找一下最好的
         model_dict = model.state_dict()  # 获得当前模型的参数字典
         load_dict = {k: v for k, v in load_checkpoint.items() if k in model_dict}  # 找名字一样的加载权重
-        load_dict["shit"]=None ####
+        #load_dict["shit"]=None ####
         #print(model.wordembedding.wordembedding.weight)
         model.load_state_dict(load_dict)  # 加载权重
         #print()
         #print(model.wordembedding.wordembedding.weight)
-        exit()
+        #exit()
     except:
         print("failed to load")
 
