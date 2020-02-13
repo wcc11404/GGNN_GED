@@ -1,6 +1,7 @@
 import argparse
 import numpy as np
 import torch
+import os
 
 from data.corpus import GedCorpus
 from myscripts.utils import train, test, load_args, load_checkpoint
@@ -106,4 +107,8 @@ if __name__ == "__main__":
     parser.add_argument("--evaluation", default="loss") # 评价指标 loss 和 f0.5 ;模型保存，earlystop等指标的依据
 
     args = parser.parse_args()
+    if args.save_dir is not None and  os.path.exists(args.save_dir):
+        args.save_dir = os.path.abspath(args.save_dir)
+    if args.load_dir is not None and  os.path.exists(args.load_dir):
+        args.load_dir = os.path.abspath(args.load_dir)
     main(args)
