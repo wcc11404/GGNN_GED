@@ -22,7 +22,6 @@ def main(args):
         args.save_dir = os.path.abspath(args.save_dir)
     if args.load_dir is not None and os.path.exists(args.load_dir):
         args.load_dir = os.path.abspath(args.load_dir)
-        print("shit")
 
     if args.mode == "Test": # 如果是测试,直接读取超参数,并用部分覆盖
         loadargs = load_args(args.load_dir + "/args.json")
