@@ -6,9 +6,9 @@ script_dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 #python $script_dir/myscripts/mytokenize.py --mode 0 --input data/orign_data/fce-public.test.original.tsv --output data/process/fce-public.test.preprocess.tsv --stanford data/stanford-corenlp-full-2018-10-05
 
 # 生成标签数据的依赖图
-python $script_dir/myscripts/genGraph.py --mode 0 --input data/process/fce-public.train.preprocess.tsv --output data/process/train_graph.txt --stanford data/stanford-corenlp-full-2018-10-05
-python $script_dir/myscripts/genGraph.py --mode 0 --input data/process/fce-public.dev.preprocess.tsv --output data/process/dev_graph.txt --stanford data/stanford-corenlp-full-2018-10-05
-python $script_dir/myscripts/genGraph.py --mode 0 --input data/process/fce-public.test.preprocess.tsv --output data/process/test_graph.txt --stanford data/stanford-corenlp-full-2018-10-05
+#python $script_dir/myscripts/genGraph.py --mode 0 --input data/process/fce-public.train.preprocess.tsv --output data/process/train_graph.txt --stanford data/stanford-corenlp-full-2018-10-05
+#python $script_dir/myscripts/genGraph.py --mode 0 --input data/process/fce-public.dev.preprocess.tsv --output data/process/dev_graph.txt --stanford data/stanford-corenlp-full-2018-10-05
+#python $script_dir/myscripts/genGraph.py --mode 0 --input data/process/fce-public.test.preprocess.tsv --output data/process/test_graph.txt --stanford data/stanford-corenlp-full-2018-10-05
 
 # tokenize无标签数据
 #python $script_dir/myscripts/mytokenize.py --mode 1 --input data/orign_data/1b.train.txt --output data/process/pretrain.train --stanford data/stanford-corenlp-full-2018-10-05
@@ -30,9 +30,9 @@ python $script_dir/myscripts/genGraph.py --mode 0 --input data/process/fce-publi
 #--word-vocab-dir data/prepare/wordvocab.pkl --char-vocab-dir data/prepare/charvocab.pkl --edge-vocab-dir data/prepare/edgevocab.pkl --output data/prepare/pretrain.pkl
 
 # pickle化所有训练数据
-#python $script_dir/myscripts/binary.py --train-dir data/process/fce-public.train.preprocess.tsv --dev-dir data/process/fce-public.dev.preprocess.tsv --test-dir data/process/fce-public.test.preprocess.tsv \
-#--train-graph-dir data/process/train_graph.txt --dev-graph-dir data/process/dev_graph.txt --test-graph-dir data/process/test_graph.txt \
-#--word-vocab-dir data/prepare/wordvocab.pkl --char-vocab-dir data/prepare/charvocab.pkl --edge-vocab-dir data/prepare/edgevocab.pkl --output data/prepare/train.pkl
+python $script_dir/myscripts/binary.py --train-dir data/process/fce-public.train.preprocess.tsv --dev-dir data/process/fce-public.dev.preprocess.tsv --test-dir data/process/fce-public.test.preprocess.tsv \
+ --train-graph-dir data/process/train_graph.txt --dev-graph-dir data/process/dev_graph.txt --test-graph-dir data/process/test_graph.txt \
+ --word-vocab-dir data/prepare/wordvocab.pkl --char-vocab-dir data/prepare/charvocab.pkl --edge-vocab-dir data/prepare/edgevocab.pkl --output data/prepare/train.pkl
 
 # 预训练
 #python $script_dir/main.py --gpu-id 0 --mode Train --arch GGNNNER --train-lm \
