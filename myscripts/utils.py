@@ -16,16 +16,16 @@ def load_checkpoint(model, dir):
         raise KeyError("checkpoint is not exist")
 
     # TODO 输入可以是具体的权重文件而不是文件夹
-    try:
-        log = os.path.join(dir, "save.log")
-        best_dir = open(log, "r").readline().strip()
-        print("load checkpoint from " + best_dir)
-        load_checkpoint = torch.load(best_dir)  # 找一下最好的
-        model_dict = model.state_dict()  # 获得当前模型的参数字典
-        load_dict = {k: v for k, v in load_checkpoint.items() if k in model_dict}  # 找名字一样的加载权重
-        model.load_state_dict(load_dict)  # 加载权重
-    except:
-        print("failed to load")
+    # try:
+    log = os.path.join(dir, "save.log")
+    best_dir = open(log, "r").readline().strip()
+    print("load checkpoint from " + best_dir)
+    load_checkpoint = torch.load(best_dir)  # 找一下最好的
+    model_dict = model.state_dict()  # 获得当前模型的参数字典
+    load_dict = {k: v for k, v in load_checkpoint.items() if k in model_dict}  # 找名字一样的加载权重
+    model.load_state_dict(load_dict)  # 加载权重
+    # except:
+    #     print("failed to load")
 
 def save_args(dic, dir):
     with open(dir, 'w') as f:
