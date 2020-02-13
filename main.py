@@ -18,6 +18,12 @@ def merage_args(user_args, loadargs):
     return loadargs
 
 def main(args):
+    if args.save_dir is not None and os.path.exists(args.save_dir):
+        args.save_dir = os.path.abspath(args.save_dir)
+    if args.load_dir is not None and os.path.exists(args.load_dir):
+        args.load_dir = os.path.abspath(args.load_dir)
+        print("shit")
+
     if args.mode == "Test": # 如果是测试,直接读取超参数,并用部分覆盖
         loadargs = load_args(args.load_dir + "/args.json")
         merageargs = merage_args(args.__dict__, loadargs)
@@ -107,8 +113,4 @@ if __name__ == "__main__":
     parser.add_argument("--evaluation", default="loss") # 评价指标 loss 和 f0.5 ;模型保存，earlystop等指标的依据
 
     args = parser.parse_args()
-    if args.save_dir is not None and  os.path.exists(args.save_dir):
-        args.save_dir = os.path.abspath(args.save_dir)
-    if args.load_dir is not None and  os.path.exists(args.load_dir):
-        args.load_dir = os.path.abspath(args.load_dir)
     main(args)
