@@ -46,6 +46,24 @@ def collate_fn(train_data):
             temp.append(max(m))
         return max(temp)
 
+    def bakwardlabel(data, max_length, paditem=0):
+        re = []
+        for d in data:
+            temp = d[1:]
+            temp.append(0)
+            temp.extend([paditem for _ in range(max_length - len(temp))])
+            re.append(temp)
+        return re
+
+    def forwardlabel(data, max_length, paditem=0):
+        re = []
+        for d in data:
+            temp = [0]
+            temp.extend(d[:-1])
+            temp.extend([paditem for _ in range(max_length - len(temp))])
+            re.append(temp)
+        return re
+
     train_x = []
     train_y = []
     train_length = []
@@ -69,6 +87,8 @@ def collate_fn(train_data):
     #train_x, train_y, train_length, train_x_char, train_length_char = sort(train_x, train_y, train_length,
     #                                                                           train_x_char, train_length_char)
     train_x = pad(train_x, max(train_length), paditem=0)  # B * S
+    train_left_x = forwardlabel(train_x, max(train_length), paditem=-1)
+    train_right_x = bakwardlabel(train_x, max(train_length), paditem=-1)
     train_y = pad(train_y, max(train_length), paditem=-1)  # B * S , y pad -1是为了计算loss时候忽略用
     if train_length_char[0] is not None:
         maxchar = getmetrixmax(train_length_char)   # B
@@ -79,6 +99,8 @@ def collate_fn(train_data):
         train_graph_out = padgraph(train_graph_out, max(train_length), edge_num, paditem=0) # B * S * S * EN
 
     train_x = torch.from_numpy(np.array(train_x)).long()
+    train_left_x = torch.from_numpy(np.array(train_left_x)).long()
+    train_right_x = torch.from_numpy(np.array(train_right_x)).long()
     train_y = torch.from_numpy(np.array(train_y)).long()
     train_length = torch.from_numpy(np.array(train_length))
     if train_length_char[0] is not None:
@@ -90,12 +112,15 @@ def collate_fn(train_data):
 
     if task == "GGNNNER":
         extra_data = (train_x_char, train_length_char, train_graph_in, train_graph_out)
+        extra_label = (train_left_x, train_right_x)
     elif task == "BaseNER" or task == "SLNER":
         extra_data = (train_x_char, train_length_char)
+        extra_label = ()
     else:
         extra_data = ()
+        extra_label = ()
 
-    return train_x, train_y, train_length, extra_data
+    return train_x, train_y, train_length, extra_data, extra_label
 
 class GedCorpus:
     def __init__(self, args):

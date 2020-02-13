@@ -14,7 +14,7 @@ class GGNNNER(nn.Module):
         self.gnn = GraphGateTemplate(args.word_embed_dim, args.edge_vocabulary_size, args.gnn_steps, args.gnn_drop,
                                      residual=False, layernorm=False)
         self.rnn = RnnTemplate(args.rnn_type, args.batch_size, args.word_embed_dim, args.word_embed_dim, args.rnn_drop,
-                               bidirectional=args.rnn_bidirectional, residual=True, layernorm=True)
+                               bidirectional=args.rnn_bidirectional, residual=False, layernorm=False)
 
         if args.char_embed_dim is not None and args.char_embed_dim > 0:
             self.charembedding = EmbeddingTemplate(args.char_vocabulary_size, args.char_embed_dim, args.embed_drop)
@@ -41,6 +41,8 @@ class GGNNNER(nn.Module):
 
         # 损失函数
         self.Loss = nn.CrossEntropyLoss(ignore_index=-1, reduction="sum")
+        self.forwardLoss = nn.CrossEntropyLoss(ignore_index=-1, reduction="sum")
+        self.bakwardLoss = nn.CrossEntropyLoss(ignore_index=-1, reduction="sum")
 
         # 加载词表权重
         self.load_embedding(args)
@@ -80,25 +82,26 @@ class GGNNNER(nn.Module):
 
         return out, (lm_fw_output, lm_bw_output)
 
-    def getLoss(self, input, length, extra_data, output, label):
+    def getLoss(self, input, length, extra_data, output, label, extra_label):
         # output, _ = output
         # return self.Loss(output.view(-1, 2), label.view(-1))
         if self.args.train_lm:
-            return self.getLMLoss(input, output)
+            return self.getLMLoss(output, extra_label)
 
         out, (lm_fw_out, lm_bw_out) = output
         loss = self.Loss(out.view(-1, 2), label.view(-1))
-        loss += self.lm_cost_weight * self.getLMLoss(input, output)
+        loss += self.lm_cost_weight * self.getLMLoss(output, extra_label)
 
         return loss
 
-    def getLMLoss(self, input, output):
+    def getLMLoss(self, output, extra_label):
         loss = 0
         out, (lm_fw_out, lm_bw_out) = output
-        fw_x = input[:, 1:]
-        fw_x = torch.cat((fw_x, torch.zeros(fw_x.shape[0], 1, dtype=torch.long, device=fw_x.device)), dim=-1)
-        bw_x = input[:, :-1]
-        bw_x = torch.cat((torch.zeros(bw_x.shape[0], 1, dtype=torch.long, device=bw_x.device), bw_x), dim=-1)
-        loss += self.Loss(lm_fw_out.view(-1, self.lm_vocab_size), fw_x.view(-1))
-        loss += self.Loss(lm_bw_out.view(-1, self.lm_vocab_size), bw_x.view(-1))
+        forwardlabel, bakwardlabel = extra_label
+        # fw_x = input[:, 1:]
+        # fw_x = torch.cat((fw_x, torch.zeros(fw_x.shape[0], 1, dtype=torch.long, device=fw_x.device)), dim=-1)
+        # bw_x = input[:, :-1]
+        # bw_x = torch.cat((torch.zeros(bw_x.shape[0], 1, dtype=torch.long, device=bw_x.device), bw_x), dim=-1)
+        loss += self.forwardLoss(lm_fw_out.view(-1, self.lm_vocab_size), forwardlabel.view(-1))
+        loss += self.bakwardLoss(lm_bw_out.view(-1, self.lm_vocab_size), bakwardlabel.view(-1))
         return loss

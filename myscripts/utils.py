@@ -22,12 +22,8 @@ def load_checkpoint(model, dir):
         print("load checkpoint from " + best_dir)
         load_checkpoint = torch.load(best_dir)  # 找一下最好的
         model_dict = model.state_dict()  # 获得当前模型的参数字典
-        # load_dict = {k: v for k, v in load_checkpoint.items() if k in model_dict}  # 找名字一样的加载权重
-        print(model.wordembedding.wordembedding.weight)
-        model.load_state_dict(load_checkpoint)  # 加载权重
-        print()
-        print(model.wordembedding.wordembedding.weight)
-        # exit()
+        load_dict = {k: v for k, v in load_checkpoint.items() if k in model_dict}  # 找名字一样的加载权重
+        model.load_state_dict(load_dict)  # 加载权重
     except:
         print("failed to load")
 
@@ -54,10 +50,7 @@ def train(args, model, Corpus):
     if args.loginfor:
         print(model)
         print()
-    # if args.load_dir is not None:
-    #     print("load checkpoint from" + args.load_dir)
-    #     print()
-    #     load_checkpoint(model, args.load_dir)
+
     if args.save_dir is not None:
         if not os.path.exists(args.save_dir):
             os.makedirs(args.save_dir)
@@ -67,7 +60,7 @@ def train(args, model, Corpus):
 
     for epoch in range(1, args.max_epoch + 1):
         print("epoch {} training".format(epoch))
-
+        i=0
         # 训练
         model.train()
         #清理GPU缓存？？
@@ -77,37 +70,41 @@ def train(args, model, Corpus):
             trainer = tqdm(Corpus.traindataloader)
         else:
             trainer = Corpus.traindataloader
-        for (train_x, train_y, train_length, extra_data) in trainer:
+        for (train_x, train_y, train_length, extra_data, extra_label) in trainer:
             if not args.use_cpu:
                 train_x = train_x.cuda(non_blocking=True)
                 train_y = train_y.cuda(non_blocking=True)
                 train_length = train_length.cuda(non_blocking=True)
                 extra_data = [i.cuda(non_blocking=True) for i in extra_data]
+                extra_label = [i.cuda(non_blocking=True) for i in extra_label]
                 if args.use_fpp16:
                     extra_data = [i.half(non_blocking=True) if i.dtype == torch.float else i for i in extra_data]
+                    extra_label = [i.half(non_blocking=True) if i.dtype == torch.float else i for i in extra_label]
 
             optimizer.zero_grad()
             out = model(train_x, train_length, extra_data)
-            loss = model.getLoss(train_x, train_length, extra_data, out, train_y)
+            loss = model.getLoss(train_x, train_length, extra_data, out, train_y, extra_label)
             loss.backward()
             optimizer.step()
+
+            #####
+            if i % 500 == 0:
+                model.eval()
+                dev_loss, dev_p, dev_r, dev_f0_5 = evaluate(args, Corpus.devdataloader, model)
+                print("dev loss: {:.4f}".format(dev_loss))
+                model.train()
+            i+=1
 
         # 每个epoch评估
         model.eval()
         # train_loss, train_p, train_r, train_f0_5 = evaluate(args, Corpus.traindataloader, model)
         dev_loss, dev_p, dev_r, dev_f0_5 = evaluate(args, Corpus.devdataloader, model)
         log = {"epoch": epoch,
-               #"train_loss": train_loss,
-               #"train_p": train_p,
-               #"train_r": train_r,
-               #"train_f0.5": train_f0_5,
                "dev_loss": dev_loss,
                "dev_p": dev_p,
                "dev_r": dev_r,
                "dev_f0.5": dev_f0_5
                }
-        # print("epoch {}  dev loss: {:.4f}  dev p: {:.4f}  dev r: {:.4f}  dev f0.5: {:.4f}  train f0.5: {:.4f}"
-        #       .format(log["epoch"],log["dev_loss"],log["dev_p"],log["dev_r"],log["dev_f0.5"],log["train_f0.5"]))
         print("epoch {}  dev loss: {:.4f}  dev p: {:.4f}  dev r: {:.4f}  dev f0.5: {:.4f}"
               .format(log["epoch"], log["dev_loss"], log["dev_p"], log["dev_r"], log["dev_f0.5"]))
         summary.append(log)
@@ -140,15 +137,6 @@ def train(args, model, Corpus):
     print("epoch {} get the best ".format(max_index)+args.evaluation+" : {}".format(best_evaluation))
 
 def test(args, model, Corpus):
-    # 如果load地址给定且合法则加载该地址，否则加载best地址
-    # if args.load_dir is not None:
-    #     load_checkpoint(model, args.load_dir)
-    # elif args.save_dir is not None and os.path.exists(args.save_dir):
-    #     d = open(args.save_dir + "/save.log", 'r').readline().strip()
-    #     load_checkpoint(model, d)
-    # else:
-    #     raise KeyError("load_dir has an invaild value: None")
-
     model.eval()
     #_, train_p, train_r, train_f = evaluate(args, Corpus.traindataloader, myscripts, Loss=None)
     dev_loss, dev_p, dev_r, dev_f = evaluate(args, Corpus.devdataloader, model)
@@ -165,17 +153,19 @@ def evaluate(args, dataloader, model, mode="average"):
     length = 0
     predict = []
     groundtruth = []
-    for (train_x, train_y, train_length, extra_data) in dataloader:
+    for (train_x, train_y, train_length, extra_data, extra_label) in dataloader:
         if not args.use_cpu:
             train_x = train_x.cuda(non_blocking=True)
             train_y = train_y.cuda(non_blocking=True)
             train_length = train_length.cuda(non_blocking=True)
             extra_data = [i.cuda(non_blocking=True) for i in extra_data]
+            extra_label = [i.cuda(non_blocking=True) for i in extra_label]
             if args.use_fpp16:
-                extra_data = [i.half(non_blocking=True) if i.dtype == torch.float else i for i in extra_data ]
+                extra_data = [i.half(non_blocking=True) if i.dtype == torch.float else i for i in extra_data]
+                extra_label = [i.half(non_blocking=True) if i.dtype == torch.float else i for i in extra_label]
 
         out = model(train_x, train_length, extra_data)
-        loss += model.getLoss(train_x, train_length, extra_data, out, train_y).item()
+        loss += model.getLoss(train_x, train_length, extra_data, out, train_y, extra_label).item()
         out = out[0].cpu().detach().numpy() # 只有out[0]参与计算F值
         train_y = train_y.cpu().detach().numpy()
         train_length = train_length.cpu().detach().numpy()
