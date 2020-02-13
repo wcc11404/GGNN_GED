@@ -15,6 +15,7 @@ def load_checkpoint(model, dir):
     if not os.path.exists(dir):
         raise KeyError("checkpoint is not exist")
 
+    # TODO 输入可以是具体的权重文件而不是文件夹
     try:
         log = os.path.join(dir, "save.log")
         best_dir = open(log, "r").readline().strip()
