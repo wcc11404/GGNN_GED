@@ -88,12 +88,12 @@ def train(args, model, Corpus):
             optimizer.step()
 
             #####
-            i += 1
-            if i % 500 == 0:
-                model.eval()
-                dev_loss, dev_p, dev_r, dev_f0_5 = evaluate(args, Corpus.devdataloader, model)
-                print("dev loss: {:.4f}".format(dev_loss))
-                model.train()
+            # i += 1
+            # if i % 500 == 0:
+            #     model.eval()
+            #     dev_loss, dev_p, dev_r, dev_f0_5 = evaluate(args, Corpus.devdataloader, model)
+            #     print("dev loss: {:.4f}".format(dev_loss))
+            #     model.train()
 
 
         # 每个epoch评估
