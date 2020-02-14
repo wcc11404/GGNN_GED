@@ -48,7 +48,7 @@ script_dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 # --batch-size 32 --early-stop 8 --max-epoch 50 --lm-cost-weight 0.0
 
 # 训练
-python $script_dir/main.py --gpu-id 3 --mode Train --arch GGNNNER --w2v-dir data/process/w2v_300d.txt \
- --char-embed-dim 0 --gnn-steps 1 --save-dir checkpoint/GGNN_att_sl_weightloss \
+python $script_dir/main.py --gpu-id 4 --mode Train --arch GGNNNER --w2v-dir data/process/w2v_300d.txt \
+ --char-embed-dim 0 --gnn-steps 1 --save-dir checkpoint/GGNN_att_sl_48 \
  --data-dir data/prepare/train.pkl --optimizer adadelta --lr 1 --evaluation f0.5 \
- --batch-size 32 --early-stop 5 --max-epoch 50 --lm-cost-weight 0.10
+ --batch-size 48 --early-stop 5 --max-epoch 50 --lm-cost-weight 0.10
