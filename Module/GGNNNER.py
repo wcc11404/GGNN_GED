@@ -1,6 +1,7 @@
 import torch
 from torch import nn
 from .Layers import EmbeddingTemplate, RnnTemplate, LinearTemplate, GraphGateTemplate, AttentionTemplate
+import numpy as np
 
 class GGNNNER(nn.Module):
     def __init__(self, args):
@@ -41,7 +42,8 @@ class GGNNNER(nn.Module):
         self.bw_lm_softmax = LinearTemplate(args.lm_hidden_dim, self.lm_vocab_size, activation=None)
 
         # 损失函数
-        self.Loss = nn.CrossEntropyLoss(ignore_index=-1, reduction="sum")
+        self.Loss = nn.CrossEntropyLoss(ignore_index=-1, reduction="sum",
+                                        weight=torch.from_numpy(np.array([1, 1.5])).float())
         self.forwardLoss = nn.CrossEntropyLoss(ignore_index=-1, reduction="sum")
         self.bakwardLoss = nn.CrossEntropyLoss(ignore_index=-1, reduction="sum")
 
