@@ -72,7 +72,7 @@ class GGNNNER(nn.Module):
             # lm_bw_input = torch.cat((lm_bw_input, charout), 2)
 
         lm_input = out.view(-1, out.shape[1], 2, out.shape[2] // 2).permute(2, 0, 1, 3).contiguous()  # 分成双向的
-        lm_fw_input, lm_bw_input = lm_input[1], lm_input[0]
+        lm_fw_input, lm_bw_input = lm_input[0], lm_input[1]
 
         out = self.hiddenlinear(out)
         out = self.classification(out)
