@@ -193,6 +193,7 @@ class LinearTemplate(nn.Module):
 
 class AttentionTemplate(nn.Module):
     def __init__(self, input_dim):
+        super(AttentionTemplate, self).__init__()
         self.evidence = LinearTemplate(input_dim * 2, input_dim, activation="tanh")
         self.weight = LinearTemplate(input_dim, input_dim, activation="sigmoid")
 
