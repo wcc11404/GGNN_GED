@@ -191,6 +191,23 @@ class LinearTemplate(nn.Module):
         out = self.dropout(out)
         return out
 
+class AttentionTemplate(nn.Module):
+    def __init__(self, input_dim):
+        self.evidence = LinearTemplate(input_dim * 2, input_dim, activation="tanh")
+        self.weight = LinearTemplate(input_dim, input_dim, activation="sigmoid")
+
+        self.init_weight()
+
+    def init_weight(self):
+        pass
+
+    def forward(self, batchinput1, batchinput2):
+        out = torch.cat(batchinput1, batchinput2)
+        out = self.evidence(out)
+        weight = self.weight(out)
+        out = batchinput1 * weight + batchinput2 * (1-weight)
+        return out
+
 class GraphGateTemplate(nn.Module):
     def __init__(self, input_dim, n_edge_types, n_steps, dropout=0.0, residual=False,
                  layernorm=False, requires_grad=True):

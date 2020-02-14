@@ -1,6 +1,6 @@
 import torch
 from torch import nn
-from .Layers import EmbeddingTemplate, RnnTemplate, LinearTemplate, GraphGateTemplate
+from .Layers import EmbeddingTemplate, RnnTemplate, LinearTemplate, GraphGateTemplate, AttentionTemplate
 
 class GGNNNER(nn.Module):
     def __init__(self, args):
@@ -13,8 +13,8 @@ class GGNNNER(nn.Module):
         self.wordembedding = EmbeddingTemplate(args.word_vocabulary_size, args.word_embed_dim, args.embed_drop)
         self.gnn = GraphGateTemplate(args.word_embed_dim, args.edge_vocabulary_size, args.gnn_steps, args.gnn_drop,
                                      residual=False, layernorm=False)
-        # self.transform = LinearTemplate(args.word_embed_dim*2, args.word_embed_dim, activation="tanh")
-        self.rnn = RnnTemplate(args.rnn_type, args.batch_size, args.word_embed_dim*2, args.word_embed_dim, args.rnn_drop,
+        self.attention = AttentionTemplate(args.word_embed_dim)
+        self.rnn = RnnTemplate(args.rnn_type, args.batch_size, args.word_embed_dim, args.word_embed_dim, args.rnn_drop,
                                bidirectional=args.rnn_bidirectional, residual=False, layernorm=False)
 
         if args.char_embed_dim is not None and args.char_embed_dim > 0:
@@ -59,8 +59,7 @@ class GGNNNER(nn.Module):
 
         emb = self.wordembedding(batchinput)
         out = self.gnn(emb, graph_in, graph_out)
-        out = torch.cat((out, emb), 2)
-        # out = self.transform(out)
+        out = self.attention(emb, out)
         out, _ = self.rnn(out, batchlength)  # B S E
 
         if self.charembedding is not None:
@@ -86,8 +85,6 @@ class GGNNNER(nn.Module):
         return out, (lm_fw_output, lm_bw_output)
 
     def getLoss(self, input, length, extra_data, output, label, extra_label):
-        # output, _ = output
-        # return self.Loss(output.view(-1, 2), label.view(-1))
         if self.args.train_lm:
             return self.getLMLoss(output, extra_label)
 
