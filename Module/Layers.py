@@ -203,7 +203,7 @@ class AttentionTemplate(nn.Module):
         pass
 
     def forward(self, batchinput1, batchinput2):
-        out = torch.cat(batchinput1, batchinput2)
+        out = torch.cat((batchinput1, batchinput2), 2)
         out = self.evidence(out)
         weight = self.weight(out)
         out = batchinput1 * weight + batchinput2 * (1-weight)
