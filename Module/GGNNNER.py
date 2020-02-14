@@ -43,7 +43,7 @@ class GGNNNER(nn.Module):
 
         # 损失函数
         self.Loss = nn.CrossEntropyLoss(ignore_index=-1, reduction="sum")#,
-                                        #weight=torch.from_numpy(np.array([1, 1.5])).float())
+                                        #weight=torch.from_numpy(np.array([1, 1.2])).float())
         self.forwardLoss = nn.CrossEntropyLoss(ignore_index=-1, reduction="sum")
         self.bakwardLoss = nn.CrossEntropyLoss(ignore_index=-1, reduction="sum")
 
