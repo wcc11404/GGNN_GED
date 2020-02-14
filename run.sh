@@ -42,7 +42,7 @@ script_dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 # --max-epoch 12
 
 # 训练
-python $script_dir/main.py --gpu-id 2 --mode Train --arch GGNNNER \
+python $script_dir/main.py --gpu-id 0 --mode Train --arch GGNNNER \
  --char-embed-dim 0 --gnn-steps 1 --save-dir checkpoint/GGNN --load-dir checkpoint/LM_GGNN_step3 \
  --data-dir data/prepare/train.pkl --optimizer adadelta --lr 1 --evaluation f0.5 \
  --batch-size 32 --early-stop 8 --max-epoch 50 --lm-cost-weight 0.0

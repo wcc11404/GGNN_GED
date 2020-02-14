@@ -9,10 +9,11 @@ class GGNNNER(nn.Module):
         self.args = args
         self.lm_vocab_size = args.lm_vocab_size
         self.lm_cost_weight = args.lm_cost_weight
-
+        # , requires_grad=False if not args.train_lm else True
         self.wordembedding = EmbeddingTemplate(args.word_vocabulary_size, args.word_embed_dim, args.embed_drop)
         self.gnn = GraphGateTemplate(args.word_embed_dim, args.edge_vocabulary_size, args.gnn_steps, args.gnn_drop,
-                                     residual=False, layernorm=False, requires_grad=False if not args.train_lm else True)
+                                     residual=False, layernorm=False)
+        self.transform = LinearTemplate(args.word_embed_dim*2, args.word_embed_dim, activation="tanh")
         self.rnn = RnnTemplate(args.rnn_type, args.batch_size, args.word_embed_dim, args.word_embed_dim, args.rnn_drop,
                                bidirectional=args.rnn_bidirectional, residual=False, layernorm=False)
 
@@ -56,8 +57,10 @@ class GGNNNER(nn.Module):
     def forward(self, batchinput, batchlength, batchextradata):
         batchinput_char, batchlength_char, graph_in, graph_out = batchextradata
 
-        out = self.wordembedding(batchinput)
-        out = self.gnn(out, graph_in, graph_out)
+        emb = self.wordembedding(batchinput)
+        out = self.gnn(emb, graph_in, graph_out)
+        out = torch.cat((out, emb), 2)
+        out = self.transform(out)
         out, _ = self.rnn(out, batchlength)  # B S E
 
         if self.charembedding is not None:
