@@ -84,18 +84,9 @@ def train(args, model, Corpus):
 
             optimizer.zero_grad()
             out = model(train_x, train_length, extra_data)
-            loss = model.getLoss(train_x, train_length, extra_data, out, train_y, extra_label)
+            loss = model.getLoss(out, train_y, extra_label)
             loss.backward()
             optimizer.step()
-
-            #####
-            # i += 1
-            # if i % 500 == 0:
-            #     model.eval()
-            #     dev_loss, dev_p, dev_r, dev_f0_5 = evaluate(args, Corpus.devdataloader, model)
-            #     print("dev loss: {:.4f}".format(dev_loss))
-            #     model.train()
-
 
         # 每个epoch评估
         model.eval()
@@ -167,7 +158,7 @@ def evaluate(args, dataloader, model, mode="average"):
                 extra_label = [i.half(non_blocking=True) if i.dtype == torch.float else i for i in extra_label]
 
         out = model(train_x, train_length, extra_data)
-        loss += model.getLoss(train_x, train_length, extra_data, out, train_y, extra_label).item()
+        loss += model.getLoss(out, train_y, extra_label).item()
         out = out[0].cpu().detach().numpy() # 只有out[0]参与计算F值
         train_y = train_y.cpu().detach().numpy()
         train_length = train_length.cpu().detach().numpy()

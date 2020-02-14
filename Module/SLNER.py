@@ -75,7 +75,7 @@ class SLNER(nn.Module):
 
         return out, (lm_fw_output, lm_bw_output)
 
-    def getLoss(self, input, length, extra_data, output, label):
+    def getLoss(self, input, length, extra_data, output, label):##### 暂时没改
         xc, xcl = extra_data[0], extra_data[1]
         out, (lm_fw_out, lm_bw_out) = output
         loss = self.Loss(out.view(-1, 2), label.view(-1))

@@ -50,8 +50,7 @@ class BaseNER(nn.Module):
 
         return out, ()
 
-    def getLoss(self, input, length, extra_data, output, label):
-        #x, xl, xc, xcl = input
+    def getLoss(self, output, label, extra_label):
         output, _ = output
         return self.Loss(output.view(-1, 2), label.view(-1))
 

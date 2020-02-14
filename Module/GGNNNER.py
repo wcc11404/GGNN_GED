@@ -84,7 +84,7 @@ class GGNNNER(nn.Module):
 
         return out, (lm_fw_output, lm_bw_output)
 
-    def getLoss(self, input, length, extra_data, output, label, extra_label):
+    def getLoss(self, output, label, extra_label):
         if self.args.train_lm:
             return self.getLMLoss(output, extra_label)
 
