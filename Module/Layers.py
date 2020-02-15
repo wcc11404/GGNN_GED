@@ -123,7 +123,8 @@ class RnnTemplate(nn.Module):
 
         rnn_ouput, hidden = self.rnn(mask_input) #, self.hidden
 
-        rnn_ouput, _ = pad_packed_sequence(rnn_ouput, batch_first=False)
+        total_length = rnn_ouput.size(0)
+        rnn_ouput, _ = pad_packed_sequence(rnn_ouput, batch_first=False, total_length=total_length)
         rnn_ouput = rnn_ouput.permute(1, 0, 2).contiguous() # B * S * E
         hidden = hidden[0].permute(1, 0, 2).contiguous()
 
