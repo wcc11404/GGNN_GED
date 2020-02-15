@@ -6,9 +6,8 @@ import os
 from data.corpus import GedCorpus
 from myscripts.utils import train, test, load_args, load_checkpoint
 
-from Module.BaseNER import BaseNER
-from Module.SLNER import SLNER
-from Module.GGNNNER import GGNNNER
+from Module.NERModel import buildModel
+from Loss.NERLoss import buildLoss
 
 def merage_args(user_args, loadargs):
     loadargs["mode"] = user_args["mode"]
@@ -40,17 +39,13 @@ def main(args):
     # 初始化数据
     corpus = GedCorpus(args)
 
-    # TODO
-    # 初始化模型，后期会把optimizer初始化也放过来，解耦，而且load权重也会少加载优化器的部分权重！！！
-    if args.arch == "BaseNER":
-        model = BaseNER(args)
-    elif args.arch == "SLNER":
-        model = SLNER(args)
-    elif args.arch == "GGNNNER":
-        model = GGNNNER(args)
-    else:
-        raise ValueError("model arch parameter illegal : " + args.arch)
+    # 初始化模型
+    model = buildModel(args)
 
+    # 初始化损失函数
+    loss = buildLoss(args)
+
+    # 初始化优化器
     if args.optimizer.lower() == "adam":
         optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, betas=(0.9, 0.998), eps=1e-08,
                                      weight_decay=args.weight_decay)
@@ -67,16 +62,17 @@ def main(args):
         model.to("cuda")
         if args.use_fpp16:
             model.half()
-        if len(args.gpu_ids) > 1:
+        if len(args.gpu_ids) > 1:   # 设置多卡并行参数
             model = torch.nn.DataParallel(model, device_ids=args.gpu_ids)
+            loss = torch.nn.DataParallel(loss, device_ids=args.gpu_ids)
             optimizer = torch.nn.DataParallel(optimizer, device_ids=args.gpu_ids)
     else:
         model.to("cpu")
 
     if args.mode == "Train":
-        train(args, model, optimizer, corpus)
+        train(args, model, loss, optimizer, corpus)
     elif args.mode == "Test":
-        test(args, model, corpus)
+        test(args, model, loss, corpus)
 
 def setup_seed(seed):
     np.random.seed(seed)
@@ -97,6 +93,7 @@ if __name__ == "__main__":
     parser.add_argument("--num-workers", type=int, default=1)
 
     parser.add_argument("--arch", default="GGNNNER")
+    parser.add_argument("--criterion", default="BaseLoss")
     parser.add_argument("--train-lm", action='store_true', default=False)
     parser.add_argument("--use-lower", action='store_true', default=True)
     parser.add_argument("--word-embed-dim", type=int, default=300)

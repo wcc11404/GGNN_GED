@@ -37,7 +37,7 @@ def load_args(dir):
         dic = json.load(f)
     return dic
 
-def train(args, model, optimizer, Corpus):
+def train(args, model, loss, optimizer, Corpus):
     best_evaluation = 0 if args.evaluation == "f0.5" else 999999999
     max_index = 0
     early_stop = 0
@@ -77,11 +77,20 @@ def train(args, model, optimizer, Corpus):
                     extra_data = [i.half(non_blocking=True) if i.dtype == torch.float else i for i in extra_data]
                     extra_label = [i.half(non_blocking=True) if i.dtype == torch.float else i for i in extra_label]
 
-            optimizer.zero_grad()
+            if len(args.gpu_ids) > 1:
+                optimizer.module.zero_grad()
+            else:
+                optimizer.zero_grad()
             out = model(train_x, train_length, extra_data)
-            loss = model.module().getLoss(out, train_y, extra_label)
-            loss.mean().backward()
-            optimizer.module.step()
+            loss_value = loss(out, train_y, extra_label)
+            if len(args.gpu_ids) > 1:
+                loss_value.mean().backward()
+            else:
+                loss_value.backward()
+            if len(args.gpu_ids) > 1:
+                optimizer.module.step()
+            else:
+                optimizer.zero_grad()
 
         # 每个epoch评估
         model.eval()
@@ -124,20 +133,20 @@ def train(args, model, optimizer, Corpus):
 
     print("epoch {} get the best ".format(max_index)+args.evaluation+" : {}".format(best_evaluation))
 
-def test(args, model, Corpus):
+def test(args, model, loss, Corpus):
     model.eval()
     #_, train_p, train_r, train_f = evaluate(args, Corpus.traindataloader, myscripts, Loss=None)
-    dev_loss, dev_p, dev_r, dev_f = evaluate(args, Corpus.devdataloader, model)
+    dev_loss, dev_p, dev_r, dev_f = evaluate(args, Corpus.devdataloader, model, loss)
     print("Dev Loss : {:.4f}\tDev Precision : {:.4f}\tDev Recall : {:.4f}\tDev F0.5 : {:.4f}"
           .format(dev_loss, dev_p, dev_r, dev_f))
 
     if Corpus.testdataloader is not None:
-        test_loss, test_p, test_r, test_f = evaluate(args, Corpus.testdataloader, model)
+        test_loss, test_p, test_r, test_f = evaluate(args, Corpus.testdataloader, model, loss)
         print("Test Loss : {:.4f}\tTest Precision : {:.4f}\tTest Recall : {:.4f}\tTest F0.5 : {:.4f}"
               .format(test_loss, test_p, test_r, test_f))
 
-def evaluate(args, dataloader, model, mode="average"):
-    loss = 0
+def evaluate(args, dataloader, model, loss, mode="average"):
+    loss_value = 0
     length = 0
     predict = []
     groundtruth = []
@@ -153,7 +162,7 @@ def evaluate(args, dataloader, model, mode="average"):
                 extra_label = [i.half(non_blocking=True) if i.dtype == torch.float else i for i in extra_label]
 
         out = model(train_x, train_length, extra_data)
-        loss += model.getLoss(out, train_y, extra_label).item()
+        loss_value += loss(out, train_y, extra_label).item()
         out = out[0].cpu().detach().numpy() # 只有out[0]参与计算F值
         train_y = train_y.cpu().detach().numpy()
         train_length = train_length.cpu().detach().numpy()
@@ -165,4 +174,4 @@ def evaluate(args, dataloader, model, mode="average"):
 
     p, r, f = 0, 0, 0
     p, r, f, _ = precision_recall_fscore_support(groundtruth, predict, 0.5, average='binary')
-    return loss / length if mode == "average" else loss, p, r, f
+    return loss_value / length if mode == "average" else loss_value, p, r, f

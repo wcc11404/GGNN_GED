@@ -119,10 +119,11 @@ class RnnTemplate(nn.Module):
         batchinput = batchinput[itemIdx]
 
         batchinput = batchinput.permute(1, 0, 2).contiguous() # S * B * E
+        # 多卡并行时，下方pad_packed函数需要在每个gpu中调用，调用时会分别计算最大长度，故而直接指定
         total_length = batchinput.size(0)
         mask_input = pack_padded_sequence(batchinput, batchlength, batch_first=False)
 
-        rnn_ouput, hidden = self.rnn(mask_input) #, self.hidden
+        rnn_ouput, hidden = self.rnn(mask_input)
 
         rnn_ouput, _ = pad_packed_sequence(rnn_ouput, batch_first=False, total_length=total_length)
         rnn_ouput = rnn_ouput.permute(1, 0, 2).contiguous() # B * S * E
