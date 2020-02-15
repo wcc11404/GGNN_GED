@@ -5,21 +5,17 @@ class SLLoss(nn.Module):
         super(SLLoss, self).__init__()
         self.lm_cost_weight = args.lm_cost_weight
         self.lm_vocab_size = args.lm_vocab_size
+        if self.lm_vocab_size == -1 or self.lm_vocab_size > args.word_vocabulary_size:
+            self.lm_vocab_size = args.word_vocabulary_size
 
         self.Loss = nn.CrossEntropyLoss(ignore_index=-1, reduction="sum")  # ,
             # weight=torch.from_numpy(np.array([1, 1.2])).float())
         self.forwardLoss = nn.CrossEntropyLoss(ignore_index=-1, reduction="sum")
         self.bakwardLoss = nn.CrossEntropyLoss(ignore_index=-1, reduction="sum")
 
-    def forward(self, output, target):#, forwardlabel
-        #out, lm_fw_out, lm_bw_out, label, extra_label
-        # output, (label, extra_label) = inputs
+    def forward(self, output, label, extra_label):
         print("output:"+str(len(output)))
-        print("target:" + str(len(target)))
-        # print("lm_bw_out:" + str(len(lm_bw_out)))
-        # print("label:" + str(len(label)))
-        # print("extra_label:" + str(len(extra_label[0])))
-        label, extra_label = target
+        print("label:" + str(len(label)))
         out, lm_fw_out, lm_bw_out = output
         loss = self.Loss(out.view(-1, 2), label.view(-1))
         forwardlabel, bakwardlabel = extra_label

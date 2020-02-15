@@ -4,6 +4,8 @@ class LMLoss(nn.Module):
     def __init__(self, args):
         super(LMLoss, self).__init__()
         self.lm_vocab_size = args.lm_vocab_size
+        if self.lm_vocab_size == -1 or self.lm_vocab_size > args.word_vocabulary_size:
+            self.lm_vocab_size = args.word_vocabulary_size
 
         self.forwardLoss = nn.CrossEntropyLoss(ignore_index=-1, reduction="sum")
         self.bakwardLoss = nn.CrossEntropyLoss(ignore_index=-1, reduction="sum")
