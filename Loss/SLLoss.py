@@ -11,15 +11,16 @@ class SLLoss(nn.Module):
         self.forwardLoss = nn.CrossEntropyLoss(ignore_index=-1, reduction="sum")
         self.bakwardLoss = nn.CrossEntropyLoss(ignore_index=-1, reduction="sum")
 
-    def forward(self, out, lm_fw_out, lm_bw_out, label, extra_label):#, forwardlabel
+    def forward(self, output, target):#, forwardlabel
+        #out, lm_fw_out, lm_bw_out, label, extra_label
         # output, (label, extra_label) = inputs
-        print("out:"+str(len(out)))
-        print("lm_fw_out:" + str(len(lm_fw_out)))
-        print("lm_bw_out:" + str(len(lm_bw_out)))
-        print("label:" + str(len(label)))
-        print("extra_label:" + str(len(extra_label[0])))
-
-        # out, (lm_fw_out, lm_bw_out) = output
+        print("output:"+str(len(output)))
+        print("target:" + str(len(target)))
+        # print("lm_bw_out:" + str(len(lm_bw_out)))
+        # print("label:" + str(len(label)))
+        # print("extra_label:" + str(len(extra_label[0])))
+        label, extra_label = target
+        out, lm_fw_out, lm_bw_out = output
         loss = self.Loss(out.view(-1, 2), label.view(-1))
         forwardlabel, bakwardlabel = extra_label
         loss += self.lm_cost_weight * self.forwardLoss(lm_fw_out.view(-1, self.lm_vocab_size), forwardlabel.view(-1))

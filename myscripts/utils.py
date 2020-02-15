@@ -81,7 +81,7 @@ def train(args, model, loss, optimizer, Corpus):
             out = model(train_x, train_length, extra_data)
             print(len(out))
             print(len(out[0]))
-            loss_value = loss(out, label=train_y, extra_label=extra_label)
+            loss_value = loss(out, train_y, extra_label)
             # if len(args.gpu_ids) > 1:
             #     loss_value.mean().backward()
             # else:
