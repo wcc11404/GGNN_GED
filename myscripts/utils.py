@@ -79,9 +79,9 @@ def train(args, model, optimizer, Corpus):
 
             optimizer.zero_grad()
             out = model(train_x, train_length, extra_data)
-            loss = model.getLoss(out, train_y, extra_label)
+            loss = model.module().getLoss(out, train_y, extra_label)
             loss.mean().backward()
-            optimizer.step()
+            optimizer.module.step()
 
         # 每个epoch评估
         model.eval()
