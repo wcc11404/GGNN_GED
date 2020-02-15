@@ -77,23 +77,16 @@ def train(args, model, loss, optimizer, Corpus):
                     extra_data = [i.half(non_blocking=True) if i.dtype == torch.float else i for i in extra_data]
                     extra_label = [i.half(non_blocking=True) if i.dtype == torch.float else i for i in extra_label]
 
-            if len(args.gpu_ids) > 1:
-                optimizer.module.zero_grad()
-            else:
-                optimizer.zero_grad()
+            optimizer.zero_grad()
             out = model(train_x, train_length, extra_data)
             loss_value = loss(out, train_y, extra_label)
-            if len(args.gpu_ids) > 1:
-                loss_value.mean().backward()
-            else:
-                loss_value.backward()
-            if len(args.gpu_ids) > 1:
-                optimizer.module.step()
-            else:
-                optimizer.zero_grad()
+            # if len(args.gpu_ids) > 1:
+            #     loss_value.mean().backward()
+            # else:
+            loss_value.backward()
+            optimizer.zero_grad()
 
         # 每个epoch评估
-        model.eval()
         # train_loss, train_p, train_r, train_f0_5 = evaluate(args, Corpus.traindataloader, model)
         dev_loss, dev_p, dev_r, dev_f0_5 = evaluate(args, Corpus.devdataloader, model, loss)
         log = {"epoch": epoch,
@@ -134,7 +127,6 @@ def train(args, model, loss, optimizer, Corpus):
     print("epoch {} get the best ".format(max_index)+args.evaluation+" : {}".format(best_evaluation))
 
 def test(args, model, loss, Corpus):
-    model.eval()
     #_, train_p, train_r, train_f = evaluate(args, Corpus.traindataloader, myscripts, Loss=None)
     dev_loss, dev_p, dev_r, dev_f = evaluate(args, Corpus.devdataloader, model, loss)
     print("Dev Loss : {:.4f}\tDev Precision : {:.4f}\tDev Recall : {:.4f}\tDev F0.5 : {:.4f}"
@@ -150,6 +142,7 @@ def evaluate(args, dataloader, model, loss, mode="average"):
     length = 0
     predict = []
     groundtruth = []
+    model.eval()
     for (train_x, train_y, train_length, extra_data, extra_label) in dataloader:
         if not args.use_cpu:
             train_x = train_x.cuda(non_blocking=True)
@@ -162,10 +155,10 @@ def evaluate(args, dataloader, model, loss, mode="average"):
                 extra_label = [i.half(non_blocking=True) if i.dtype == torch.float else i for i in extra_label]
 
         out = model(train_x, train_length, extra_data)
-        if len(args.gpu_ids) > 1:
-            temp = loss(out, train_y, extra_label).mean().item()
-        else:
-            temp = loss(out, train_y, extra_label).item()
+        # if len(args.gpu_ids) > 1:
+        #     temp = loss(out, train_y, extra_label).mean().item()
+        # else:
+        temp = loss(out, train_y, extra_label).item()
         loss_value += temp
         out = out[0].cpu().detach().numpy() # 只有out[0]参与计算F值
         train_y = train_y.cpu().detach().numpy()

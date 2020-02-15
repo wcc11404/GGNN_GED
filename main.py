@@ -2,9 +2,12 @@ import argparse
 import numpy as np
 import torch
 import os
+from torch.nn.parallel import DistributedDataParallel as DDP
+import torch.distributed as dist
 
 from data.corpus import GedCorpus
 from myscripts.utils import train, test, load_args, load_checkpoint
+from myscripts.parallel import DataParallelModel, DataParallelCriterion
 
 from Module.NERModel import buildModel
 from Loss.NERLoss import buildLoss
@@ -15,6 +18,13 @@ def merage_args(user_args, loadargs):
     loadargs["use_cpu"] = user_args["use_cpu"]
     loadargs["gpu_ids"] = user_args["gpu_ids"]
     return loadargs
+
+def setup_ddp(rank, world_size=1, backend="nccl"):
+    os.environ['MASTER_ADDR'] = 'localhost'
+    os.environ['MASTER_PORT'] = '12355'
+
+    # initialize the process group
+    dist.init_process_group(backend, rank=rank, world_size=world_size)
 
 def main(args):
     # 预处理程序参数
@@ -63,9 +73,8 @@ def main(args):
         if args.use_fpp16:
             model.half()
         if len(args.gpu_ids) > 1:   # 设置多卡并行参数
-            model = torch.nn.DataParallel(model, device_ids=args.gpu_ids)
-            loss = torch.nn.DataParallel(loss, device_ids=args.gpu_ids)
-            optimizer = torch.nn.DataParallel(optimizer, device_ids=args.gpu_ids)
+            model = DataParallelModel(model, device_ids=args.gpu_ids)
+            loss = DataParallelCriterion(loss, device_ids=args.gpu_ids)
     else:
         model.to("cpu")
 
