@@ -137,6 +137,7 @@ def _criterion_parallel_apply(modules, inputs, targets, kwargs_tup=None, devices
         try:
             with torch.cuda.device(device):
                 # output = module(*(input + target), **kwargs)
+                # 实在搞不懂
                 output = module(input, target[0], target[1])
             with lock:
                 results[i] = output

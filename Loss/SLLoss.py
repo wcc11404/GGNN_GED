@@ -15,7 +15,6 @@ class SLLoss(nn.Module):
 
     def forward(self, output, label, extra_label):
         out, (lm_fw_out, lm_bw_out) = output
-        # label, (forwardlabel, bakwardlabel) = target
         forwardlabel, bakwardlabel = extra_label
         loss = self.Loss(out.view(-1, 2), label.view(-1))
         loss += self.lm_cost_weight * self.forwardLoss(lm_fw_out.view(-1, self.lm_vocab_size), forwardlabel.view(-1))

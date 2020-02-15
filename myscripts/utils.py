@@ -153,7 +153,7 @@ def evaluate(args, dataloader, model, loss, mode="average"):
                 extra_label = [i.half(non_blocking=True) if i.dtype == torch.float else i for i in extra_label]
 
         out = model(train_x, train_length, extra_data)
-        temp = loss(out, (train_y, extra_label)).item()
+        temp = loss(out, train_y, extra_label).item()
         loss_value += temp
         out = out[0].cpu().detach().numpy() # 只有out[0]参与计算F值
         train_y = train_y.cpu().detach().numpy()
