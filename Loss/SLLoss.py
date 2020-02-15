@@ -14,10 +14,10 @@ class SLLoss(nn.Module):
     def forward(self, out, lm_fw_out, lm_bw_out, label, forwardlabel):
         # output, (label, extra_label) = inputs
         print("out:"+str(len(out)))
-        print("out:" + str(len(lm_fw_out)))
-        print("out:" + str(len(lm_bw_out)))
-        print("out:" + str(len(label)))
-        print("out:" + str(len(forwardlabel)))
+        print("lm_fw_out:" + str(len(lm_fw_out)))
+        print("lm_bw_out:" + str(len(lm_bw_out)))
+        print("label:" + str(len(label)))
+        print("forwardlabel:" + str(len(forwardlabel)))
 
         # out, (lm_fw_out, lm_bw_out) = output
         loss = self.Loss(out.view(-1, 2), label.view(-1))
