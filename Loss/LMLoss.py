@@ -12,7 +12,7 @@ class LMLoss(nn.Module):
 
     def forward(self, output, target):
         out, (lm_fw_out, lm_bw_out) = output
-        label, (forwardlabel, bakwardlabel) = target
+        (label, (forwardlabel, bakwardlabel)) = target
         loss = self.forwardLoss(lm_fw_out.view(-1, self.lm_vocab_size), forwardlabel.view(-1))
         loss += self.bakwardLoss(lm_bw_out.view(-1, self.lm_vocab_size), bakwardlabel.view(-1))
         return loss

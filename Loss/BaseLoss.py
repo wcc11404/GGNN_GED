@@ -7,6 +7,6 @@ class BaseLoss(nn.Module):
 
     def forward(self, output, target):
         out, _ = output
-        label, _ = target
+        (label, _) = target
         loss = self.Loss(out.view(-1, 2), label.view(-1))
         return loss
