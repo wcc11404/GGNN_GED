@@ -79,7 +79,7 @@ def train(args, model, loss, optimizer, Corpus):
 
             optimizer.zero_grad()
             out = model(train_x, train_length, extra_data)
-            loss_value = loss(out, (train_y, extra_label))
+            loss_value = loss(out, train_y, extra_label)
             loss_value.backward()
             optimizer.zero_grad()
 
