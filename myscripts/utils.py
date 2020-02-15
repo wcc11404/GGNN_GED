@@ -79,8 +79,8 @@ def train(args, model, loss, optimizer, Corpus):
 
             optimizer.zero_grad()
             out = model(train_x, train_length, extra_data)
-            print(len(out))
-            print(len(out[0]))
+            # print(len(out))
+            # print(len(out[0]))
             loss_value = loss(out, train_y, extra_label)
             # if len(args.gpu_ids) > 1:
             #     loss_value.mean().backward()
