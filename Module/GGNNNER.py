@@ -84,7 +84,7 @@ class GGNNNER(nn.Module):
         lm_fw_output = self.fw_lm_softmax(lm_fw_output)
         lm_bw_output = self.bw_lm_softmax(lm_bw_output)
 
-        return out, (lm_fw_output, lm_bw_output)
+        return (out, lm_fw_output, lm_bw_output)
 
     # def getLoss(self, output, label, extra_label):
     #     if self.args.train_lm:
