@@ -79,7 +79,7 @@ def train(args, model, loss, optimizer, Corpus):
 
             optimizer.zero_grad()
             out = model(train_x, train_length, extra_data)
-            loss_value = loss(out, (train_y, extra_label))
+            loss_value = loss(out, train_y, extra_label)
             # if len(args.gpu_ids) > 1:
             #     loss_value.mean().backward()
             # else:
@@ -158,7 +158,7 @@ def evaluate(args, dataloader, model, loss, mode="average"):
         # if len(args.gpu_ids) > 1:
         #     temp = loss(out, train_y, extra_label).mean().item()
         # else:
-        temp = loss(out, (train_y, extra_label)).item()
+        temp = loss(out, train_y, extra_label).item()
         loss_value += temp
         out = out[0].cpu().detach().numpy() # 只有out[0]参与计算F值
         train_y = train_y.cpu().detach().numpy()
