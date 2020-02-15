@@ -37,16 +37,11 @@ def load_args(dir):
         dic = json.load(f)
     return dic
 
-def train(args, model, Corpus):
+def train(args, model, optimizer, Corpus):
     best_evaluation = 0 if args.evaluation == "f0.5" else 999999999
     max_index = 0
     early_stop = 0
     summary = []
-    if args.optimizer.lower() == "adam":
-        optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, betas=(0.9, 0.998), eps=1e-08,
-                                     weight_decay=args.weight_decay)
-    elif args.optimizer.lower() == "adadelta":
-        optimizer = torch.optim.Adadelta(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
 
     if args.loginfor:
         print(model)
@@ -61,7 +56,7 @@ def train(args, model, Corpus):
 
     for epoch in range(1, args.max_epoch + 1):
         print("epoch {} training".format(epoch))
-        i=-1
+
         # 训练
         model.train()
         #清理GPU缓存？？
@@ -85,7 +80,7 @@ def train(args, model, Corpus):
             optimizer.zero_grad()
             out = model(train_x, train_length, extra_data)
             loss = model.getLoss(out, train_y, extra_label)
-            loss.backward()
+            loss.mean().backward()
             optimizer.step()
 
         # 每个epoch评估
