@@ -11,7 +11,8 @@ class SLLoss(nn.Module):
         self.forwardLoss = nn.CrossEntropyLoss(ignore_index=-1, reduction="sum")
         self.bakwardLoss = nn.CrossEntropyLoss(ignore_index=-1, reduction="sum")
 
-    def forward(self, output, label, extra_label):
+    def forward(self, output, target):
+        label, extra_label = target
         out, (lm_fw_out, lm_bw_out) = output
         loss = self.Loss(out.view(-1, 2), label.view(-1))
         forwardlabel, bakwardlabel = extra_label

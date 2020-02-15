@@ -5,7 +5,8 @@ class BaseLoss(nn.Module):
         super(BaseLoss, self).__init__()
         self.Loss = nn.CrossEntropyLoss(ignore_index=-1, reduction="sum")
 
-    def forward(self, output, label, extra_label):
+    def forward(self, output, target):
+        label, _ = target
         out, _ = output
         loss = self.Loss(out.view(-1, 2), label.view(-1))
         return loss
