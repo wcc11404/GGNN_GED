@@ -8,7 +8,7 @@ class LMLoss(nn.Module):
         self.forwardLoss = nn.CrossEntropyLoss(ignore_index=-1, reduction="sum")
         self.bakwardLoss = nn.CrossEntropyLoss(ignore_index=-1, reduction="sum")
 
-    def forward(self, output, target):
+    def forward(self, output, target, **kwargs):
         _, extra_label = target
         out, (lm_fw_out, lm_bw_out) = output
         forwardlabel, bakwardlabel = extra_label
