@@ -95,7 +95,7 @@ def train(args, model, loss, optimizer, Corpus):
         # 每个epoch评估
         model.eval()
         # train_loss, train_p, train_r, train_f0_5 = evaluate(args, Corpus.traindataloader, model)
-        dev_loss, dev_p, dev_r, dev_f0_5 = evaluate(args, Corpus.devdataloader, model)
+        dev_loss, dev_p, dev_r, dev_f0_5 = evaluate(args, Corpus.devdataloader, model, loss)
         log = {"epoch": epoch,
                "dev_loss": dev_loss,
                "dev_p": dev_p,
