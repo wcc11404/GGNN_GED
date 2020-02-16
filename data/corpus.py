@@ -163,7 +163,7 @@ class GedCorpus:
         if args.use_ddp:
             trainsampler = DistributedSampler(self.traindataset)
             self.traindataloader = DataLoader(dataset=self.traindataset, batch_size=args.batch_size,# * len(args.gpu_ids),
-                                              shuffle=True, collate_fn=collate_fn, num_workers=args.num_workers,
+                                              shuffle=False, collate_fn=collate_fn, num_workers=args.num_workers,
                                               sampler=trainsampler)
         else:
             self.traindataloader = DataLoader(dataset=self.traindataset, batch_size=args.batch_size ,#* len(args.gpu_ids),
