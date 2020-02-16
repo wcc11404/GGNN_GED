@@ -57,6 +57,15 @@ def train(args, model, loss, optimizer, Corpus):
     for epoch in range(1, args.max_epoch + 1):
         print("epoch {} training".format(epoch))
 
+        dev_loss, dev_p, dev_r, dev_f0_5 = evaluate(args, Corpus.devdataloader, model, loss)
+        log = {"epoch": epoch,
+               "dev_loss": dev_loss,
+               "dev_p": dev_p,
+               "dev_r": dev_r,
+               "dev_f0.5": dev_f0_5
+               }
+        print("epoch {}  dev loss: {:.4f}  dev p: {:.4f}  dev r: {:.4f}  dev f0.5: {:.4f}"
+              .format(log["epoch"], log["dev_loss"], log["dev_p"], log["dev_r"], log["dev_f0.5"]))
         # 训练
         model.train()
         #清理GPU缓存？？
@@ -156,7 +165,7 @@ def evaluate(args, dataloader, model, loss, mode="average"):
         loss_value += loss(out, train_y, extra_label).item()
         if len(args.gpu_ids) > 1:
             out = out[0]
-        out = out[0].cpu().detach().numpy() # 只有out[0]参与计算F值
+        out = out[0].cpu().detach().numpy() # 只有out[0],模型的第一个输出，参与计算F值
         train_y = train_y.cpu().detach().numpy()
         train_length = train_length.cpu().detach().numpy()
         for o, y, l in zip(out, train_y, train_length):

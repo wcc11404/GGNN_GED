@@ -41,12 +41,6 @@ class GGNNNER(nn.Module):
         self.fw_lm_softmax = LinearTemplate(args.lm_hidden_dim, self.lm_vocab_size, activation=None)
         self.bw_lm_softmax = LinearTemplate(args.lm_hidden_dim, self.lm_vocab_size, activation=None)
 
-        # 损失函数
-        # self.Loss = nn.CrossEntropyLoss(ignore_index=-1, reduction="sum")#,
-        #                                 #weight=torch.from_numpy(np.array([1, 1.2])).float())
-        # self.forwardLoss = nn.CrossEntropyLoss(ignore_index=-1, reduction="sum")
-        # self.bakwardLoss = nn.CrossEntropyLoss(ignore_index=-1, reduction="sum")
-
         # 加载词表权重
         self.load_embedding(args)
 
@@ -85,25 +79,3 @@ class GGNNNER(nn.Module):
         lm_bw_output = self.bw_lm_softmax(lm_bw_output)
 
         return out, (lm_fw_output, lm_bw_output)
-
-    # def getLoss(self, output, label, extra_label):
-    #     if self.args.train_lm:
-    #         return self.getLMLoss(output, extra_label)
-    #
-    #     out, (lm_fw_out, lm_bw_out) = output
-    #     loss = self.Loss(out.view(-1, 2), label.view(-1))
-    #     loss += self.lm_cost_weight * self.getLMLoss(output, extra_label)
-    #
-    #     return loss
-    #
-    # def getLMLoss(self, output, extra_label):
-    #     loss = 0
-    #     out, (lm_fw_out, lm_bw_out) = output
-    #     forwardlabel, bakwardlabel = extra_label
-    #     # fw_x = input[:, 1:]
-    #     # fw_x = torch.cat((fw_x, torch.zeros(fw_x.shape[0], 1, dtype=torch.long, device=fw_x.device)), dim=-1)
-    #     # bw_x = input[:, :-1]
-    #     # bw_x = torch.cat((torch.zeros(bw_x.shape[0], 1, dtype=torch.long, device=bw_x.device), bw_x), dim=-1)
-    #     loss += self.forwardLoss(lm_fw_out.view(-1, self.lm_vocab_size), forwardlabel.view(-1))
-    #     loss += self.bakwardLoss(lm_bw_out.view(-1, self.lm_vocab_size), bakwardlabel.view(-1))
-    #     return loss

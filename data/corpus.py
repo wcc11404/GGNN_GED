@@ -3,6 +3,7 @@ from torch.utils.data import Dataset, DataLoader
 import torch
 import pickle
 
+
 def collate_fn(train_data):
     def pad(data, max_length, paditem=0):
         re = []

@@ -20,11 +20,12 @@ def merage_args(user_args, loadargs):
     return loadargs
 
 def setup_ddp(rank, world_size=1, backend="nccl"):
-    os.environ['MASTER_ADDR'] = 'localhost'
-    os.environ['MASTER_PORT'] = '12355'
+    # os.environ['MASTER_ADDR'] = 'localhost'
+    # os.environ['MASTER_PORT'] = '12355'
 
     # initialize the process group
-    dist.init_process_group(backend, rank=rank, world_size=world_size)
+    # dist.init_process_group(backend, rank=rank, world_size=world_size)
+    dist.init_process_group(backend,rank=rank)
 
 def main(args):
     # 预处理程序参数
@@ -67,12 +68,19 @@ def main(args):
         load_checkpoint(model, args.load_dir)
 
     # 设置gpu模式
-    if torch.cuda.is_available() and not args.use_cpu:
+    if not args.use_cpu and args.use_ddp:
+        setup_ddp(args.local_rank, args.backend)
+        device = torch.device('cuda', args.local_rank)
+        torch.cuda.set_device(args.local_rank)
+        model = model.to(device)
+        model = DDP(model, device_ids=[args.local_rank], output_device=args.local_rank)
+    elif not args.use_cpu and torch.cuda.is_available() :
         torch.cuda.set_device(args.gpu_ids[0])
         model.to("cuda")
         if args.use_fpp16:
             model.half()
-        if len(args.gpu_ids) > 1:   # 设置多卡并行参数
+
+        if len(args.gpu_ids) > 1:   # 设置DataParallel多卡并行参数
             model = DataParallelModel(model, device_ids=args.gpu_ids)
             loss = DataParallelCriterion(loss, device_ids=args.gpu_ids)
     else:
@@ -132,6 +140,11 @@ if __name__ == "__main__":
     parser.add_argument("--weight-decay", type=float, default=0.0001)
     parser.add_argument("--optimizer", default="adadelta")
     parser.add_argument("--evaluation", default="loss") # 评价指标 loss 和 f0.5 ;模型保存，earlystop等指标的依据
+
+    # DDP
+    parser.add_argument("--use-ddp", action='store_true', default=False)
+    parser.add_argument("--local_rank", type=int) # 貌似是其他python程序自动传参，对应不同的gpu号或者不同机器
+    parser.add_argument("--backend", default="nccl")
 
     args = parser.parse_args()
     main(args)
