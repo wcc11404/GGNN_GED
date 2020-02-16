@@ -24,6 +24,7 @@ def log_information(args, str, force=False):
             print(str)
 
 def update_best_checkpoint(save_dir, epoch):
+    save_dir = os.path.abspath(save_dir)
     with open(save_dir+"/save.log",'w') as f:
         f.write(save_dir+"/checkpoint"+str(epoch)+".pt")
 
