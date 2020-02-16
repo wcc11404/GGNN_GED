@@ -62,7 +62,6 @@ def train(args, model, loss, optimizer, Corpus):
         print("epoch {} training".format(epoch))
 
         # 训练
-
         model.train()
         #清理GPU碎片空间？？
         if not args.use_cpu:
