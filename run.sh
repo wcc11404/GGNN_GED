@@ -42,10 +42,18 @@ script_dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 # --max-epoch 12
 
 # fine-tune
-python $script_dir/main.py --gpu-id 3 --mode Train --arch GGNNNER --criterion SLLoss \
+#python $script_dir/main.py --gpu-id 3 --mode Train --arch GGNNNER --criterion SLLoss \
+# --char-embed-dim 0 --gnn-steps 1 --save-dir checkpoint/GGNN_new --load-dir checkpoint/LM_GGNN_new \
+# --data-dir data/prepare/train.pkl --optimizer adadelta --lr 1 --evaluation f0.5 \
+# --batch-size 32 --early-stop 8 --max-epoch 50 --lm-cost-weight 0.1
+
+# ddp
+python -m torch.distributed.launch --nproc_per_node=4 --nnodes=2 --node_rank=0 \
+ --master_addr="192.168.1.1"  --master_port=1234 \
+ $script_dir/main.py --gpu-id 3 4 --mode Train --arch GGNNNER --criterion SLLoss \
  --char-embed-dim 0 --gnn-steps 1 --save-dir checkpoint/GGNN_new --load-dir checkpoint/LM_GGNN_new \
  --data-dir data/prepare/train.pkl --optimizer adadelta --lr 1 --evaluation f0.5 \
- --batch-size 32 --early-stop 8 --max-epoch 50 --lm-cost-weight 0.1
+ --batch-size 16 --early-stop 8 --max-epoch 50 --lm-cost-weight 0.1
 
 # 训练
 #python $script_dir/main.py --gpu-id 4 --mode Train --arch GGNNNER --w2v-dir data/process/w2v_300d.txt \
