@@ -19,20 +19,7 @@ def merage_args(user_args, loadargs):
     loadargs["gpu_ids"] = user_args["gpu_ids"]
     return loadargs
 
-def setup_ddp(rank, world_size=1, backend="nccl"):
-    # os.environ['MASTER_ADDR'] = 'localhost'
-    # os.environ['MASTER_PORT'] = '12355'
-
-    # initialize the process group
-    # dist.init_process_group(backend, rank=rank, world_size=world_size)
-    dist.init_process_group(backend=backend, init_method='tcp://localhost:23456', rank=rank, world_size=world_size)
-
-def temp_main(rank,args):
-    args.local_rank = rank
-    main(args)
-
-def main(args):
-    # 预处理程序参数
+def check_args(args):
     if args.save_dir is not None and os.path.exists(args.save_dir):
         args.save_dir = os.path.abspath(args.save_dir)
     if args.load_dir is not None and os.path.exists(args.load_dir):
@@ -43,9 +30,26 @@ def main(args):
         merageargs = merage_args(args.__dict__, loadargs)
         args.__dict__ = merageargs
 
+    if not args.use_cpu:
+        if args.gpu_ids is None:
+            raise ValueError("gpu ids value error")
+        args.gpu_ids = [int(i) for i in args.gpu_ids]
+    return args
 
-    if not args.use_cpu and args.use_ddp:
-        setup_ddp(args.local_rank, world_size=len(args.gpu_ids), backend=args.backend)
+def setup_ddp(rank, world_size=1, backend="nccl"):
+    # os.environ['MASTER_ADDR'] = 'localhost'
+    # os.environ['MASTER_PORT'] = '12355'
+
+    dist.init_process_group(backend=backend, init_method='tcp://localhost:23456', rank=rank, world_size=world_size)
+
+def cleanddp():
+    dist.destroy_process_group()
+
+def ddp_main(rank, args):
+    args.local_rank = rank
+    main(args)
+
+def main(args):
     # 设置随机种子
     if args.random_seed is not None:
         setup_seed(args.random_seed)
@@ -55,6 +59,14 @@ def main(args):
 
     # 初始化模型
     model = buildModel(args)
+
+    # 设置ddp
+    if not args.use_cpu and args.use_ddp:
+        setup_ddp(args.local_rank, world_size=len(args.gpu_ids), backend=args.ddp_backend)
+        device = torch.device('cuda', args.gpu_ids[args.local_rank])
+        torch.cuda.set_device(device)
+        model = model.to(device)
+        model = DDP(model, device_ids=[args.gpu_ids[args.local_rank]])
 
     # 初始化损失函数
     loss = buildLoss(args)
@@ -70,20 +82,14 @@ def main(args):
     if args.load_dir is not None:
         load_checkpoint(model, args.load_dir)
 
-    # 设置gpu模式
-    if not args.use_cpu and args.use_ddp:
-        print(args.gpu_ids[args.local_rank])
-        device = torch.device('cuda', args.gpu_ids[args.local_rank])
-        torch.cuda.set_device(device)
-        model = model.to(device)
-        model = DDP(model, device_ids=[args.gpu_ids[args.local_rank]])#, device_ids=[args.local_rank], output_device=args.local_rank
-    elif not args.use_cpu and torch.cuda.is_available():
+    # 设置gpu和dp
+    if not args.use_cpu and not args.use_ddp and torch.cuda.is_available():
         torch.cuda.set_device(args.gpu_ids[0])
         model.to("cuda")
         if args.use_fpp16:
             model.half()
 
-        if len(args.gpu_ids) > 1:   # 设置DataParallel多卡并行参数
+        if len(args.gpu_ids) > 1:  # 设置DataParallel多卡并行参数
             args.use_dp = True
             model = DataParallelModel(model, device_ids=args.gpu_ids)
             loss = DataParallelCriterion(loss, device_ids=args.gpu_ids)
@@ -101,7 +107,7 @@ def setup_seed(seed):
     torch.manual_seed(seed) #cpu
     torch.cuda.manual_seed_all(seed)  #并行gpu
     # torch.backends.cudnn.deterministic = True  #cpu/gpu结果一致
-    # torch.backends.cudnn.benchmark = True   #训练集变化不大时使训练加速
+    torch.backends.cudnn.benchmark = True   #训练集变化不大时使训练加速
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -149,13 +155,14 @@ if __name__ == "__main__":
 
     # DDP
     parser.add_argument("--use-ddp", action='store_true', default=False)
-    parser.add_argument("--local_rank", type=int, default=0) # python -m torch.distributed.launch 传参
-    parser.add_argument("--backend", default="nccl")
+    # python -m torch.distributed.launch 传参, 也可以是torch.multiprocessing传参，然后再复制给它
+    parser.add_argument("--local_rank", type=int, default=0)
+    parser.add_argument("--ddp-backend", default="nccl")
 
     args = parser.parse_args()
-    if not args.use_cpu:
-        if args.gpu_ids is None:
-            raise ValueError("gpu ids value error")
-        args.gpu_ids = [int(i) for i in args.gpu_ids]
-    run_demo(temp_main, len(args.gpu_ids), args)
-    # main(args)
+    args = check_args(args)# 预处理程序参数
+
+    if args.use_ddp and len(args.gpu_ids) > 1:
+        run_demo(ddp_main, len(args.gpu_ids), args)
+    else:
+        main(args)

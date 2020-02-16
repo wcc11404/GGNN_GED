@@ -47,7 +47,7 @@ def train(args, model, loss, optimizer, Corpus):
     early_stop = 0
     summary = []
 
-    if args.loginfor:
+    if args.loginfor and args.local_rank == 0:
         print(model)
         print()
 
