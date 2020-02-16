@@ -160,26 +160,26 @@ class GedCorpus:
         #Train
         self.traindataset = GedDataset((self.args.arch, self.edgevocabularysize), self.trainx, self.trainy,
                                        self.trainsize, self.trainx_char, self.trainsize_char, self.train_graph)
-        # if args.use_ddp:
-        #     trainsampler = DistributedSampler(self.traindataset)
-        #     self.traindataloader = DataLoader(dataset=self.traindataset, batch_size=args.batch_size * len(args.gpu_ids),
-        #                                       shuffle=True, collate_fn=collate_fn, num_workers=args.num_workers,
-        #                                       sampler=trainsampler)
-        # else:
-        self.traindataloader = DataLoader(dataset=self.traindataset, batch_size=args.batch_size ,#* len(args.gpu_ids),
-                                          shuffle=True, collate_fn=collate_fn, num_workers=args.num_workers)
+        if args.use_ddp:
+            trainsampler = DistributedSampler(self.traindataset)
+            self.traindataloader = DataLoader(dataset=self.traindataset, batch_size=args.batch_size,# * len(args.gpu_ids),
+                                              shuffle=True, collate_fn=collate_fn, num_workers=args.num_workers,
+                                              sampler=trainsampler)
+        else:
+            self.traindataloader = DataLoader(dataset=self.traindataset, batch_size=args.batch_size ,#* len(args.gpu_ids),
+                                              shuffle=True, collate_fn=collate_fn, num_workers=args.num_workers)
 
         #Dev
         self.devdataset = GedDataset((self.args.arch, self.edgevocabularysize), self.devx, self.devy, self.devsize,
                                      self.devx_char, self.devsize_char, self.dev_graph)
-        # if args.use_ddp:
-        #     devsampler = DistributedSampler(self.devdataset)
-        #     self.devdataloader = DataLoader(dataset=self.devdataset, batch_size=args.batch_size * len(args.gpu_ids),
-        #                                     shuffle=False, collate_fn=collate_fn, num_workers=args.num_workers,
-        #                                     sampler=devsampler)
-        # else:
-        self.devdataloader = DataLoader(dataset=self.devdataset, batch_size=args.batch_size ,#* len(args.gpu_ids),
-                                        shuffle=False, collate_fn=collate_fn, num_workers=args.num_workers)
+        if args.use_ddp:
+            devsampler = DistributedSampler(self.devdataset)
+            self.devdataloader = DataLoader(dataset=self.devdataset, batch_size=args.batch_size,# * len(args.gpu_ids),
+                                            shuffle=False, collate_fn=collate_fn, num_workers=args.num_workers,
+                                            sampler=devsampler)
+        else:
+            self.devdataloader = DataLoader(dataset=self.devdataset, batch_size=args.batch_size ,#* len(args.gpu_ids),
+                                            shuffle=False, collate_fn=collate_fn, num_workers=args.num_workers)
 
         #Test
         if self.testx is not None:

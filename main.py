@@ -76,7 +76,7 @@ def main(args):
         device = torch.device('cuda', args.local_rank)
         torch.cuda.set_device(args.local_rank)
         model = model.to(device)
-        model = DDP(model)#, device_ids=[args.local_rank], output_device=args.local_rank
+        model = DDP(model, device_ids=args.gpu_ids)#, device_ids=[args.local_rank], output_device=args.local_rank
     elif not args.use_cpu and torch.cuda.is_available() :
         torch.cuda.set_device(args.gpu_ids[0])
         model.to("cuda")
