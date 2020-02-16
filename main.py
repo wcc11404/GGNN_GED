@@ -59,15 +59,16 @@ def main(args):
     if args.random_seed is not None:
         setup_seed(args.random_seed)
 
+    # 一定要在前边=。=
+    if not args.use_cpu and args.use_ddp:
+        setup_ddp(args.local_rank, world_size=len(args.gpu_ids), backend=args.ddp_backend)
+
     # 初始化数据
     corpus = GedCorpus(args)
+    corpus.build_Dataloader()
 
     # 初始化模型
     model = build_Model(args)
-
-
-
-    corpus.build_Dataloader()
 
     # 初始化损失函数
     loss = build_Loss(args)
@@ -87,16 +88,13 @@ def main(args):
         load_checkpoint(model, args.load_dir)
 
     # 设置ddp, https://github.com/pytorch/fairseq/blob/e6422528dae0b899848469efe2dc404c1e639ce9/train.py#L44
-    # 说设置ddp要在load数据之后，不确定是否必须.还得在loader创建之前，要不报错，因为有DistributedSampler?
+    # 说设置ddp要在load数据之后，不确定是否必须
     if not args.use_cpu and args.use_ddp:
-        setup_ddp(args.local_rank, world_size=len(args.gpu_ids), backend=args.ddp_backend)
         device = torch.device('cuda', args.gpu_ids[args.local_rank])
         torch.cuda.set_device(device)
         model = model.to(device)
         model = DDP(model, device_ids=[args.gpu_ids[args.local_rank]])
-
-    # 设置gpu和dp
-    if not args.use_cpu and not args.use_ddp and torch.cuda.is_available():
+    elif not args.use_cpu and not args.use_ddp and torch.cuda.is_available():# 设置gpu和dp
         torch.cuda.set_device(args.gpu_ids[0])
         model.to("cuda")
         if args.use_fpp16:
