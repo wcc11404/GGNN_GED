@@ -165,7 +165,6 @@ class GedCorpus:
         self.devdataset = GedDataset((self.args.arch, self.edgevocabularysize), self.devx, self.devy, self.devsize,
                                      self.devx_char, self.devsize_char, self.dev_graph)
 
-
         #Test
         if self.testx is not None:
             self.testdataset = GedDataset((self.args.arch, self.edgevocabularysize), self.testx, self.testy, self.testsize,
@@ -274,13 +273,13 @@ class GedCorpus:
         # Test loader
         if self.testdataset is not None:
             if self.args.use_ddp:
-                raise ValueError()
+                # raise ValueError()
                 testsampler = DistributedSampler(self.testdataset)
                 self.testdataloader = DataLoader(dataset=self.testdataset, batch_size=1, shuffle=False,
                                                  collate_fn=collate_fn, num_workers=self.args.num_workers,
                                                  sampler=testsampler)
             elif self.args.use_dp:
-                raise ValueError()
+                # raise ValueError()
                 self.testdataloader = DataLoader(dataset=self.testdataset, batch_size=1 * len(self.args.gpu_ids),
                                                  shuffle=False, collate_fn=collate_fn,
                                                  num_workers=self.args.num_workers)
