@@ -25,7 +25,7 @@ def setup_ddp(rank, world_size=1, backend="nccl"):
 
     # initialize the process group
     # dist.init_process_group(backend, rank=rank, world_size=world_size)
-    dist.init_process_group(backend, rank=rank)
+    dist.init_process_group(backend=backend, init_method='tcp://localhost:23456', rank=rank, world_size=world_size)
 
 def main(args):
     # 预处理程序参数
@@ -149,7 +149,7 @@ if __name__ == "__main__":
 
     # DDP
     parser.add_argument("--use-ddp", action='store_true', default=False)
-    parser.add_argument("--local_rank", type=int) # 貌似是其他python程序自动传参，对应不同的gpu号或者不同机器
+    parser.add_argument("--local_rank", type=int, default=0)
     parser.add_argument("--backend", default="nccl")
 
     args = parser.parse_args()

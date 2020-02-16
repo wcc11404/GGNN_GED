@@ -48,8 +48,7 @@ script_dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 # --batch-size 32 --early-stop 8 --max-epoch 50 --lm-cost-weight 0.1
 
 # ddp
-CUDA_VISIBLE_DEVICES=3,4 python -m torch.distributed.launch --nproc_per_node=2 --nnodes=1 \
- --node_rank=0 --master_addr="192.168.1.1"  --master_port=1234 \
+CUDA_VISIBLE_DEVICES=3,4 python -m torch.distributed.launch \
  $script_dir/main.py --gpu-id 3 4 --mode Train --arch GGNNNER --criterion SLLoss \
  --char-embed-dim 0 --gnn-steps 1 --save-dir checkpoint/GGNN_new --load-dir checkpoint/LM_GGNN_new \
  --data-dir data/prepare/train.pkl --optimizer adadelta --lr 1 --evaluation f0.5 \
