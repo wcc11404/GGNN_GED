@@ -257,12 +257,13 @@ class GedCorpus:
             self.traindataloader = DataLoader(dataset=self.traindataset, batch_size=self.args.batch_size,
                                               shuffle=True, collate_fn=collate_fn, num_workers=self.args.num_workers)
         # Dev loader
-        if self.args.use_ddp:
-            devsampler = DistributedSampler(self.devdataset)
-            self.devdataloader = DataLoader(dataset=self.devdataset, batch_size=self.args.batch_size,
-                                            shuffle=False, collate_fn=collate_fn, num_workers=self.args.num_workers,
-                                            sampler=devsampler)
-        elif self.args.use_dp:
+        # if self.args.use_ddp:
+        #     devsampler = DistributedSampler(self.devdataset)
+        #     self.devdataloader = DataLoader(dataset=self.devdataset, batch_size=self.args.batch_size,
+        #                                     shuffle=False, collate_fn=collate_fn, num_workers=self.args.num_workers,
+        #                                     sampler=devsampler)
+        # el
+        if self.args.use_dp:
             self.devdataloader = DataLoader(dataset=self.devdataset,
                                             batch_size=self.args.batch_size * len(self.args.gpu_ids),
                                             shuffle=False, collate_fn=collate_fn, num_workers=self.args.num_workers)
@@ -272,18 +273,18 @@ class GedCorpus:
 
         # Test loader
         if self.testdataset is not None:
-            if self.args.use_ddp:
-                # raise ValueError()
-                testsampler = DistributedSampler(self.testdataset)
-                self.testdataloader = DataLoader(dataset=self.testdataset, batch_size=1, shuffle=False,
-                                                 collate_fn=collate_fn, num_workers=self.args.num_workers,
-                                                 sampler=testsampler)
-            elif self.args.use_dp:
-                # raise ValueError()
-                self.testdataloader = DataLoader(dataset=self.testdataset, batch_size=1 * len(self.args.gpu_ids),
-                                                 shuffle=False, collate_fn=collate_fn,
-                                                 num_workers=self.args.num_workers)
-            else:
+            # if self.args.use_ddp:
+            #     # raise ValueError()
+            #     testsampler = DistributedSampler(self.testdataset)
+            #     self.testdataloader = DataLoader(dataset=self.testdataset, batch_size=1, shuffle=False,
+            #                                      collate_fn=collate_fn, num_workers=self.args.num_workers,
+            #                                      sampler=testsampler)
+            # elif self.args.use_dp:
+            #     # raise ValueError()
+            #     self.testdataloader = DataLoader(dataset=self.testdataset, batch_size=1 * len(self.args.gpu_ids),
+            #                                      shuffle=False, collate_fn=collate_fn,
+            #                                      num_workers=self.args.num_workers)
+            # else:
                 self.testdataloader = DataLoader(dataset=self.testdataset, batch_size=1, shuffle=False,
                                                  collate_fn=collate_fn, num_workers=self.args.num_workers)
         else:

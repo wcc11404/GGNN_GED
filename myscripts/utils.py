@@ -58,10 +58,21 @@ def train(args, model, loss, optimizer, Corpus):
     # 先存储参数
     save_args(args.__dict__, args.save_dir + "/args.json")
 
+    model.eval()
+    dev_loss, dev_p, dev_r, dev_f0_5 = evaluate(args, Corpus.devdataloader, model, loss)
+    log = {
+           "dev_loss": dev_loss,
+           "dev_p": dev_p,
+           "dev_r": dev_r,
+           "dev_f0.5": dev_f0_5
+           }
+    print("dev loss: {:.4f}  dev p: {:.4f}  dev r: {:.4f}  dev f0.5: {:.4f}"
+          .format(log["dev_loss"], log["dev_p"], log["dev_r"], log["dev_f0.5"]))
     for epoch in range(1, args.max_epoch + 1):
         print("epoch {} training".format(epoch))
 
         # 训练
+
         model.train()
         #清理GPU碎片空间？？
         if not args.use_cpu:
