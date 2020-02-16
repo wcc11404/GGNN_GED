@@ -149,7 +149,7 @@ if __name__ == "__main__":
 
     # DDP
     parser.add_argument("--use-ddp", action='store_true', default=False)
-    parser.add_argument("--local_rank", type=int, default=0)
+    parser.add_argument("--local_rank", type=int, default=0) # python -m torch.distributed.launch 传参
     parser.add_argument("--backend", default="nccl")
 
     args = parser.parse_args()
