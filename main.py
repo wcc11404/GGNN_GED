@@ -6,7 +6,7 @@ from torch.nn.parallel import DistributedDataParallel as DDP
 import torch.distributed as dist
 
 from data.corpus import GedCorpus
-from myscripts.utils import train, test, load_args, load_checkpoint
+from myscripts.utils import train, test, load_args, load_checkpoint, run_demo
 from myscripts.parallel import DataParallelModel, DataParallelCriterion
 
 from Module.NERModel import buildModel
@@ -33,10 +33,6 @@ def main(args):
         args.save_dir = os.path.abspath(args.save_dir)
     if args.load_dir is not None and os.path.exists(args.load_dir):
         args.load_dir = os.path.abspath(args.load_dir)
-    if not args.use_cpu:
-        if args.gpu_ids is None:
-            raise ValueError("gpu ids value error")
-        args.gpu_ids = [int(i) for i in args.gpu_ids]
 
     if args.mode == "Test": # 如果是测试,直接读取超参数,并用部分覆盖
         loadargs = load_args(args.load_dir + "/args.json")
@@ -45,7 +41,7 @@ def main(args):
 
 
     if not args.use_cpu and args.use_ddp:
-        setup_ddp(args.local_rank, backend=args.backend)
+        setup_ddp(args.local_rank, world_size=len(args.gpu_ids), backend=args.backend)
     # 设置随机种子
     if args.random_seed is not None:
         setup_seed(args.random_seed)
@@ -153,4 +149,9 @@ if __name__ == "__main__":
     parser.add_argument("--backend", default="nccl")
 
     args = parser.parse_args()
-    main(args)
+    if not args.use_cpu:
+        if args.gpu_ids is None:
+            raise ValueError("gpu ids value error")
+        args.gpu_ids = [int(i) for i in args.gpu_ids]
+    run_demo(main, len(args.gpu_ids), args)
+    # main(args)
