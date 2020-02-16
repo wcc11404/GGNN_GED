@@ -3,6 +3,7 @@ from torch.utils.data import Dataset, DataLoader
 import torch
 import pickle
 from torch.utils.data.distributed import DistributedSampler
+from myscripts.utils import log_information
 
 def collate_fn(train_data):
     def pad(data, max_length, paditem=0):
@@ -142,20 +143,20 @@ class GedCorpus:
         args.edge_vocabulary_size = self.edgevocabularysize
         args.word2id = self.word2id
 
-        if args.loginfor:
-            print("word dictionary size : " + str(self.wordvocabularysize))
-            if self.id2edge is not None:
-                print("char dictionary size : " + str(self.charvocabularysize))
-            if self.id2edge is not None:
-                print("edge dictionary size : " + str(self.edgevocabularysize))
-            print("train data size : " + str(len(self.trainx)))
-            print("max train data length : " + str(max(self.trainsize)))
-            print("dev data size : " + str(len(self.devx)))
-            print("max dev data length : " + str(max(self.devsize)))
-            if self.testx is not None:
-                print("test data size : " + str(len(self.testx)))
-                print("max test data length : " + str(max(self.testsize)))
-            print()
+        # 打印数据信息
+        log_information(args, "word dictionary size : " + str(self.wordvocabularysize))
+        if self.id2edge is not None:
+            log_information(args, "char dictionary size : " + str(self.charvocabularysize))
+        if self.id2edge is not None:
+            log_information(args, "edge dictionary size : " + str(self.edgevocabularysize))
+        log_information(args, "train data size : " + str(len(self.trainx)))
+        log_information(args, "max train data length : " + str(max(self.trainsize)))
+        log_information(args, "dev data size : " + str(len(self.devx)))
+        log_information(args, "max dev data length : " + str(max(self.devsize)))
+        if self.testx is not None:
+            log_information(args, "test data size : " + str(len(self.testx)))
+            log_information(args, "max test data length : " + str(max(self.testsize)))
+            log_information(args, "")
 
         #Train
         self.traindataset = GedDataset((self.args.arch, self.edgevocabularysize), self.trainx, self.trainy,

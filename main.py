@@ -3,10 +3,10 @@ import numpy as np
 import torch
 import os
 from torch.nn.parallel import DistributedDataParallel as DDP
-import torch.distributed as dist
 
 from data.corpus import GedCorpus
-from myscripts.utils import train, test, load_args, load_checkpoint, run_demo
+from myscripts.utils import train, test, load_args, load_checkpoint, log_information
+from myscripts.utils import run_demo, setup_ddp, clean_ddp
 from myscripts.parallel import DataParallelModel, DataParallelCriterion
 
 from Module.NERModel import build_Model
@@ -35,20 +35,14 @@ def check_args(args):
             raise ValueError("gpu ids value error")
         args.gpu_ids = [int(i) for i in args.gpu_ids]
 
+    if not args.use_ddp and args.local_rank > 0:
+        raise ValueError("Don't modification the local_rank parameter")
+
     if args.use_ddp == args.use_dp and args.use_ddp == True:
         raise ValueError() # ddp和dp模型不同同时为真
     if len(args.gpu_ids) > 1 and not args.use_ddp:
         args.use_dp = True
     return args
-
-def setup_ddp(rank, world_size=1, backend="nccl"):
-    # os.environ['MASTER_ADDR'] = 'localhost'
-    # os.environ['MASTER_PORT'] = '12355'
-
-    dist.init_process_group(backend=backend, init_method='tcp://localhost:23456', rank=rank, world_size=world_size)
-
-def cleanddp():
-    dist.destroy_process_group()
 
 def ddp_main(rank, args):
     args.local_rank = rank
@@ -85,7 +79,8 @@ def main(args):
     # 在cpu中加载权重
     # 同上，官方加载权重在所有都创建完毕后，不确定是否必须
     if args.load_dir is not None:
-        load_checkpoint(model, args.load_dir)
+        best_dir = load_checkpoint(model, args.load_dir)
+        log_information(args, best_dir)
 
     # 设置ddp, https://github.com/pytorch/fairseq/blob/e6422528dae0b899848469efe2dc404c1e639ce9/train.py#L44
     # 说设置ddp要在load数据之后，不确定是否必须
