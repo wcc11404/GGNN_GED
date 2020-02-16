@@ -27,6 +27,10 @@ def setup_ddp(rank, world_size=1, backend="nccl"):
     # dist.init_process_group(backend, rank=rank, world_size=world_size)
     dist.init_process_group(backend=backend, init_method='tcp://localhost:23456', rank=rank, world_size=world_size)
 
+def temp_main(rank,args):
+    args.local_rank = rank
+    main(args)
+
 def main(args):
     # 预处理程序参数
     if args.save_dir is not None and os.path.exists(args.save_dir):
@@ -153,5 +157,5 @@ if __name__ == "__main__":
         if args.gpu_ids is None:
             raise ValueError("gpu ids value error")
         args.gpu_ids = [int(i) for i in args.gpu_ids]
-    run_demo(main, len(args.gpu_ids), args)
+    run_demo(temp_main, len(args.gpu_ids), args)
     # main(args)
