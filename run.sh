@@ -11,8 +11,8 @@ script_dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 #python $script_dir/myscripts/genGraph.py --mode 0 --input data/process/fce-public.test.preprocess.tsv --output data/process/test_graph.txt --stanford data/stanford-corenlp-full-2018-10-05
 
 # tokenize无标签数据
-#python $script_dir/myscripts/mytokenize.py --mode 1 --input data/orign_data/1b.train.txt --output data/process/pretrain.train --stanford data/stanford-corenlp-full-2018-10-05
-#python $script_dir/myscripts/mytokenize.py --mode 1 --input data/orign_data/1b.dev.txt --output data/process/pretrain.dev --stanford data/stanford-corenlp-full-2018-10-05
+python $script_dir/myscripts/mytokenize.py --mode 1 --input data/orign_data/1b.train.txt --output data/process/pretrain.train --stanford data/stanford-corenlp-full-2018-10-05
+python $script_dir/myscripts/mytokenize.py --mode 1 --input data/orign_data/1b.dev.txt --output data/process/pretrain.dev --stanford data/stanford-corenlp-full-2018-10-05
 
 # 生成无标签数据的依赖图（部分）
 #head -n 1000000 data/process/pretrain.train > data/process/pretrain.train.1M
@@ -48,10 +48,10 @@ script_dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 # --batch-size 32 --early-stop 8 --max-epoch 50 --lm-cost-weight 0.1
 
 # ddp
-python $script_dir/main.py --gpu-id 3 4 --mode Train --arch GGNNNER --criterion SLLoss \
- --char-embed-dim 0 --gnn-steps 1 --save-dir checkpoint/GGNN_new --load-dir checkpoint/LM_GGNN_new \
- --data-dir data/prepare/train.pkl --optimizer adadelta --lr 1 --evaluation f0.5 \
- --batch-size 16 --early-stop 8 --max-epoch 50 --lm-cost-weight 0.1 --use-ddp
+#python $script_dir/main.py --gpu-id 3 4 --mode Train --arch GGNNNER --criterion SLLoss \
+# --char-embed-dim 0 --gnn-steps 1 --save-dir checkpoint/GGNN_new --load-dir checkpoint/LM_GGNN_new \
+# --data-dir data/prepare/train.pkl --optimizer adadelta --lr 1 --evaluation f0.5 \
+# --batch-size 16 --early-stop 8 --max-epoch 50 --lm-cost-weight 0.1 --use-ddp
 
 # 训练
 #python $script_dir/main.py --gpu-id 4 --mode Train --arch GGNNNER --w2v-dir data/process/w2v_300d.txt \

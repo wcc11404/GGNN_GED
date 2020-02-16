@@ -80,7 +80,7 @@ def main(args):
     # 同上，官方加载权重在所有都创建完毕后，不确定是否必须
     if args.load_dir is not None:
         best_dir = load_checkpoint(model, args.load_dir)
-        log_information(args, best_dir)
+        log_information(args, "load checkpoint from " + best_dir)
 
     # 设置ddp, https://github.com/pytorch/fairseq/blob/e6422528dae0b899848469efe2dc404c1e639ce9/train.py#L44
     # 说设置ddp要在load数据之后，不确定是否必须

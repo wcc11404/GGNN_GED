@@ -36,6 +36,27 @@ def tokenize_(args):
     f2.close()
     nlp.close()
 
+# 特例，去除括号内容
+def remove_brackets(line):
+    while("(" in line):
+        left = line.find("(")
+        right = line.find(")")
+        if right != -1:
+            if right > left:
+                if left - 1 >= 0 and right + 1 < len(line):
+                    if line[left - 1] == " " and line[right + 1] == " ":
+                        left -= 1
+                line = line[:left] + line[right + 1:]
+            else:
+                if left - 1 >= 0 and line[left - 1] == " ":
+                    left -= 1
+                line = line[:left]
+        else:
+            if left - 1 >= 0 and line[left - 1] == " ":
+                left -= 1
+            line = line[:left]
+    return line
+
 # 对单语语料进行tokenize
 def tokenize__(args):
     f1 = open(args.input, 'r', encoding='utf-8')    # 包含非ascii码的需要这样打开文件
@@ -46,6 +67,7 @@ def tokenize__(args):
         if len(line) == 0:  #空行
             continue
 
+        # 检查是否有非ascii码字符
         line = line.encode("utf-8") # str -> bytes
         try:
             line.decode("ascii")
@@ -53,9 +75,26 @@ def tokenize__(args):
             continue
         line = bytes.decode(line)   # bytes -> str
 
-        line = line.split()
-        if len(line)>60 or len(line)<=4:   # 长度不符合
+        # 去除括号内容
+        line = remove_brackets(line)
+
+        # 特例去除
+        if "http" in line or "www" in line:
             continue
+
+        line = line.split()
+        if len(line) > 60 or len(line) <= 8:  # 长度不符合
+            continue
+
+        # 特例，结尾重复标点
+        temp = -1
+        for i in range(len(line) - 2, -1, -1):
+            if line[i]==line[i+1]:
+                temp = i
+            else:
+                break
+        if temp != -1:
+            line = line[:temp+1]
 
         f2.write(" ".join(line))
         f2.write("\n")
