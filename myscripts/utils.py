@@ -154,7 +154,7 @@ def evaluate(args, dataloader, model, loss, mode="average"):
 
         out = model(train_x, train_length, extra_data)
         loss_value += loss(out, train_y, extra_label).item()
-        if len(args.gpu_ids) > 1:
+        if args.use_dp: # dp模式，out是多个gpu的结果，所以只取第一个结果，暂不确定对不对
             out = out[0]
         out = out[0].cpu().detach().numpy() # 只有out[0],模型的第一个输出，参与计算F值
         train_y = train_y.cpu().detach().numpy()

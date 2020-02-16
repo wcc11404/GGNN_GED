@@ -25,7 +25,7 @@ def setup_ddp(rank, world_size=1, backend="nccl"):
 
     # initialize the process group
     # dist.init_process_group(backend, rank=rank, world_size=world_size)
-    dist.init_process_group(backend,rank=rank)
+    dist.init_process_group(backend, rank=rank)
 
 def main(args):
     # 预处理程序参数
@@ -43,6 +43,9 @@ def main(args):
         merageargs = merage_args(args.__dict__, loadargs)
         args.__dict__ = merageargs
 
+
+    if not args.use_cpu and args.use_ddp:
+        setup_ddp(args.local_rank, backend=args.backend)
     # 设置随机种子
     if args.random_seed is not None:
         setup_seed(args.random_seed)
@@ -69,7 +72,7 @@ def main(args):
 
     # 设置gpu模式
     if not args.use_cpu and args.use_ddp:
-        setup_ddp(args.local_rank, args.backend)
+        print(args.local_rank)
         device = torch.device('cuda', args.local_rank)
         torch.cuda.set_device(args.local_rank)
         model = model.to(device)
@@ -81,9 +84,9 @@ def main(args):
             model.half()
 
         if len(args.gpu_ids) > 1:   # 设置DataParallel多卡并行参数
+            args.use_dp = True
             model = DataParallelModel(model, device_ids=args.gpu_ids)
             loss = DataParallelCriterion(loss, device_ids=args.gpu_ids)
-            args.use_dp = True
     else:
         model.to("cpu")
 
