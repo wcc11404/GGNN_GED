@@ -30,7 +30,7 @@ def load_checkpoint(model, dir):
         load_dict = {k: v for k, v in load_checkpoint.items() if k in model_dict}  # 找名字一样的加载权重
         model.load_state_dict(load_dict)  # 加载权重
     except Exception:
-        print(Exception)
+        raise Exception
 
 def save_args(dic, dir):
     with open(dir, 'w') as f:
