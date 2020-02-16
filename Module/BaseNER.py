@@ -21,8 +21,6 @@ class BaseNER(nn.Module):
                                                dropout=args.linear_drop)
 
         self.classification = LinearTemplate(args.hidden_dim, 2, activation=None)
-        # self.logsoftmax = nn.LogSoftmax(dim=2)
-        self.Loss = nn.CrossEntropyLoss(ignore_index=-1, reduction="sum")
 
         self.load_embedding(args)
 
@@ -49,9 +47,5 @@ class BaseNER(nn.Module):
         out = self.classification(out)
 
         return out, ()
-
-    def getLoss(self, output, label, extra_label):
-        output, _ = output
-        return self.Loss(output.view(-1, 2), label.view(-1))
 
 

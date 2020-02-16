@@ -57,15 +57,6 @@ def train(args, model, loss, optimizer, Corpus):
     for epoch in range(1, args.max_epoch + 1):
         print("epoch {} training".format(epoch))
 
-        dev_loss, dev_p, dev_r, dev_f0_5 = evaluate(args, Corpus.devdataloader, model, loss)
-        log = {"epoch": epoch,
-               "dev_loss": dev_loss,
-               "dev_p": dev_p,
-               "dev_r": dev_r,
-               "dev_f0.5": dev_f0_5
-               }
-        print("epoch {}  dev loss: {:.4f}  dev p: {:.4f}  dev r: {:.4f}  dev f0.5: {:.4f}"
-              .format(log["epoch"], log["dev_loss"], log["dev_p"], log["dev_r"], log["dev_f0.5"]))
         # 训练
         model.train()
         #清理GPU缓存？？
@@ -90,7 +81,7 @@ def train(args, model, loss, optimizer, Corpus):
             out = model(train_x, train_length, extra_data)
             loss_value = loss(out, train_y, extra_label)
             loss_value.backward()
-            optimizer.zero_grad()
+            optimizer.step()
 
         # 每个epoch评估
         # train_loss, train_p, train_r, train_f0_5 = evaluate(args, Corpus.traindataloader, model)
