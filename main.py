@@ -36,7 +36,7 @@ def check_args(args):
         args.gpu_ids = [int(i) for i in args.gpu_ids]
 
     # ddp和dp模型不同同时为真
-    assert not args.use_ddp == args.use_dp and not args.use_ddp == True
+    assert not args.use_ddp == args.use_dp and not args.use_ddp
     if len(args.gpu_ids) > 1 and not args.use_ddp:
         args.use_dp = True
     return args
