@@ -9,8 +9,8 @@ from data.corpus import GedCorpus
 from myscripts.utils import train, test, load_args, load_checkpoint, run_demo
 from myscripts.parallel import DataParallelModel, DataParallelCriterion
 
-from Module.NERModel import buildModel
-from Loss.NERLoss import buildLoss
+from Module.NERModel import build_Model
+from Loss.NERLoss import build_Loss
 
 def merage_args(user_args, loadargs):
     loadargs["mode"] = user_args["mode"]
@@ -34,6 +34,10 @@ def check_args(args):
         if args.gpu_ids is None:
             raise ValueError("gpu ids value error")
         args.gpu_ids = [int(i) for i in args.gpu_ids]
+
+    assert args.use_ddp == args.use_dp and args.use_ddp == True
+    if len(args.gpu_ids) > 1 and not args.use_ddp:
+        args.use_dp = True
     return args
 
 def setup_ddp(rank, world_size=1, backend="nccl"):
@@ -58,9 +62,10 @@ def main(args):
     corpus = GedCorpus(args)
 
     # 初始化模型
-    model = buildModel(args)
+    model = build_Model(args)
 
-    # 设置ddp
+    # 设置ddp, https://github.com/pytorch/fairseq/blob/e6422528dae0b899848469efe2dc404c1e639ce9/train.py#L44
+    # 说设置ddp要在load数据之后，不确定是否必须，且还得在loader创建之前，要不报错，因为有DistributedSampler
     if not args.use_cpu and args.use_ddp:
         setup_ddp(args.local_rank, world_size=len(args.gpu_ids), backend=args.ddp_backend)
         device = torch.device('cuda', args.gpu_ids[args.local_rank])
@@ -68,10 +73,14 @@ def main(args):
         model = model.to(device)
         model = DDP(model, device_ids=[args.gpu_ids[args.local_rank]])
 
+    corpus.build_Dataloader()
+
     # 初始化损失函数
-    loss = buildLoss(args)
+    loss = build_Loss(args)
 
     # 初始化优化器
+    # https://pytorch.org/tutorials/intermediate/ddp_tutorial.html?highlight=dataparallel
+    # 官方定义优化器在ddp设置之后，不确定是否必须
     if args.optimizer.lower() == "adam":
         optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, betas=(0.9, 0.998), eps=1e-08,
                                      weight_decay=args.weight_decay)
@@ -79,6 +88,7 @@ def main(args):
         optimizer = torch.optim.Adadelta(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
 
     # 在cpu中加载权重
+    # 同上，官方加载权重在所有都创建完毕后，不确定是否必须
     if args.load_dir is not None:
         load_checkpoint(model, args.load_dir)
 
@@ -90,7 +100,6 @@ def main(args):
             model.half()
 
         if len(args.gpu_ids) > 1:  # 设置DataParallel多卡并行参数
-            args.use_dp = True
             model = DataParallelModel(model, device_ids=args.gpu_ids)
             loss = DataParallelCriterion(loss, device_ids=args.gpu_ids)
     else:

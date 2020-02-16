@@ -2,7 +2,7 @@ from Loss.LMLoss import LMLoss
 from Loss.BaseLoss import BaseLoss
 from Loss.SLLoss import SLLoss
 
-def buildLoss(args):
+def build_Loss(args):
     if args.criterion == "BaseLoss":
         loss = BaseLoss(args)
     elif args.criterion == "LMLoss":

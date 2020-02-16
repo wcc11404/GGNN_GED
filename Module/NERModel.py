@@ -2,7 +2,7 @@ from Module.BaseNER import BaseNER
 from Module.SLNER import SLNER
 from Module.GGNNNER import GGNNNER
 
-def buildModel(args):
+def build_Model(args):
     if args.arch == "BaseNER":
         model = BaseNER(args)
     elif args.arch == "SLNER":

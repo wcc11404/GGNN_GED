@@ -1,7 +1,6 @@
 import torch
 from torch import nn
 from .Layers import EmbeddingTemplate, RnnTemplate, LinearTemplate, GraphGateTemplate, AttentionTemplate
-import numpy as np
 
 class GGNNNER(nn.Module):
     def __init__(self, args):

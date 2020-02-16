@@ -63,7 +63,7 @@ def train(args, model, loss, optimizer, Corpus):
 
         # 训练
         model.train()
-        #清理GPU缓存？？
+        #清理GPU碎片空间？？
         if not args.use_cpu:
             torch.cuda.empty_cache()
         if args.loginfor:

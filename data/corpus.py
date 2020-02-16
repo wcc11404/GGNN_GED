@@ -160,42 +160,18 @@ class GedCorpus:
         #Train
         self.traindataset = GedDataset((self.args.arch, self.edgevocabularysize), self.trainx, self.trainy,
                                        self.trainsize, self.trainx_char, self.trainsize_char, self.train_graph)
-        if args.use_ddp:
-            trainsampler = DistributedSampler(self.traindataset)
-            self.traindataloader = DataLoader(dataset=self.traindataset, batch_size=args.batch_size,# * len(args.gpu_ids),
-                                              shuffle=False, collate_fn=collate_fn, num_workers=args.num_workers,
-                                              sampler=trainsampler)
-        else:
-            self.traindataloader = DataLoader(dataset=self.traindataset, batch_size=args.batch_size ,#* len(args.gpu_ids),
-                                              shuffle=True, collate_fn=collate_fn, num_workers=args.num_workers)
 
         #Dev
         self.devdataset = GedDataset((self.args.arch, self.edgevocabularysize), self.devx, self.devy, self.devsize,
                                      self.devx_char, self.devsize_char, self.dev_graph)
-        if args.use_ddp:
-            devsampler = DistributedSampler(self.devdataset)
-            self.devdataloader = DataLoader(dataset=self.devdataset, batch_size=args.batch_size,# * len(args.gpu_ids),
-                                            shuffle=False, collate_fn=collate_fn, num_workers=args.num_workers,
-                                            sampler=devsampler)
-        else:
-            self.devdataloader = DataLoader(dataset=self.devdataset, batch_size=args.batch_size ,#* len(args.gpu_ids),
-                                            shuffle=False, collate_fn=collate_fn, num_workers=args.num_workers)
+
 
         #Test
         if self.testx is not None:
             self.testdataset = GedDataset((self.args.arch, self.edgevocabularysize), self.testx, self.testy, self.testsize,
                                           self.testx_char, self.testsize_char, self.test_graph)
-
-            # if args.use_ddp:
-            #     testsampler = DistributedSampler(self.testdataset)
-            #     self.testdataloader = DataLoader(dataset=self.testdataset, batch_size=1, shuffle=False,
-            #                                      collate_fn=collate_fn, num_workers=args.num_workers,
-            #                                      sampler=testsampler)
-            # else:
-            self.testdataloader = DataLoader(dataset=self.testdataset, batch_size=1, shuffle=False,
-                                             collate_fn=collate_fn, num_workers=args.num_workers)
         else:
-            self.testdataloader = None
+            self.testdataset = None
 
     def load_preprocess(self, args):
         f = open(args.data_dir, 'rb')
@@ -266,6 +242,53 @@ class GedCorpus:
             self.test_graph = pickle.load(f)
 
         f.close()
+
+    def build_Dataloader(self):
+        # Train loader
+        if self.args.use_ddp:
+            trainsampler = DistributedSampler(self.traindataset)
+            self.traindataloader = DataLoader(dataset=self.traindataset, batch_size=self.args.batch_size,
+                                              shuffle=False, collate_fn=collate_fn, num_workers=self.args.num_workers,
+                                              sampler=trainsampler)
+        elif self.args.use_dp:
+            self.traindataloader = DataLoader(dataset=self.traindataset,
+                                              batch_size=self.args.batch_size * len(self.args.gpu_ids),
+                                              shuffle=True, collate_fn=collate_fn, num_workers=self.args.num_workers)
+        else:
+            self.traindataloader = DataLoader(dataset=self.traindataset, batch_size=self.args.batch_size,
+                                              shuffle=True, collate_fn=collate_fn, num_workers=self.args.num_workers)
+        # Dev loader
+        if self.args.use_ddp:
+            devsampler = DistributedSampler(self.devdataset)
+            self.devdataloader = DataLoader(dataset=self.devdataset, batch_size=self.args.batch_size,
+                                            shuffle=False, collate_fn=collate_fn, num_workers=self.args.num_workers,
+                                            sampler=devsampler)
+        elif self.args.use_dp:
+            self.devdataloader = DataLoader(dataset=self.devdataset,
+                                            batch_size=self.args.batch_size * len(self.args.gpu_ids),
+                                            shuffle=False, collate_fn=collate_fn, num_workers=self.args.num_workers)
+        else:
+            self.devdataloader = DataLoader(dataset=self.devdataset, batch_size=self.args.batch_size,
+                                            shuffle=False, collate_fn=collate_fn, num_workers=self.args.num_workers)
+
+        # Test loader
+        if self.testdataset is not None:
+            if self.args.use_ddp:
+                raise ValueError()
+                testsampler = DistributedSampler(self.testdataset)
+                self.testdataloader = DataLoader(dataset=self.testdataset, batch_size=1, shuffle=False,
+                                                 collate_fn=collate_fn, num_workers=self.args.num_workers,
+                                                 sampler=testsampler)
+            elif self.args.use_dp:
+                raise ValueError()
+                self.testdataloader = DataLoader(dataset=self.testdataset, batch_size=1 * len(self.args.gpu_ids),
+                                                 shuffle=False, collate_fn=collate_fn,
+                                                 num_workers=self.args.num_workers)
+            else:
+                self.testdataloader = DataLoader(dataset=self.testdataset, batch_size=1, shuffle=False,
+                                                 collate_fn=collate_fn, num_workers=self.args.num_workers)
+        else:
+            self.testdataloader = None
 
 class GedDataset(Dataset):
     def __init__(self, tup, x, y, size, x_char, size_char, graph):

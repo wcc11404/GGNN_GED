@@ -1,6 +1,7 @@
 from torch import nn
 from torch.nn.modules.loss import _Loss
 
+# 注意loss继承的父类和model不同，但不清楚有什么区别
 class SLLoss(_Loss):
     def __init__(self, args):
         super(SLLoss, self).__init__()
