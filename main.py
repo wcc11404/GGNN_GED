@@ -149,7 +149,7 @@ if __name__ == "__main__":
 
     # DDP
     parser.add_argument("--use-ddp", action='store_true', default=False)
-    parser.add_argument("--local-rank", type=int, default=0)
+    parser.add_argument("--local_rank", type=int, default=0)
     parser.add_argument("--backend", default="nccl")
 
     args = parser.parse_args()
