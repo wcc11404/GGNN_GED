@@ -55,13 +55,13 @@ def ddp_main(rank, args):
     main(args)
 
 def main(args):
-    # 设置随机种子
-    if args.random_seed is not None:
-        setup_seed(args.random_seed)
-
     # 一定要在前边=。=
     if not args.use_cpu and args.use_ddp:
         setup_ddp(args.local_rank, world_size=len(args.gpu_ids), backend=args.ddp_backend)
+
+    # 设置随机种子
+    if args.random_seed is not None:
+        setup_seed(args.random_seed)
 
     # 初始化数据
     corpus = GedCorpus(args)
