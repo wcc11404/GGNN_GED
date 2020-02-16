@@ -77,7 +77,7 @@ def main(args):
         torch.cuda.set_device(args.local_rank)
         model = model.to(device)
         model = DDP(model)#, device_ids=[args.local_rank], output_device=args.local_rank
-    elif not args.use_cpu and torch.cuda.is_available() :
+    elif not args.use_cpu and torch.cuda.is_available():
         torch.cuda.set_device(args.gpu_ids[0])
         model.to("cuda")
         if args.use_fpp16:
@@ -149,7 +149,7 @@ if __name__ == "__main__":
 
     # DDP
     parser.add_argument("--use-ddp", action='store_true', default=False)
-    parser.add_argument("--local_rank", type=int, default=0)
+    parser.add_argument("--local-rank", type=int, default=0)
     parser.add_argument("--backend", default="nccl")
 
     args = parser.parse_args()
