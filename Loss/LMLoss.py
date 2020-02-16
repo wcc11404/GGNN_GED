@@ -1,6 +1,7 @@
 from torch import nn
+from torch.nn.modules.loss import _Loss
 
-class LMLoss(nn.Module):
+class LMLoss(_Loss):
     def __init__(self, args):
         super(LMLoss, self).__init__()
         self.lm_vocab_size = args.lm_vocab_size

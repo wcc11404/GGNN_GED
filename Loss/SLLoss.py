@@ -1,6 +1,7 @@
 from torch import nn
+from torch.nn.modules.loss import _Loss
 
-class SLLoss(nn.Module):
+class SLLoss(_Loss):
     def __init__(self, args):
         super(SLLoss, self).__init__()
         self.lm_cost_weight = args.lm_cost_weight

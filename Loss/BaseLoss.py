@@ -1,6 +1,7 @@
 from torch import nn
+from torch.nn.modules.loss import _Loss
 
-class BaseLoss(nn.Module):
+class BaseLoss(_Loss):
     def __init__(self, args):
         super(BaseLoss, self).__init__()
         self.Loss = nn.CrossEntropyLoss(ignore_index=-1, reduction="sum")
