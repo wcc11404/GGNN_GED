@@ -6,7 +6,7 @@ from tqdm import tqdm
 import torch.multiprocessing as mp
 
 def run_demo(demo_fn, world_size,args):
-    mp.spawn(demo_fn, args=args, nprocs=world_size, join=True)
+    mp.spawn(demo_fn, args=(args,), nprocs=world_size, join=True)
 
 def update_best_checkpoint(save_dir, epoch):
     with open(save_dir+"/save.log",'w') as f:
