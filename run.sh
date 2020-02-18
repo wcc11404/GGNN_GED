@@ -15,24 +15,24 @@ script_dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 #python $script_dir/myscripts/mytokenize.py --mode 1 --input data/orign_data/1b.dev.txt --output data/process/pretrain.dev --stanford data/stanford-corenlp-full-2018-10-05
 
 # 生成无标签数据的依赖图（部分）
-head -n 5000000 data/process/pretrain.train > data/process/pretrain.train.5M
-head -n 100000 data/process/pretrain.dev > data/process/pretrain.dev.100K
-python $script_dir/myscripts/genGraph.py --mode 1 --input data/process/pretrain.train.5M --output data/process/pretrain.train.5M.graph --process data/process/pretrain.train.5M.ic --stanford data/stanford-corenlp-full-2018-10-05
-python $script_dir/myscripts/genGraph.py --mode 1 --input data/process/pretrain.dev.100K --output data/process/pretrain.dev.100K.graph --process data/process/pretrain.dev.100K.ic --stanford data/stanford-corenlp-full-2018-10-05
+#head -n 5000000 data/process/pretrain.train > data/process/pretrain.train.5M
+#head -n 100000 data/process/pretrain.dev > data/process/pretrain.dev.100K
+#python $script_dir/myscripts/genGraph.py --mode 1 --input data/process/pretrain.train.5M --output data/process/pretrain.train.5M.graph --process data/process/pretrain.train.5M.ic --stanford data/stanford-corenlp-full-2018-10-05
+#python $script_dir/myscripts/genGraph.py --mode 1 --input data/process/pretrain.dev.100K --output data/process/pretrain.dev.100K.graph --process data/process/pretrain.dev.100K.ic --stanford data/stanford-corenlp-full-2018-10-05
 
 # 生成word、char以及edge词典
-#python $script_dir/myscripts/genVocab.py --mode 0 --input data/process/fce-public.train.preprocess.tsv data/process/fce-public.dev.preprocess.tsv --output data/prepare/wordvocab.pkl --mergeinput data/process/pretrain.train.1M.ic --mergemaxnum 50000
-#python $script_dir/myscripts/genVocab.py --mode 1 --input data/process/pretrain.train.1M.ic data/process/fce-public.train.preprocess.tsv data/process/fce-public.dev.preprocess.tsv --output data/prepare/charvocab.pkl
-#python $script_dir/myscripts/genVocab.py --mode 2 --input data/process/pretrain.train.1M.graph data/process/train_graph.txt data/process/dev_graph.txt --output data/prepare/edgevocab.pkl
+python $script_dir/myscripts/genVocab.py --mode 0 --input data/process/fce-public.train.preprocess.tsv data/process/fce-public.dev.preprocess.tsv --output data/prepare/wordvocab.pkl --mergeinput data/process/pretrain.train.5M.ic --mergemaxnum 80000
+python $script_dir/myscripts/genVocab.py --mode 1 --input data/process/pretrain.train.5M.ic data/process/fce-public.train.preprocess.tsv data/process/fce-public.dev.preprocess.tsv --output data/prepare/charvocab.pkl
+python $script_dir/myscripts/genVocab.py --mode 2 --input data/process/pretrain.train.5M.graph data/process/train_graph.txt data/process/dev_graph.txt --output data/prepare/edgevocab.pkl
 
 # pickle化所有预训练数据
-#python $script_dir/myscripts/binary.py --train-dir data/process/pretrain.train.1M.ic --dev-dir data/process/pretrain.dev.20K.ic --train-graph-dir data/process/pretrain.train.1M.graph --dev-graph-dir data/process/pretrain.dev.20K.graph \
-#--word-vocab-dir data/prepare/wordvocab.pkl --char-vocab-dir data/prepare/charvocab.pkl --edge-vocab-dir data/prepare/edgevocab.pkl --output data/prepare/pretrain.pkl
+python $script_dir/myscripts/binary.py --train-dir data/process/pretrain.train.5M.ic --dev-dir data/process/pretrain.dev.100K.ic --train-graph-dir data/process/pretrain.train.5M.graph --dev-graph-dir data/process/pretrain.dev.100K.graph \
+--word-vocab-dir data/prepare/wordvocab.pkl --char-vocab-dir data/prepare/charvocab.pkl --edge-vocab-dir data/prepare/edgevocab.pkl --output data/prepare/pretrain.pkl
 
 # pickle化所有训练数据
-#python $script_dir/myscripts/binary.py --train-dir data/process/fce-public.train.preprocess.tsv --dev-dir data/process/fce-public.dev.preprocess.tsv --test-dir data/process/fce-public.test.preprocess.tsv \
-# --train-graph-dir data/process/train_graph.txt --dev-graph-dir data/process/dev_graph.txt --test-graph-dir data/process/test_graph.txt \
-# --word-vocab-dir data/prepare/wordvocab.pkl --char-vocab-dir data/prepare/charvocab.pkl --edge-vocab-dir data/prepare/edgevocab.pkl --output data/prepare/train.pkl
+python $script_dir/myscripts/binary.py --train-dir data/process/fce-public.train.preprocess.tsv --dev-dir data/process/fce-public.dev.preprocess.tsv --test-dir data/process/fce-public.test.preprocess.tsv \
+ --train-graph-dir data/process/train_graph.txt --dev-graph-dir data/process/dev_graph.txt --test-graph-dir data/process/test_graph.txt \
+ --word-vocab-dir data/prepare/wordvocab.pkl --char-vocab-dir data/prepare/charvocab.pkl --edge-vocab-dir data/prepare/edgevocab.pkl --output data/prepare/train.pkl
 
 # 预训练
 #python $script_dir/main.py --gpu-id 1 --mode Train --arch GGNNNER --criterion LMLoss \
