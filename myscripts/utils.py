@@ -82,7 +82,6 @@ def train(args, model, loss, optimizer, Corpus):
         batch_num = 1 # 更新到第n个batch，update_freq用
         # 训练
         model.train()
-        optimizer.zero_grad()
         #清理GPU碎片空间？？
         if not args.use_cpu:
             torch.cuda.empty_cache()

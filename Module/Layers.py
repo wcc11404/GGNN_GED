@@ -52,8 +52,7 @@ class EmbeddingTemplate(nn.Module):
 
         self.wordembedding.weight.data.copy_(torch.from_numpy(temp))
 
-        if loginfor:
-            print("load {} word embeddings".format(num))
+        return num
 
     def set_pad_zero(self):
         temp = self.wordembedding.weight.detach().numpy()

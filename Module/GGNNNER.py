@@ -1,6 +1,7 @@
 import torch
 from torch import nn
 from .Layers import EmbeddingTemplate, RnnTemplate, LinearTemplate, GraphGateTemplate, AttentionTemplate
+from myscripts.utils import log_information
 
 class GGNNNER(nn.Module):
     def __init__(self, args):
@@ -41,7 +42,8 @@ class GGNNNER(nn.Module):
         self.bw_lm_softmax = LinearTemplate(args.lm_hidden_dim, self.lm_vocab_size, activation=None)
 
         # 加载词表权重
-        self.load_embedding(args)
+        re = self.load_embedding(args)
+        log_information(args, re)
 
     def load_embedding(self, args):
         if args.mode == "Train" and args.load_dir is None:
