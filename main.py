@@ -3,7 +3,7 @@ import numpy as np
 import torch
 import os
 # from torch.nn.parallel import DistributedDataParallel as DDP
-import apex as amp
+from apex import amp
 from apex.parallel import DistributedDataParallel as DDP
 
 from data.corpus import GedCorpus

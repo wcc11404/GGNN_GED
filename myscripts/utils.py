@@ -5,7 +5,7 @@ from sklearn.metrics import precision_recall_fscore_support
 from tqdm import tqdm
 import torch.multiprocessing as mp
 import torch.distributed as dist
-import apex as amp
+from apex import amp
 
 def run_demo(demo_fn, world_size,args):
     mp.spawn(demo_fn, args=(args,), nprocs=world_size, join=True)
