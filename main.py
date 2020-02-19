@@ -2,8 +2,9 @@ import argparse
 import numpy as np
 import torch
 import os
-from torch.nn.parallel import DistributedDataParallel as DDP
-# from apex.parallel import DistributedDataParallel as DDP
+# from torch.nn.parallel import DistributedDataParallel as DDP
+import apex as amp
+from apex.parallel import DistributedDataParallel as DDP
 
 from data.corpus import GedCorpus
 from myscripts.utils import train, test, load_args, load_checkpoint, log_information
@@ -92,7 +93,9 @@ def main(args):
         device = torch.device('cuda', args.gpu_ids[args.local_rank])
         torch.cuda.set_device(device)
         model = model.to(device)
-        model = DDP(model, device_ids=[args.gpu_ids[args.local_rank]])
+        model, optimizer = amp.initialize(model, optimizer, opt_level="O1")
+        model = DDP(model) # apex
+        # model = DDP(model, device_ids=[args.gpu_ids[args.local_rank]]) # torch
     elif not args.use_cpu and not args.use_ddp and torch.cuda.is_available():# 设置gpu和dp
         torch.cuda.set_device(args.gpu_ids[0])
         model.to("cuda")
@@ -116,7 +119,7 @@ def setup_seed(seed):
     torch.manual_seed(seed) #cpu
     torch.cuda.manual_seed_all(seed)  #并行gpu
     # torch.backends.cudnn.deterministic = True  #cpu/gpu结果一致
-    # torch.backends.cudnn.benchmark = True   #训练集变化不大时使训练加速
+    torch.backends.cudnn.benchmark = True   #训练集变化不大时使训练加速
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

@@ -5,6 +5,7 @@ from sklearn.metrics import precision_recall_fscore_support
 from tqdm import tqdm
 import torch.multiprocessing as mp
 import torch.distributed as dist
+import apex as amp
 
 def run_demo(demo_fn, world_size,args):
     mp.spawn(demo_fn, args=(args,), nprocs=world_size, join=True)
@@ -102,7 +103,8 @@ def train(args, model, loss, optimizer, Corpus):
 
             out = model(train_x, train_length, extra_data)
             loss_value = loss(out, train_y, extra_label)
-            loss_value.backward()
+            with amp.scale_loss(loss_value, optimizer) as scaled_loss:
+                scaled_loss.backward()
             if batch_num % args.update_freq == 0:
                 optimizer.step()
                 optimizer.zero_grad()
