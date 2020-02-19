@@ -79,8 +79,10 @@ def train(args, model, loss, optimizer, Corpus):
     for epoch in range(1, args.max_epoch + 1):
         log_information(args, "epoch {} training".format(epoch))
 
+        batch_num = 1 # 更新到第n个batch，update_freq用
         # 训练
         model.train()
+        optimizer.zero_grad()
         #清理GPU碎片空间？？
         if not args.use_cpu:
             torch.cuda.empty_cache()
@@ -99,11 +101,12 @@ def train(args, model, loss, optimizer, Corpus):
                     extra_data = [i.half(non_blocking=True) if i.dtype == torch.float else i for i in extra_data]
                     extra_label = [i.half(non_blocking=True) if i.dtype == torch.float else i for i in extra_label]
 
-            optimizer.zero_grad()
             out = model(train_x, train_length, extra_data)
             loss_value = loss(out, train_y, extra_label)
             loss_value.backward()
-            optimizer.step()
+            if batch_num % args.update_freq == 0:
+                optimizer.step()
+                optimizer.zero_grad()
 
         # 每个epoch评估
         # train_loss, train_p, train_r, train_f0_5 = evaluate(args, Corpus.traindataloader, model)

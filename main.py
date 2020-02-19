@@ -30,6 +30,9 @@ def check_args(args):
         merageargs = merage_args(args.__dict__, loadargs)
         args.__dict__ = merageargs
 
+    if args.update_freq <= 0:
+        raise ValueError("update_freq value error")
+
     if not args.use_cpu:
         if args.gpu_ids is None:
             raise ValueError("gpu ids value error")
@@ -149,6 +152,7 @@ if __name__ == "__main__":
     parser.add_argument("--data-dir", default="data/prepare/train.pkl")
     parser.add_argument("--vocab-dir", default="data/prepare")
     parser.add_argument("--batch-size", type=int, default=32)
+    parser.add_argument("--update-freq", type=int, default=1)
     parser.add_argument("--max-epoch", type=int, default=100)
     parser.add_argument("--early-stop", type=int, default=10)
     parser.add_argument("--lr", type=float, default=1)
