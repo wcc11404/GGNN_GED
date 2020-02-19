@@ -2,8 +2,8 @@ import argparse
 import numpy as np
 import torch
 import os
-# from torch.nn.parallel import DistributedDataParallel as DDP
-from apex.parallel import DistributedDataParallel as DDP
+from torch.nn.parallel import DistributedDataParallel as DDP
+# from apex.parallel import DistributedDataParallel as DDP
 
 from data.corpus import GedCorpus
 from myscripts.utils import train, test, load_args, load_checkpoint, log_information
