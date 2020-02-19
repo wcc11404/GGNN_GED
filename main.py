@@ -125,7 +125,7 @@ if __name__ == "__main__":
     parser.add_argument("--random-seed", type=int, default=44)
     parser.add_argument("--loginfor", action='store_true', default=True)
     parser.add_argument("--use-fpp16", action='store_true', default=False)
-    parser.add_argument("--num-workers", type=int, default=1)
+    parser.add_argument("--num-workers", type=int, default=0)
 
     parser.add_argument("--arch", default="GGNNNER")
     parser.add_argument("--criterion", default="BaseLoss")
