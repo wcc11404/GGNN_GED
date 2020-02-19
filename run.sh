@@ -39,7 +39,7 @@ python $script_dir/main.py --gpu-id 1 2 --mode Train --arch GGNNNER --criterion 
  --char-embed-dim 0 --gnn-steps 3 --save-dir checkpoint/LM_GGNN_Big \
  --w2v-dir data/process/w2v_300d.txt --data-dir data/prepare/pretrain.pkl \
  --optimizer adam --lr 1e-3 --evaluation loss --batch-size 64 --early-stop 5 \
- --max-epoch 10 --use-ddp --update-freq 1
+ --max-epoch 10 --use-ddp --update-freq 2
 
 # fine-tune
 #python $script_dir/main.py --gpu-id 3 --mode Train --arch GGNNNER --criterion SLLoss \
