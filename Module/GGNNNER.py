@@ -43,7 +43,7 @@ class GGNNNER(nn.Module):
 
         # 加载词表权重
         re = self.load_embedding(args)
-        log_information(args, re)
+        log_information(args, "load word num " + str(re))
 
     def load_embedding(self, args):
         if args.mode == "Train" and args.load_dir is None:

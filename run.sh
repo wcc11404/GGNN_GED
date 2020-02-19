@@ -35,11 +35,13 @@ script_dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 # --word-vocab-dir data/prepare/wordvocab.pkl --char-vocab-dir data/prepare/charvocab.pkl --edge-vocab-dir data/prepare/edgevocab.pkl --output data/prepare/train.pkl
 
 # 预训练
-python $script_dir/main.py --gpu-id 1 2 --mode Train --arch GGNNNER --criterion LMLoss \
+python $script_dir/main.py --gpu-id 1 --mode Train --arch GGNNNER --criterion LMLoss \
  --char-embed-dim 0 --gnn-steps 3 --save-dir checkpoint/LM_GGNN_Big \
  --w2v-dir data/process/w2v_300d.txt --data-dir data/prepare/pretrain.pkl \
  --optimizer adam --lr 1e-3 --evaluation loss --batch-size 64 --early-stop 5 \
- --max-epoch 10 --use-ddp --update-freq 2
+ --max-epoch 10 --update-freq 2
+
+#--use-ddp 
 
 # fine-tune
 #python $script_dir/main.py --gpu-id 3 --mode Train --arch GGNNNER --criterion SLLoss \
