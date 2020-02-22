@@ -4,7 +4,7 @@ from Module.Layers import *
 
 class GraphAttentionTemplate(nn.Module):
     def __init__(self, input_dim, n_head, n_steps, dropout=0.0, residual=False,
-                 layernorm=False, requires_grad=True, cuda=True):
+                 layernorm=False, requires_grad=True):
         super(GraphAttentionTemplate, self).__init__()
         self.input_dim = input_dim
         self.n_steps = n_steps
@@ -15,9 +15,7 @@ class GraphAttentionTemplate(nn.Module):
         self.weight_b = nn.Conv1d(self.input_dim // self.n_head, 1, 1)
         self.weight_c = nn.Conv1d(self.input_dim // self.n_head, 1, 1)
         self.bias = torch.zeros(self.input_dim // self.n_head, dtype=torch.float32, requires_grad=True)
-        print(cuda)
-        if cuda:
-            self.bias.cuda()
+
 
         self.dropout = nn.Dropout(dropout)
         self.residual = residual
@@ -33,6 +31,9 @@ class GraphAttentionTemplate(nn.Module):
         #         nn.init.constant_(param, 0.01)
         #     elif 'weight' in name:
         #         nn.init.xavier_uniform_(param)
+
+    def init_cuda(self):
+        self.bias.cuda()
 
     def head_attention(self, input):
         # Aggregater
