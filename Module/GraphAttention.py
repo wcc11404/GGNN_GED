@@ -56,7 +56,7 @@ class GraphAttentionTemplate(nn.Module):
         print(out)
         print()
         print("coefs")
-        print(coefs)
+        print(coefs[0][0])
         print()
         coefs = self.dropout(coefs)
         out = self.dropout(out)
