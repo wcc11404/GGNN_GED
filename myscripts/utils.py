@@ -121,7 +121,6 @@ def train(args, model, loss, optimizer, Corpus):
                 optimizer.step()
                 optimizer.zero_grad()
             batch_num += 1
-            break
 
         # 每个epoch评估
         # train_loss, train_p, train_r, train_f0_5 = evaluate(args, Corpus.traindataloader, model)
