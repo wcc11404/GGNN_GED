@@ -62,7 +62,7 @@ class GraphAttentionTemplate(nn.Module):
         coefs = nn.functional.softmax(nn.functional.leaky_relu(temp1, negative_slope=0.2), dim=-1)  # paper B * S * S
         out = out.permute(0, 2, 1).contiguous()  # B * S * (E//n_head)
         print("out")
-        print(out)
+        print(out[0][0])
         print()
         print("coefs")
         print(coefs[0][0])
@@ -71,9 +71,9 @@ class GraphAttentionTemplate(nn.Module):
         out = self.dropout(out)
 
         # Updater
-        re = torch.bmm(coefs, out) # B * S * (E//n_head)
+        re = torch.bmm(out, coefs) # B * S * (E//n_head)
         print("temp")
-        print(re)
+        print(re[0][0])
         print()
         re = re + self.bias # B * S * (E//n_head)
         print("re")
