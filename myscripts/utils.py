@@ -45,7 +45,7 @@ def load_checkpoint(model, dir):
         print(load_checkpoint.keys())
         print()
         model_dict = model.state_dict()  # 获得当前模型的参数字典
-        # print(model_dict.keys())
+        print(model_dict.keys())
         print()
         load_dict = {k: v for k, v in load_checkpoint.items() if k in model_dict}  # 找名字一样的加载权重
         # print(load_dict.keys())
