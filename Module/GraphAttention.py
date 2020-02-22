@@ -36,12 +36,15 @@ class GraphAttentionTemplate(nn.Module):
         out = self.dropout(input) # B * S * E
 
         out = out.permute(0, 2, 1).contiguous() # B * E * S
+        print(out.shape)
         out = self.weight_a(out) # conv = [E, E//n_head, 1] => B * (E//n_head) * S
         temp1 = self.weight_b(out) # conv = [E//n_head, 1, 1] => B * 1 * S
         temp2 = self.weight_c(out) # conv = [E//n_head, 1, 1] => B * 1 * S
         temp1 = temp1.permute(0, 2, 1).contiguous() + temp2 # B * S * 1 + B * 1 * S => B * S * S
-        coefs = nn.functional.softmax(nn.functional.leaky_relu(temp1, negative_slope=0.2))  # paper
+        coefs = nn.functional.softmax(nn.functional.leaky_relu(temp1, negative_slope=0.2))  # paper B * S * S
         out = out.permute(0, 2, 1).contiguous()  # B * S * (E//n_head)
+        print(coefs.shape)
+        print(out.shape)
 
         coefs = self.dropout(coefs)
         out = self.dropout(out)
