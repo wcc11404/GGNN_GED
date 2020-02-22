@@ -121,6 +121,7 @@ def train(args, model, loss, optimizer, Corpus):
                 optimizer.step()
                 optimizer.zero_grad()
             batch_num += 1
+            break
 
         # 每个epoch评估
         # train_loss, train_p, train_r, train_f0_5 = evaluate(args, Corpus.traindataloader, model)
@@ -212,8 +213,5 @@ def evaluate(args, dataloader, model, loss, mode="average"):
             length += l
 
     p, r, f = 0, 0, 0
-    try:
-        p, r, f, _ = precision_recall_fscore_support(groundtruth, predict, 0.5, average='binary')
-    except:
-        pass
+    p, r, f, _ = precision_recall_fscore_support(groundtruth, predict, 0.5, average='binary')
     return loss_value / length if mode == "average" else loss_value, p, r, f
