@@ -42,8 +42,14 @@ def load_checkpoint(model, dir):
         best_dir = open(log, "r").readline().strip()
         # 之前save会存储gpu信息，所以可能会导致load cuda error（之前gpu被占）
         load_checkpoint = torch.load(best_dir, map_location=lambda storage, loc: storage)
+        print(load_checkpoint)
+        print()
         model_dict = model.state_dict()  # 获得当前模型的参数字典
+        print(model_dict)
+        print()
         load_dict = {k: v for k, v in load_checkpoint.items() if k in model_dict}  # 找名字一样的加载权重
+        print(load_dict)
+        print()
         model.load_state_dict(load_dict)  # 加载权重
     except Exception:
         raise Exception
