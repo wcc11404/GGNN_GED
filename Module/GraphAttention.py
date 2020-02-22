@@ -15,6 +15,7 @@ class GraphAttentionTemplate(nn.Module):
         self.weight_b = nn.Conv1d(self.input_dim // self.n_head, 1, 1)
         self.weight_c = nn.Conv1d(self.input_dim // self.n_head, 1, 1)
         self.bias = torch.zeros(self.input_dim // self.n_head, dtype=torch.float32, requires_grad=True)
+        print(cuda)
         if cuda:
             self.bias.cuda()
 
