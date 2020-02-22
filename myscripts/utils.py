@@ -86,7 +86,9 @@ def train(args, model, loss, optimizer, Corpus):
     if args.local_rank == 0:
         save_args(args.__dict__, args.save_dir + "/args.json")
 
+    print("1")
     for epoch in range(1, args.max_epoch + 1):
+        print("2")
         log_information(args, "epoch {} training".format(epoch))
 
         batch_num = 1 # 更新到第n个batch，update_freq用
