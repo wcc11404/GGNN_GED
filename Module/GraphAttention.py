@@ -48,13 +48,7 @@ class GraphAttentionTemplate(nn.Module):
         out = out.permute(0, 2, 1).contiguous() # B * E * S
         out = self.weight_a(out) # conv = [E, E//n_head, 1] => B * (E//n_head) * S
         temp1 = self.weight_b(out) # conv = [E//n_head, 1, 1] => B * 1 * S
-        print("temp1")
-        print(temp1)
-        print()
         temp2 = self.weight_c(out) # conv = [E//n_head, 1, 1] => B * 1 * S
-        print("temp2")
-        print(temp2)
-        print()
         temp1 = temp1.permute(0, 2, 1).contiguous() + temp2 # B * S * 1 + B * 1 * S => B * S * S
         print("temp1")
         print(temp1[0][0])
@@ -62,7 +56,7 @@ class GraphAttentionTemplate(nn.Module):
         coefs = nn.functional.softmax(nn.functional.leaky_relu(temp1, negative_slope=0.2), dim=-1)  # paper B * S * S
         out = out.permute(0, 2, 1).contiguous()  # B * S * (E//n_head)
         print("out")
-        print(out[0][0])
+        print(out)
         print()
         print("coefs")
         print(coefs[0][0])
@@ -71,14 +65,11 @@ class GraphAttentionTemplate(nn.Module):
         out = self.dropout(out)
 
         # Updater
-        re = torch.bmm(out, coefs) # B * S * (E//n_head)
+        re = torch.bmm(coefs, out) # B * S * (E//n_head)
         print("temp")
         print(re[0][0])
         print()
         re = re + self.bias # B * S * (E//n_head)
-        print("re")
-        print(re)
-        print()
         exit()
         if self.residual:
             re = re + out
