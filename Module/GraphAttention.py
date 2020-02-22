@@ -60,6 +60,7 @@ class GraphAttentionTemplate(nn.Module):
         print()
         print("coefs")
         print(coefs[0][0])
+        print(coefs[0][1])
         print()
         coefs = self.dropout(coefs)
         out = self.dropout(out)
@@ -67,7 +68,7 @@ class GraphAttentionTemplate(nn.Module):
         # Updater
         re = torch.bmm(coefs, out) # B * S * (E//n_head)
         print("temp")
-        print(re[0][0])
+        print(re)
         print()
         re = re + self.bias # B * S * (E//n_head)
         exit()
