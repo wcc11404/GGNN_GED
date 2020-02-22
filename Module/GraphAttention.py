@@ -12,8 +12,8 @@ class GraphAttentionTemplate(nn.Module):
         assert self.input_dim % self.n_head == 0
 
         self.weight_a = nn.Conv1d(self.input_dim, self.input_dim // self.n_head, 1, bias=False)
-        self.weight_b = nn.Conv1d(self.input_dim, 1, 1)
-        self.weight_c = nn.Conv1d(self.input_dim, 1, 1)
+        self.weight_b = nn.Conv1d(self.input_dim // self.n_head, 1, 1)
+        self.weight_c = nn.Conv1d(self.input_dim // self.n_head, 1, 1)
         self.bias = torch.zeros(self.input_dim // self.n_head, dtype=torch.float32, requires_grad=True)
 
         self.dropout = nn.Dropout(dropout)
@@ -33,20 +33,22 @@ class GraphAttentionTemplate(nn.Module):
 
     def head_attention(self, input):
         # Aggregater
-        out = self.dropout(input)
+        out = self.dropout(input) # B * S * E
 
-        out = self.weight_a(out)
-        temp1 = self.weight_b(out)
-        temp2 = self.weight_c(out)
-        temp1 = temp1 + temp2.permute(0, 2, 1).contiguous()
+        out = out.permute(0, 2, 1).contiguous() # B * E * S
+        out = self.weight_a(out) # conv = [E, E//n_head, 1] => B * (E//n_head) * S
+        temp1 = self.weight_b(out) # conv = [E//n_head, 1, 1] => B * 1 * S
+        temp2 = self.weight_c(out) # conv = [E//n_head, 1, 1] => B * 1 * S
+        temp1 = temp1.permute(0, 2, 1).contiguous() + temp2 # B * S * 1 + B * 1 * S => B * S * S
         coefs = nn.functional.softmax(nn.functional.leaky_relu(temp1, negative_slope=0.2))  # paper
+        out = out.permute(0, 2, 1).contiguous()  # B * S * (E//n_head)
 
         coefs = self.dropout(coefs)
         out = self.dropout(out)
 
         # Updater
-        re = coefs * out
-        re = re + self.bias
+        re = coefs * out # B * S * (E//n_head)
+        re = re + self.bias # B * S * (E//n_head)
 
         if self.residual:
             re = re + out
