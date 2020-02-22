@@ -101,6 +101,8 @@ def main(args):
         model.to("cuda")
         try:
             model.init_cuda()
+        except:
+            pass
         if args.use_fpp16:
             model.half()
 
