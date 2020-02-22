@@ -14,7 +14,7 @@ class GANNER(nn.Module):
         # , requires_grad=False if not args.train_lm else True
         self.wordembedding = EmbeddingTemplate(args.word_vocabulary_size, args.word_embed_dim, args.embed_drop)
         self.gan = GraphAttentionTemplate(args.word_embed_dim, 1, args.gnn_steps, args.gnn_drop,
-                                     residual=False, layernorm=False)
+                                     residual=False, layernorm=False, cuda=not args.use_cpu)
         # self.attention = AttentionTemplate(args.word_embed_dim)
         # self.rnn = RnnTemplate(args.rnn_type, args.batch_size, args.word_embed_dim, args.word_embed_dim, args.rnn_drop,
         #                        bidirectional=args.rnn_bidirectional, residual=False, layernorm=False)
