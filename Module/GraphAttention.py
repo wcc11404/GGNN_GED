@@ -24,11 +24,12 @@ class GraphAttentionTemplate(nn.Module):
         self.init_weight()
 
     def init_weight(self):
-        for name, param in self.bias.named_parameters():
-            if 'bias' in name:
-                nn.init.constant_(param, 0.01)
-            elif 'weight' in name:
-                nn.init.xavier_uniform_(param)
+        nn.init.constant_(self.bias, 0.01)
+        # for name, param in self.bias.named_parameters():
+        #     if 'bias' in name:
+        #         nn.init.constant_(param, 0.01)
+        #     elif 'weight' in name:
+        #         nn.init.xavier_uniform_(param)
 
     def head_attention(self, input):
         # Aggregater
