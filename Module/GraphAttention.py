@@ -32,9 +32,6 @@ class GraphAttentionTemplate(nn.Module):
         #     elif 'weight' in name:
         #         nn.init.xavier_uniform_(param)
 
-    def init_cuda(self):
-        self.bias.cuda()
-
     def head_attention(self, input):
         # Aggregater
         out = self.dropout(input) # B * S * E

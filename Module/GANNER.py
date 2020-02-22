@@ -54,6 +54,9 @@ class GANNER(nn.Module):
                     log_information(args, "load word num " + str(num))
         del args.word2id
 
+    def init_cuda(self):
+        self.gan.bias.cuda()
+
     def forward(self, batchinput, batchlength, batchextradata):
         #batchinput_char, batchlength_char = batchextradata
 
