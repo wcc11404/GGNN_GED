@@ -55,7 +55,7 @@ class GANNER(nn.Module):
         del args.word2id
 
     def forward(self, batchinput, batchlength, batchextradata):
-        batchinput_char, batchlength_char, graph_in, graph_out = batchextradata
+        #batchinput_char, batchlength_char = batchextradata
 
         emb = self.wordembedding(batchinput)
         out = self.gan(emb)
