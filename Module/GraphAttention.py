@@ -14,7 +14,6 @@ class GraphAttentionTemplate(nn.Module):
         self.weight_a = nn.Conv1d(self.input_dim, self.input_dim // self.n_head, 1, bias=False)
         self.weight_b = nn.Conv1d(self.input_dim // self.n_head, 1, 1)
         self.weight_c = nn.Conv1d(self.input_dim // self.n_head, 1, 1)
-        #self.bias = torch.zeros(self.input_dim // self.n_head, dtype=torch.float32, requires_grad=True)
         self.bias = nn.Parameter(torch.FloatTensor(self.input_dim // self.n_head))
 
         self.dropout = nn.Dropout(dropout)
@@ -29,17 +28,18 @@ class GraphAttentionTemplate(nn.Module):
             if 'bias' in name:
                 nn.init.constant_(param, 0.01)
             elif 'weight' in name:
-                nn.init.kaiming_normal(param, mode='fan_out')
+                nn.init.kaiming_normal_(param, mode='fan_out')
         for name, param in self.weight_b.named_parameters():
             if 'bias' in name:
                 nn.init.constant_(param, 0.01)
             elif 'weight' in name:
-                nn.init.kaiming_normal(param, mode='fan_out')
+                nn.init.kaiming_normal_(param, mode='fan_out')
+                print("shit")
         for name, param in self.weight_c.named_parameters():
             if 'bias' in name:
                 nn.init.constant_(param, 0.01)
             elif 'weight' in name:
-                nn.init.kaiming_normal(param, mode='fan_out')
+                nn.init.kaiming_normal_(param, mode='fan_out')
         nn.init.constant_(self.bias, 0.01)
 
     def head_attention(self, input):

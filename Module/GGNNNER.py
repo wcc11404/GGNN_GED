@@ -43,7 +43,7 @@ class GGNNNER(nn.Module):
         self.bw_lm_softmax = LinearTemplate(args.lm_hidden_dim, self.lm_vocab_size, activation=None)
 
         # 加载词表权重
-        re = self.load_embedding(args)
+        self.load_embedding(args)
 
     def load_embedding(self, args):
         if args.mode == "Train" and args.load_dir is None:
