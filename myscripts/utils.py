@@ -21,7 +21,7 @@ def clean_ddp():
 
 def log_information(args, str, force=False):
     if force or args.loginfor:
-        if force or args.local_rank == 0:
+        if force or (args.local_rank == 0):
             print(str)
 
 def update_best_checkpoint(save_dir, epoch):
@@ -132,8 +132,8 @@ def train(args, model, loss, optimizer, Corpus):
                    "dev_r": dev_r,
                    "dev_f0.5": dev_f0_5
                    }
-            log_information(args, "epoch {}  dev loss: {:.4f}  dev p: {:.4f}  dev r: {:.4f}  dev f0.5: {:.4f}"
-                  .format(log["epoch"], log["dev_loss"], log["dev_p"], log["dev_r"], log["dev_f0.5"]))
+            log_information(args, "epoch {}  dev loss: {:.4f}  dev p: {:.4f}  dev r: {:.4f}  dev f0.5: {:.4f}".format(
+                log["epoch"], log["dev_loss"], log["dev_p"], log["dev_r"], log["dev_f0.5"]))
             summary.append(log) # 日志，暂时没用
 
             # 存储策略
@@ -212,5 +212,8 @@ def evaluate(args, dataloader, model, loss, mode="average"):
             length += l
 
     p, r, f = 0, 0, 0
-    p, r, f, _ = precision_recall_fscore_support(groundtruth, predict, 0.5, average='binary')
+    try:
+        p, r, f, _ = precision_recall_fscore_support(groundtruth, predict, 0.5, average='binary')
+    except:
+        pass
     return loss_value / length if mode == "average" else loss_value, p, r, f
