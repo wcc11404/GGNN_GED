@@ -20,7 +20,7 @@ def clean_ddp():
     dist.destroy_process_group()
 
 def log_information(args, str, force=False):
-    if force or args.loginfor == True:
+    if force or args.loginfor:
         if force or args.local_rank == 0:
             print(str)
 

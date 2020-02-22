@@ -1,6 +1,7 @@
 import torch
 from torch import nn
-from .Layers import EmbeddingTemplate, RnnTemplate, LinearTemplate, GraphGateTemplate, AttentionTemplate
+from Module.Layers import EmbeddingTemplate, RnnTemplate, LinearTemplate, AttentionTemplate
+from Module.GraphGate import GraphGateTemplate
 from myscripts.utils import log_information
 
 class GGNNNER(nn.Module):
