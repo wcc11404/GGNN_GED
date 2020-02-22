@@ -132,6 +132,7 @@ def train(args, model, loss, optimizer, Corpus):
                    "dev_r": dev_r,
                    "dev_f0.5": dev_f0_5
                    }
+            print("shit")
             log_information(args, "epoch {}  dev loss: {:.4f}  dev p: {:.4f}  dev r: {:.4f}  dev f0.5: {:.4f}".format(
                 log["epoch"], log["dev_loss"], log["dev_p"], log["dev_r"], log["dev_f0.5"]))
             summary.append(log) # 日志，暂时没用
