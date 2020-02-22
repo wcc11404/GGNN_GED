@@ -55,9 +55,7 @@ class GANNER(nn.Module):
         del args.word2id
 
     def init_cuda(self):
-
-        self.gan.bias.cuda()
-        print("shit")
+        self.gan.bias.to("cuda")
         print(self.gan.bias.device)
 
     def forward(self, batchinput, batchlength, batchextradata):
