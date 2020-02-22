@@ -42,13 +42,13 @@ script_dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 # --max-epoch 10 --update-freq 2 --use-ddp
 
 # fine-tune
-python -u $script_dir/main.py --gpu-id 3 --mode Train --arch GGNNNER --criterion SLLoss \
- --char-embed-dim 0 --gnn-steps 1 --save-dir checkpoint/GGNN_Big --load-dir checkpoint/LM_GGNN_Big \
- --data-dir data/prepare/train.pkl --optimizer adadelta --lr 1 --evaluation f0.5 \
- --batch-size 32 --early-stop 8 --max-epoch 50 --lm-cost-weight 0.02
+#python -u $script_dir/main.py --gpu-id 3 --mode Train --arch GGNNNER --criterion SLLoss \
+# --char-embed-dim 0 --gnn-steps 1 --save-dir checkpoint/GGNN_Big --load-dir checkpoint/LM_GGNN_Big \
+# --data-dir data/prepare/train.pkl --optimizer adadelta --lr 1 --evaluation f0.5 \
+# --batch-size 32 --early-stop 8 --max-epoch 50 --lm-cost-weight 0.02
 
 # 训练
-#python -u $script_dir/main.py --gpu-id 4 --mode Train --arch GANNER --w2v-dir data/process/w2v_300d.txt \
-# --char-embed-dim 0 --gnn-steps 3 --save-dir checkpoint/GAN_step3 \
-# --data-dir data/prepare/train.pkl --optimizer adadelta --lr 1 --evaluation f0.5 \
-# --batch-size 32 --early-stop 8 --max-epoch 50 --lm-cost-weight 0.10
+python -u $script_dir/main.py --gpu-id 4 --mode Train --arch GANNER --criterion BaseLoss \
+ --char-embed-dim 0 --gnn-steps 3 --save-dir checkpoint/GAN_step3 --w2v-dir data/process/w2v_300d.txt \
+ --data-dir data/prepare/train.pkl --optimizer adadelta --lr 1 --evaluation f0.5 \
+ --batch-size 32 --early-stop 8 --max-epoch 50 --lm-cost-weight 0.10
