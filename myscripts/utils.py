@@ -53,8 +53,6 @@ def load_checkpoint(model, dir):
         model_dict = model.state_dict()  # 获得当前模型的参数字典
         # 找名字一样的加载权重
         load_dict = {check(k, model_dict): v for k, v in load_checkpoint.items() if check(k, model_dict) is not None}
-        print(load_dict.keys())
-        print()
         model.load_state_dict(load_dict)  # 加载权重
     except Exception:
         raise Exception
@@ -114,8 +112,11 @@ def train(args, model, loss, optimizer, Corpus):
 
             out = model(train_x, train_length, extra_data)
             loss_value = loss(out, train_y, extra_label)
-            with amp.scale_loss(loss_value, optimizer) as scaled_loss:
-                scaled_loss.backward()
+            if args.use_ddp:
+                with amp.scale_loss(loss_value, optimizer) as scaled_loss:
+                    scaled_loss.backward()
+            else:
+                loss_value.backward()
             if batch_num % args.update_freq == 0:
                 optimizer.step()
                 optimizer.zero_grad()
