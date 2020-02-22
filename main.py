@@ -143,7 +143,7 @@ if __name__ == "__main__":
     parser.add_argument("--rnn-type", default="LSTM")
     parser.add_argument("--rnn-bidirectional", action='store_true', default=True)
     parser.add_argument("--rnn-drop", type=float, default=0.3)
-    parser.add_argument("--gnn-drop", type=float, default=0.3)
+    parser.add_argument("--gnn-drop", type=float, default=0.0)
     parser.add_argument("--linear-drop", type=float, default=0.0)
     parser.add_argument("--hidden-dim", type=int, default=50)
     parser.add_argument("--lm-hidden-dim", type=int, default=50)

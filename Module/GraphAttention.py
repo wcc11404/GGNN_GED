@@ -34,7 +34,6 @@ class GraphAttentionTemplate(nn.Module):
                 nn.init.constant_(param, 0.01)
             elif 'weight' in name:
                 nn.init.kaiming_normal_(param, mode='fan_out')
-                print("shit")
         for name, param in self.weight_c.named_parameters():
             if 'bias' in name:
                 nn.init.constant_(param, 0.01)
