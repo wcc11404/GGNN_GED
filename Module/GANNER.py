@@ -33,9 +33,9 @@ class GANNER(nn.Module):
         self.classification = LinearTemplate(args.hidden_dim, 2, activation=None)
 
         ## LM
-        self.fw_lm_hiddenlinear = LinearTemplate((args.word_embed_dim) // 2 + args.char_embed_dim, args.lm_hidden_dim,
+        self.fw_lm_hiddenlinear = LinearTemplate(args.word_embed_dim + args.char_embed_dim, args.lm_hidden_dim,
                                                  activation="tanh", dropout=args.linear_drop)
-        self.bw_lm_hiddenlinear = LinearTemplate((args.word_embed_dim) // 2 + args.char_embed_dim, args.lm_hidden_dim,
+        self.bw_lm_hiddenlinear = LinearTemplate(args.word_embed_dim + args.char_embed_dim, args.lm_hidden_dim,
                                                  activation="tanh", dropout=args.linear_drop)
         if self.lm_vocab_size == -1 or self.lm_vocab_size > args.word_vocabulary_size:
             self.lm_vocab_size = args.word_vocabulary_size
