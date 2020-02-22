@@ -99,10 +99,6 @@ def main(args):
     elif not args.use_cpu and not args.use_ddp and torch.cuda.is_available():# 设置gpu和dp
         torch.cuda.set_device(args.gpu_ids[0])
         model.to("cuda")
-        try:
-            model.init_cuda()
-        except:
-            pass
         if args.use_fpp16:
             model.half()
 
