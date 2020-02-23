@@ -77,6 +77,9 @@ class GraphAttentionTemplate(nn.Module):
         print(re)
         print()
         re = re + self.bias # B * S * (E//n_head)
+        print("re")
+        print(re)
+        print()
         exit()
         if self.residual:
             re = re + out
