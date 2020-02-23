@@ -6,6 +6,7 @@ from tqdm import tqdm
 import torch.multiprocessing as mp
 import torch.distributed as dist
 from apex import amp
+import sys
 
 def run_demo(demo_fn, world_size,args):
     mp.spawn(demo_fn, args=(args,), nprocs=world_size, join=True)
@@ -23,6 +24,7 @@ def log_information(args, str, force=False):
     if force or args.loginfor:
         if force or (args.local_rank == 0):
             print(str)
+            sys.stdout.flush()
 
 def update_best_checkpoint(save_dir, epoch):
     save_dir = os.path.abspath(save_dir)
