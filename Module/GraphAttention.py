@@ -72,7 +72,7 @@ class GraphAttentionTemplate(nn.Module):
         if self.residual:
             re = re + out
 
-        re = torch.nn.ELU(re)
+        re = nn.functional.elu(re)
         # re = torch.tanh(re)
         return re
 
