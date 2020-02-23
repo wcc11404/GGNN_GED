@@ -78,8 +78,13 @@ class GANNER(nn.Module):
         lm_bw_output = self.bw_lm_hiddenlinear(out)
         lm_fw_output = self.fw_lm_softmax(lm_fw_output)
         lm_bw_output = self.bw_lm_softmax(lm_bw_output)
-
+        print(out)
+        print()
         out = self.hiddenlinear(out)
+        print(out)
+        print()
         out = self.classification(out)
-
+        print(out)
+        print()
+        exit()
         return out, (lm_fw_output, lm_bw_output)
