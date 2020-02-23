@@ -81,5 +81,5 @@ class GANNER(nn.Module):
 
         out = self.hiddenlinear(out)
         out = self.classification(out)
-        
+
         return out, (lm_fw_output, lm_bw_output)

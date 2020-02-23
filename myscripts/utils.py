@@ -213,8 +213,5 @@ def evaluate(args, dataloader, model, loss, mode="average"):
             length += l
 
     p, r, f = 0, 0, 0
-    print(groundtruth)
-    print()
-    print(predict)
     p, r, f, _ = precision_recall_fscore_support(groundtruth, predict, 0.5, average='binary')
     return loss_value / length if mode == "average" else loss_value, p, r, f
