@@ -69,12 +69,13 @@ class GraphAttentionTemplate(nn.Module):
         out = torch.matmul(coefs, out) # B * S * (E//n_head)
         out = out + self.bias # B * S * (E//n_head)
 
-        out = self.dropout(out)
+
 
         if self.residual:
             out = out + input
 
         out = nn.functional.elu(out)
+        out = self.dropout(out)
         # out = torch.tanh(out)
         return out
 
