@@ -44,7 +44,7 @@ class GraphAttentionTemplate(nn.Module):
                 nn.init.kaiming_normal_(param, mode='fan_out')
         nn.init.constant_(self.bias, 0)
 
-    def head_attention(self, input):
+    def head_attention(self, input, mask):
         # Aggregater
         out = self.dropout(input) # B * S * E
 
@@ -55,37 +55,52 @@ class GraphAttentionTemplate(nn.Module):
         temp1 = temp1.permute(0, 2, 1).contiguous() + temp2 # B * S * 1 + B * 1 * S => B * S * S
         # temp1 = torch.bmm(temp1, temp2.permute(0, 2, 1).contiguous()) # B * S * 1 + B * 1 * S => B * S * S
         # coefs = nn.functional.softmax(nn.functional.leaky_relu(temp1, negative_slope=0.2), dim=-1)  # paper B * S * S
-        coefs = nn.functional.softmax(torch.tanh(temp1), dim=-1)  # paper B * S * S
-        # print("coefs")
-        # print(coefs)
-        # print()
+        temp1 = torch.tanh(temp1)
+        temp1 = temp1 + mask
+        print(temp1)
+        coefs = nn.functional.softmax(temp1, dim=-1)  # paper B * S * S
+        print("coefs")
+        print(coefs)
+        print()
 
         out = out.permute(0, 2, 1).contiguous()  # B * S * (E//n_head)
-        # print("out")
-        # print(out)
-        # print()
+        print("out")
+        print(out)
+        print()
         coefs = self.dropout(coefs)
         out = self.dropout(out)
 
         # Updater
         re = torch.matmul(coefs, out) # B * S * (E//n_head)
-        # print("re")
-        # print(re)
-        # print()
+        print("re")
+        print(re)
+        print()
         re = re + self.bias # B * S * (E//n_head)
-        # exit()
+        exit()
         if self.residual:
             re = re + out
 
         re = torch.tanh(re)
         return re
 
-    def forward(self, batchinput):
+    def genMask(self, len, maxlen, value=float('-inf')):
+        a = torch.zeros(len)
+        b = torch.ones(maxlen - len) * value
+        c = torch.cat([a, b])
+        return c
+
+    def forward(self, batchinput, batchlength):
         out = batchinput
+        mask = []
+        for l in batchlength:
+            mask.append(self.genMask(l, batchinput.size(1)))
+        mask = torch.stack(mask, dim=0).cuda()
+        print(mask.shape)
+        print(mask)
         for step in range(self.n_steps):
             head = []
             for _ in range(self.n_head):
-                head.append(self.head_attention(out))
+                head.append(self.head_attention(out, mask))
             head = torch.stack(head)
             out = torch.mean(head, 0)
 
