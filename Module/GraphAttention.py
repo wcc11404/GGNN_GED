@@ -84,8 +84,8 @@ class GraphAttentionTemplate(nn.Module):
         return re
 
     def genMask(self, len, maxlen, value=float('-inf')):
-        a = torch.zeros(len)
-        b = torch.ones(maxlen - len) * value
+        a = torch.zeros(len).float()
+        b = torch.ones(maxlen - len).float() * value
         c = torch.cat([a, b])
         return c
 
