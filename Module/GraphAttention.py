@@ -29,20 +29,20 @@ class GraphAttentionTemplate(nn.Module):
     def init_weight(self):
         for name, param in self.weight_a.named_parameters():
             if 'bias' in name:
-                nn.init.constant_(param, 0.01)
+                nn.init.constant_(param, 0)
             elif 'weight' in name:
                 nn.init.kaiming_normal_(param, mode='fan_out')
         for name, param in self.weight_b.named_parameters():
             if 'bias' in name:
-                nn.init.constant_(param, 0.01)
+                nn.init.constant_(param, 0)
             elif 'weight' in name:
                 nn.init.kaiming_normal_(param, mode='fan_out')
         for name, param in self.weight_c.named_parameters():
             if 'bias' in name:
-                nn.init.constant_(param, 0.01)
+                nn.init.constant_(param, 0)
             elif 'weight' in name:
                 nn.init.kaiming_normal_(param, mode='fan_out')
-        nn.init.constant_(self.bias, 0.01)
+        nn.init.constant_(self.bias, 0)
 
     def head_attention(self, input):
         # Aggregater

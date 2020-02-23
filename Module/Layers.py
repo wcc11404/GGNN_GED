@@ -19,7 +19,7 @@ class EmbeddingTemplate(nn.Module):
     def init_weight(self):
         for name, param in self.wordembedding.named_parameters():
             if 'bias' in name:
-                nn.init.constant_(param, 0.01)
+                nn.init.constant_(param, 0)
             elif 'weight' in name:
                 nn.init.xavier_uniform_(param)
             param.requires_grad = self.requires_grad
@@ -98,7 +98,7 @@ class RnnTemplate(nn.Module):
     def init_weight(self):
         for name, param in self.rnn.named_parameters():
             if 'bias' in name:
-                nn.init.constant_(param, 0.01)
+                nn.init.constant_(param, 0)
             elif 'weight' in name:
                 nn.init.xavier_uniform_(param)
             param.requires_grad = self.requires_grad
@@ -177,7 +177,7 @@ class LinearTemplate(nn.Module):
     def init_weight(self):
         for name, param in self.linear.named_parameters():
             if 'bias' in name:
-                nn.init.constant_(param, 0.01)
+                nn.init.constant_(param, 0)
             elif 'weight' in name:
                 nn.init.xavier_uniform_(param)
             param.requires_grad = self.requires_grad
