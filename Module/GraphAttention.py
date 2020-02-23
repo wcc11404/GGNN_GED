@@ -57,26 +57,26 @@ class GraphAttentionTemplate(nn.Module):
         # coefs = nn.functional.softmax(nn.functional.leaky_relu(temp1, negative_slope=0.2), dim=-1)  # paper B * S * S
         temp1 = torch.tanh(temp1)
         temp1 = temp1 + mask
-        print(temp1)
+        # print(temp1)
         coefs = nn.functional.softmax(temp1, dim=-1)  # paper B * S * S
-        print("coefs")
-        print(coefs)
-        print()
+        # print("coefs")
+        # print(coefs)
+        # print()
 
         out = out.permute(0, 2, 1).contiguous()  # B * S * (E//n_head)
-        print("out")
-        print(out)
-        print()
+        # print("out")
+        # print(out)
+        # print()
         coefs = self.dropout(coefs)
         out = self.dropout(out)
 
         # Updater
         re = torch.matmul(coefs, out) # B * S * (E//n_head)
-        print("re")
-        print(re)
-        print()
+        # print("re")
+        # print(re)
+        # print()
         re = re + self.bias # B * S * (E//n_head)
-        exit()
+        # exit()
         if self.residual:
             re = re + out
 
@@ -95,8 +95,8 @@ class GraphAttentionTemplate(nn.Module):
         for l in batchlength:
             mask.append(self.genMask(l, batchinput.size(1)))
         mask = torch.stack(mask, dim=0).unsqueeze(dim=1).cuda()
-        print(mask.shape)
-        print(mask)
+        # print(mask.shape)
+        # print(mask)
         for step in range(self.n_steps):
             head = []
             for _ in range(self.n_head):
