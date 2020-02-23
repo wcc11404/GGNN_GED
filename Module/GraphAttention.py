@@ -55,8 +55,8 @@ class GraphAttentionTemplate(nn.Module):
         # temp1 = temp1.permute(0, 2, 1).contiguous() + temp2 # B * S * 1 + B * 1 * S => B * S * S
         temp1 = torch.bmm(temp1, temp2.permute(0, 2, 1).contiguous()) # B * S * 1 + B * 1 * S => B * S * S
         # coefs = nn.functional.softmax(nn.functional.leaky_relu(temp1, negative_slope=0.2), dim=-1)  # paper B * S * S
-        # temp1 = nn.functional.leaky_relu(temp1, negative_slope=0.2)
-        temp1 = torch.tanh(temp1)
+        temp1 = nn.functional.leaky_relu(temp1, negative_slope=0.2)
+        # temp1 = torch.tanh(temp1)
         temp1 = temp1 + mask
         coefs = nn.functional.softmax(temp1, dim=-1)  # paper B * S * S
 
@@ -72,7 +72,8 @@ class GraphAttentionTemplate(nn.Module):
         if self.residual:
             re = re + out
 
-        re = torch.tanh(re)
+        re = torch.nn.ELU(re)
+        # re = torch.tanh(re)
         return re
 
     def genMask(self, len, maxlen, value=float('-inf')):
