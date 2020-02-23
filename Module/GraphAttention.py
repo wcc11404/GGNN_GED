@@ -94,7 +94,7 @@ class GraphAttentionTemplate(nn.Module):
         mask = []
         for l in batchlength:
             mask.append(self.genMask(l, batchinput.size(1)))
-        mask = torch.stack(mask, dim=0).cuda()
+        mask = torch.stack(mask, dim=0).unsqueeze(dim=1).cuda()
         print(mask.shape)
         print(mask)
         for step in range(self.n_steps):
