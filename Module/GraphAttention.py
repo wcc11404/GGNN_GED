@@ -70,7 +70,8 @@ class GraphAttentionTemplate(nn.Module):
         out = self.dropout(out)
 
         # Updater
-        re = torch.matmul(coefs, out) # B * S * (E//n_head)
+        re=out
+        # re = torch.matmul(coefs, out) # B * S * (E//n_head)
         # print("temp")
         # print(re)
         # print()
