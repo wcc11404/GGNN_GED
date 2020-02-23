@@ -152,10 +152,10 @@ class RnnTemplate(nn.Module):
 
 class LinearTemplate(nn.Module):
     def __init__(self, input_dim, output_dim, bn=False, activation=None, dropout=0.0,
-                 residual=False, layernorm=False, requires_grad=True):
+                 residual=False, layernorm=False, requires_grad=True, use_bias=True):
         super(LinearTemplate, self).__init__()
         self.requires_grad = requires_grad
-        self.linear = nn.Linear(input_dim, output_dim)
+        self.linear = nn.Linear(input_dim, output_dim, bias=use_bias)
         if activation == "sigmoid":
             self.activation = torch.sigmoid
         elif activation == "softmax":
