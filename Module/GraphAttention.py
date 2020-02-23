@@ -76,7 +76,7 @@ class GraphAttentionTemplate(nn.Module):
         # print("re")
         # print(re)
         # print()
-        # re = re + self.bias # B * S * (E//n_head)
+        re = re + self.bias # B * S * (E//n_head)
         # print("re")
         # print(re)
         # print()
@@ -84,7 +84,7 @@ class GraphAttentionTemplate(nn.Module):
         # if self.residual:
         #     re = re + out
 
-        # re = torch.tanh(re)
+        re = torch.tanh(re)
         return re
 
     def genMask(self, len, maxlen, value=float('-inf')):
