@@ -105,11 +105,11 @@ class GraphAttentionTemplate(nn.Module):
             head = []
             for _ in range(self.n_head):
                 head.append(self.head_attention(out, mask))
-            head = torch.stack(head)
+            head = torch.stack(head, dim=0)
             out = torch.mean(head, 0)
-            print(out)
-            print()
-        exit()
+            # print(out)
+            # print()
+        # exit()
 
         if self.use_layernorm:
             out = self.layernorm(out)
