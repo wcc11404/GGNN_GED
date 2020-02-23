@@ -23,7 +23,7 @@ class GraphAttentionTemplate(nn.Module):
         self.residual = residual
         self.use_layernorm = layernorm
         if self.use_layernorm:
-            self.layernorm = nn.LayerNorm(self.input_dim)
+            self.layernorm = nn.ModuleList([nn.LayerNorm(self.input_dim) for _ in range(n_steps)])
         self.init_weight()
 
     def init_weight(self):
@@ -31,17 +31,17 @@ class GraphAttentionTemplate(nn.Module):
             if 'bias' in name:
                 nn.init.constant_(param, 0)
             elif 'weight' in name:
-                nn.init.kaiming_normal_(param, mode='fan_out')
+                nn.init.xavier_uniform_(param)
         for name, param in self.weight_b.named_parameters():
             if 'bias' in name:
                 nn.init.constant_(param, 0)
             elif 'weight' in name:
-                nn.init.kaiming_normal_(param, mode='fan_out')
+                nn.init.xavier_uniform_(param)
         for name, param in self.weight_c.named_parameters():
             if 'bias' in name:
                 nn.init.constant_(param, 0)
             elif 'weight' in name:
-                nn.init.kaiming_normal_(param, mode='fan_out')
+                nn.init.xavier_uniform_(param)
         nn.init.constant_(self.bias, 0)
 
     def head_attention(self, input, mask):
@@ -95,10 +95,7 @@ class GraphAttentionTemplate(nn.Module):
                 head.append(self.head_attention(out, mask))
             head = torch.stack(head, dim=0)
             out = torch.mean(head, 0)
-            # print(out)
-            # print()
-        # exit()
 
-        if self.use_layernorm:
-            out = self.layernorm(out)
+            if self.use_layernorm:
+                out = self.layernorm[step](out)
         return out

@@ -14,18 +14,11 @@ class GANNER(nn.Module):
         # , requires_grad=False if not args.train_lm else True
         self.wordembedding = EmbeddingTemplate(args.word_vocabulary_size, args.word_embed_dim, args.embed_drop)
         self.gan = GraphAttentionTemplate(args.word_embed_dim, 1, args.gnn_steps, args.gnn_drop,
-                                     residual=False, layernorm=False)
+                                     residual=False, layernorm=True)
         # self.attention = AttentionTemplate(args.word_embed_dim)
         # self.rnn = RnnTemplate(args.rnn_type, args.batch_size, args.word_embed_dim, args.word_embed_dim, args.rnn_drop,
         #                        bidirectional=args.rnn_bidirectional, residual=False, layernorm=False)
 
-        # if args.char_embed_dim is not None and args.char_embed_dim > 0:
-        #     self.charembedding = EmbeddingTemplate(args.char_vocabulary_size, args.char_embed_dim, args.embed_drop)
-        #     self.charrnn = RnnTemplate(args.rnn_type, args.batch_size, args.char_embed_dim, args.char_embed_dim,
-        #                                args.rnn_drop)
-        #     self.hiddenlinear = LinearTemplate(args.word_embed_dim + args.char_embed_dim, args.hidden_dim,
-        #                                        activation="tanh", dropout=args.linear_drop)
-        # else:
         self.charembedding = None
         self.hiddenlinear = LinearTemplate(args.word_embed_dim + args.char_embed_dim, args.hidden_dim,
                                            activation="tanh", dropout=args.linear_drop)
