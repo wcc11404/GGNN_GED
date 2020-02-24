@@ -20,6 +20,9 @@ script_dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 #python $script_dir/myscripts/genGraph.py --mode 1 --input data/process/pretrain.train.2M --output data/process/pretrain.train.2M.graph --process data/process/pretrain.train.2M.ic --stanford data/stanford-corenlp-full-2018-10-05
 #python $script_dir/myscripts/genGraph.py --mode 1 --input data/process/pretrain.dev.40K --output data/process/pretrain.dev.40K.graph --process data/process/pretrain.dev.40K.ic --stanford data/stanford-corenlp-full-2018-10-05
 
+#python $script_dir/myscripts/corrupt.py --input data/process/pretrain.train.2M.ic --output data/process/pretrain.train.2M.ic.error --errorrate 0.2
+#python $script_dir/myscripts/corrupt.py --input data/process/pretrain.dev.40K.ic --output data/process/pretrain.dev.40K.ic.error --errorrate 0.2
+
 # 生成word、char以及edge词典
 #python $script_dir/myscripts/genVocab.py --mode 0 --input data/process/fce-public.train.preprocess.tsv data/process/fce-public.dev.preprocess.tsv --output data/prepare/wordvocab.pkl --mergeinput data/process/pretrain.train.2M.ic --mergemaxnum 50000
 #python $script_dir/myscripts/genVocab.py --mode 1 --input data/process/pretrain.train.2M.ic data/process/fce-public.train.preprocess.tsv data/process/fce-public.dev.preprocess.tsv --output data/prepare/charvocab.pkl
@@ -28,6 +31,10 @@ script_dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 # pickle化所有预训练数据
 #python $script_dir/myscripts/binary.py --train-dir data/process/pretrain.train.2M.ic --dev-dir data/process/pretrain.dev.40K.ic --train-graph-dir data/process/pretrain.train.2M.graph --dev-graph-dir data/process/pretrain.dev.40K.graph \
 #--word-vocab-dir data/prepare/wordvocab.pkl --char-vocab-dir data/prepare/charvocab.pkl --edge-vocab-dir data/prepare/edgevocab.pkl --output data/prepare/pretrain.pkl
+
+# pickle化腐化云训练数据
+python $script_dir/myscripts/binary.py --train-dir data/process/pretrain.train.2M.ic.error --dev-dir data/process/fce-public.dev.preprocess.tsv --train-graph-dir data/process/pretrain.train.2M.graph --dev-graph-dir data/process/dev_graph.txt \
+--word-vocab-dir data/prepare/wordvocab.pkl --char-vocab-dir data/prepare/charvocab.pkl --edge-vocab-dir data/prepare/edgevocab.pkl --output data/prepare/pretrain_corrupt.pkl
 
 # pickle化所有训练数据
 #python $script_dir/myscripts/binary.py --train-dir data/process/fce-public.train.preprocess.tsv --dev-dir data/process/fce-public.dev.preprocess.tsv --test-dir data/process/fce-public.test.preprocess.tsv \
@@ -48,7 +55,7 @@ script_dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 # --batch-size 32 --early-stop 8 --max-epoch 50 --lm-cost-weight 0.02
 
 # 训练
-python -u $script_dir/main.py --gpu-id 0 --mode Train --arch GANNER --criterion BaseLoss \
- --char-embed-dim 0 --gnn-steps 1 --save-dir checkpoint/GAN_step3 --w2v-dir data/process/w2v_300d.txt \
- --data-dir data/prepare/train.pkl --optimizer adadelta --lr 1 --evaluation f0.5 \
- --batch-size 32 --early-stop 8 --max-epoch 50 --lm-cost-weight 0.10
+#python -u $script_dir/main.py --gpu-id 0 --mode Train --arch GANNER --criterion BaseLoss \
+# --char-embed-dim 0 --gnn-steps 1 --save-dir checkpoint/GAN_step3 --w2v-dir data/process/w2v_300d.txt \
+# --data-dir data/prepare/train.pkl --optimizer adadelta --lr 1 --evaluation f0.5 \
+# --batch-size 32 --early-stop 8 --max-epoch 50 --lm-cost-weight 0.10
