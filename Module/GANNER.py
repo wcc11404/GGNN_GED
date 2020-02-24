@@ -16,8 +16,8 @@ class GANNER(nn.Module):
         self.gan = GraphAttentionTemplate(args.word_embed_dim, 1, args.gnn_steps, args.gnn_drop,
                                      residual=False, layernorm=False)
         # self.attention = AttentionTemplate(args.word_embed_dim)
-        # self.rnn = RnnTemplate(args.rnn_type, args.batch_size, args.word_embed_dim, args.word_embed_dim, args.rnn_drop,
-        #                        bidirectional=args.rnn_bidirectional, residual=False, layernorm=False)
+        self.rnn = RnnTemplate(args.rnn_type, args.batch_size, args.word_embed_dim, args.word_embed_dim, args.rnn_drop,
+                                bidirectional=args.rnn_bidirectional, residual=False, layernorm=False)
 
         self.charembedding = None
         self.hiddenlinear = LinearTemplate(args.word_embed_dim + args.char_embed_dim, args.hidden_dim,
@@ -53,7 +53,7 @@ class GANNER(nn.Module):
         emb = self.wordembedding(batchinput)
         out = self.gan(emb, batchlength)
         # out = self.attention(emb, out)
-        # out, _ = self.rnn(out, batchlength)  # B S E
+        out, _ = self.rnn(out, batchlength)  # B S E
 
         # if self.charembedding is not None:
         #     charout = self.charembedding(batchinput_char)
