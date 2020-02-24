@@ -11,7 +11,7 @@ def corrupt_sentence(args):
         line = line.split("\n")
         for word in line:
             word = word.split("\t")
-            counter.update(word[0])
+            counter.update([word[0]])
 
     voc = []
     for k, v in counter.most_common():
