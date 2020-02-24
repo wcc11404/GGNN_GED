@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 from Module.Layers import EmbeddingTemplate, RnnTemplate, LinearTemplate, AttentionTemplate
-from Module.GraphAttention import GraphAttentionTemplate
+from Module.GraphLayers import GraphAttentionTemplate
 from myscripts.utils import log_information
 
 class GANNER(nn.Module):
