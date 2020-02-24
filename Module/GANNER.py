@@ -51,9 +51,10 @@ class GANNER(nn.Module):
         #batchinput_char, batchlength_char = batchextradata
 
         emb = self.wordembedding(batchinput)
-        out = self.gan(emb, batchlength)
+        out, _ = self.rnn(emb, batchlength)  # B S E
+        out = self.gan(out, batchlength)
         # out = self.attention(emb, out)
-        out, _ = self.rnn(out, batchlength)  # B S E
+
 
         # if self.charembedding is not None:
         #     charout = self.charembedding(batchinput_char)
