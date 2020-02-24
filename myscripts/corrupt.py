@@ -35,7 +35,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--input", default="../data/temp.txt")
     parser.add_argument("--output", default="../data/shit.txt")
-    parser.add_argument("--errorrate", type=int, default=0.2)
+    parser.add_argument("--errorrate", type=float, default=0.2)
     #parser.add_argument("--stanford", default="../data/stanford-corenlp-full-2018-10-05")
     #parser.add_argument("--mode", type=int, default=1) # 0==BIO 1==parallel
 
