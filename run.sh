@@ -45,7 +45,7 @@ script_dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 python -u $script_dir/main.py --gpu-id 1 2 --mode Train --arch GGNNNER --criterion SLLoss \
  --char-embed-dim 0 --gnn-steps 3 --save-dir checkpoint/LM_GGNN_new \
  --w2v-dir data/process/w2v_300d.txt --data-dir data/prepare/pretrain_corrupt.pkl \
- --optimizer adam --lr 5e-3 --evaluation loss --batch-size 64 --early-stop 5 \
+ --optimizer adam --lr 5e-3 --evaluation loss --batch-size 60 --early-stop 5 \
  --max-epoch 10 --update-freq 2 --use-ddp
 
 # fine-tune

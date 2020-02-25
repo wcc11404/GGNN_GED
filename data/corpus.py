@@ -267,10 +267,10 @@ class GedCorpus:
         # Dev loader
         if self.args.use_dp:
             self.devdataloader = DataLoader(dataset=self.devdataset,
-                                            batch_size=self.args.batch_size * len(self.args.gpu_ids),
+                                            batch_size=1 * len(self.args.gpu_ids),
                                             shuffle=False, collate_fn=collate_fn, num_workers=self.args.num_workers)
         else:
-            self.devdataloader = DataLoader(dataset=self.devdataset, batch_size=self.args.batch_size,
+            self.devdataloader = DataLoader(dataset=self.devdataset, batch_size=1,
                                             shuffle=False, collate_fn=collate_fn, num_workers=self.args.num_workers)
 
         # Test loader
