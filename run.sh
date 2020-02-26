@@ -42,11 +42,11 @@ script_dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 # --word-vocab-dir data/prepare/wordvocab.pkl --char-vocab-dir data/prepare/charvocab.pkl --edge-vocab-dir data/prepare/edgevocab.pkl --output data/prepare/train.pkl
 
 # 预训练
-python -u $script_dir/main.py --gpu-id 0 1 2 3 --mode Train --arch GGNNNER --criterion SLLoss \
- --char-embed-dim 0 --gnn-steps 3 --save-dir checkpoint/LM_GGNN_new \
- --w2v-dir data/process/w2v_300d.txt --data-dir data/prepare/pretrain_corrupt.pkl \
- --optimizer adadelta --lr 1 --evaluation loss --batch-size 60 --early-stop 5 \
- --max-epoch 10 --update-freq 1 --use-ddp
+#python -u $script_dir/main.py --gpu-id 0 1 2 3 --mode Train --arch GGNNNER --criterion SLLoss \
+# --char-embed-dim 0 --gnn-steps 3 --save-dir checkpoint/LM_GGNN_new \
+# --w2v-dir data/process/w2v_300d.txt --data-dir data/prepare/pretrain_corrupt.pkl \
+# --optimizer adadelta --lr 1 --evaluation loss --batch-size 60 --early-stop 5 \
+# --max-epoch 10 --update-freq 1 --use-ddp
 
 # fine-tune
 #python -u $script_dir/main.py --gpu-id 3 --mode Train --arch GGNNNER --criterion SLLoss \
@@ -55,7 +55,7 @@ python -u $script_dir/main.py --gpu-id 0 1 2 3 --mode Train --arch GGNNNER --cri
 # --batch-size 32 --early-stop 8 --max-epoch 50 --lm-cost-weight 0.02
 
 # 训练
-#python -u $script_dir/main.py --gpu-id 0 --mode Train --arch GANNER --criterion BaseLoss \
-# --char-embed-dim 0 --gnn-steps 1 --save-dir checkpoint/GAN_step3 --w2v-dir data/process/w2v_300d.txt \
-# --data-dir data/prepare/train.pkl --optimizer adadelta --lr 1 --evaluation f0.5 \
-# --batch-size 32 --early-stop 8 --max-epoch 50 --lm-cost-weight 0.10
+python -u $script_dir/main.py --gpu-id 0 --mode Train --arch SLNER --criterion SLLoss \
+ --char-embed-dim 0 --gnn-steps 1 --save-dir checkpoint/SLNER --w2v-dir data/process/w2v_300d.txt \
+ --data-dir data/prepare/train.pkl --optimizer adadelta --lr 1 --evaluation f0.5 \
+ --batch-size 32 --early-stop 8 --max-epoch 50 --lm-cost-weight 0.10
