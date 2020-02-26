@@ -69,7 +69,8 @@ class GGNNNER(nn.Module):
         lm_bw_output = self.bw_lm_softmax(lm_bw_output)
 
         gout = self.gnn(emb, graph_in, graph_out)
-        out = torch.cat((out, gout), dim=-1)
+        # out = torch.cat((out, gout), dim=-1)
+        out = self.attention(out, gout)
 
         out = self.hiddenlinear(out)
         out = self.classification(out)
