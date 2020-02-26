@@ -60,17 +60,19 @@ class GGNNNER(nn.Module):
         emb = self.wordembedding(batchinput)
         out, _ = self.rnn(emb, batchlength)  # B S E
 
-        lm_input = out.view(-1, out.shape[1], 2, out.shape[2] // 2).permute(2, 0, 1, 3).contiguous()  # 分成双向的
-        lm_fw_input, lm_bw_input = lm_input[0], lm_input[1]
+
+
+        gout = self.gnn(emb, graph_in, graph_out)
+        # out = torch.cat((out, gout), dim=-1)
+        out = self.attention(out, gout)
+
+        # lm_input = out.view(-1, out.shape[1], 2, out.shape[2] // 2).permute(2, 0, 1, 3).contiguous()  # 分成双向的
+        lm_fw_input, lm_bw_input = out, out  # lm_input[0], lm_input[1]
 
         lm_fw_output = self.fw_lm_hiddenlinear(lm_fw_input)
         lm_bw_output = self.bw_lm_hiddenlinear(lm_bw_input)
         lm_fw_output = self.fw_lm_softmax(lm_fw_output)
         lm_bw_output = self.bw_lm_softmax(lm_bw_output)
-
-        gout = self.gnn(emb, graph_in, graph_out)
-        # out = torch.cat((out, gout), dim=-1)
-        out = self.attention(out, gout)
 
         out = self.hiddenlinear(out)
         out = self.classification(out)
