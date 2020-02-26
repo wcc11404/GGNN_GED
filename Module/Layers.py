@@ -131,8 +131,6 @@ class RnnTemplate(nn.Module):
         # 还原之前的排序
         rnn_ouput = rnn_ouput[recoverItemIdx]
 
-        rnn_ouput = self.rnndropout(rnn_ouput)
-
         if ischar:
             rnn_ouput = rnn_ouput.view(-1, sl, wl, self.input_dim) # B * S * W * E
             hidden = hidden.view(-1, sl, 2, self.input_dim//2)  # B * S * 2 * E//2
@@ -140,6 +138,7 @@ class RnnTemplate(nn.Module):
 
         if self.residual:
             rnn_ouput = rnn_ouput + residual
+        rnn_ouput = self.rnndropout(rnn_ouput)
         if self.use_layernorm:
             rnn_ouput = self.layernorm(rnn_ouput)
 
