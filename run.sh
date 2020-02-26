@@ -24,29 +24,29 @@ script_dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 #python $script_dir/myscripts/corrupt.py --input data/process/pretrain.dev.40K.ic --output data/process/pretrain.dev.40K.ic.error --errorrate 0.2
 
 # 生成word、char以及edge词典
-#python $script_dir/myscripts/genVocab.py --mode 0 --input data/process/fce-public.train.preprocess.tsv data/process/fce-public.dev.preprocess.tsv --output data/prepare/wordvocab.pkl --mergeinput data/process/pretrain.train.2M.ic --mergemaxnum 50000
-#python $script_dir/myscripts/genVocab.py --mode 1 --input data/process/pretrain.train.2M.ic data/process/fce-public.train.preprocess.tsv data/process/fce-public.dev.preprocess.tsv --output data/prepare/charvocab.pkl
-#python $script_dir/myscripts/genVocab.py --mode 2 --input data/process/pretrain.train.2M.graph data/process/train_graph.txt data/process/dev_graph.txt --output data/prepare/edgevocab.pkl
+python $script_dir/myscripts/genVocab.py --mode 0 --input data/process/fce-public.train.preprocess.tsv data/process/fce-public.dev.preprocess.tsv --output data/prepare/wordvocab.pkl --mergeinput data/process/pretrain.train.1M.ic --mergemaxnum 50000
+python $script_dir/myscripts/genVocab.py --mode 1 --input data/process/pretrain.train.1M.ic data/process/fce-public.train.preprocess.tsv data/process/fce-public.dev.preprocess.tsv --output data/prepare/charvocab.pkl
+python $script_dir/myscripts/genVocab.py --mode 2 --input data/process/pretrain.train.1M.graph data/process/train_graph.txt data/process/dev_graph.txt --output data/prepare/edgevocab.pkl
 
 # pickle化所有预训练数据
 #python $script_dir/myscripts/binary.py --train-dir data/process/pretrain.train.2M.ic --dev-dir data/process/pretrain.dev.40K.ic --train-graph-dir data/process/pretrain.train.2M.graph --dev-graph-dir data/process/pretrain.dev.40K.graph \
 #--word-vocab-dir data/prepare/wordvocab.pkl --char-vocab-dir data/prepare/charvocab.pkl --edge-vocab-dir data/prepare/edgevocab.pkl --output data/prepare/pretrain.pkl
 
 # pickle化腐化云训练数据
-#python $script_dir/myscripts/binary.py --train-dir data/process/pretrain.train.2M.ic.error --dev-dir data/process/fce-public.dev.preprocess.tsv --train-graph-dir data/process/pretrain.train.2M.graph --dev-graph-dir data/process/dev_graph.txt \
-#--word-vocab-dir data/prepare/wordvocab.pkl --char-vocab-dir data/prepare/charvocab.pkl --edge-vocab-dir data/prepare/edgevocab.pkl --output data/prepare/pretrain_corrupt.pkl
+python $script_dir/myscripts/binary.py --train-dir data/process/pretrain.train.1M.ic.error --dev-dir data/process/fce-public.dev.preprocess.tsv --train-graph-dir data/process/pretrain.train.1M.graph --dev-graph-dir data/process/dev_graph.txt \
+--word-vocab-dir data/prepare/wordvocab.pkl --char-vocab-dir data/prepare/charvocab.pkl --edge-vocab-dir data/prepare/edgevocab.pkl --output data/prepare/pretrain_corrupt.pkl
 
 # pickle化所有训练数据
-#python $script_dir/myscripts/binary.py --train-dir data/process/fce-public.train.preprocess.tsv --dev-dir data/process/fce-public.dev.preprocess.tsv --test-dir data/process/fce-public.test.preprocess.tsv \
-# --train-graph-dir data/process/train_graph.txt --dev-graph-dir data/process/dev_graph.txt --test-graph-dir data/process/test_graph.txt \
-# --word-vocab-dir data/prepare/wordvocab.pkl --char-vocab-dir data/prepare/charvocab.pkl --edge-vocab-dir data/prepare/edgevocab.pkl --output data/prepare/train.pkl
+python $script_dir/myscripts/binary.py --train-dir data/process/fce-public.train.preprocess.tsv --dev-dir data/process/fce-public.dev.preprocess.tsv --test-dir data/process/fce-public.test.preprocess.tsv \
+ --train-graph-dir data/process/train_graph.txt --dev-graph-dir data/process/dev_graph.txt --test-graph-dir data/process/test_graph.txt \
+ --word-vocab-dir data/prepare/wordvocab.pkl --char-vocab-dir data/prepare/charvocab.pkl --edge-vocab-dir data/prepare/edgevocab.pkl --output data/prepare/train.pkl
 
 # 预训练
-python -u $script_dir/main.py --gpu-id 1 2 --mode Train --arch GGNNNER --criterion SLLoss \
- --char-embed-dim 0 --gnn-steps 3 --save-dir checkpoint/LM_GGNN_new \
- --w2v-dir data/process/w2v_300d.txt --data-dir data/prepare/pretrain_corrupt.pkl \
- --optimizer adam --lr 5e-3 --evaluation loss --batch-size 60 --early-stop 5 \
- --max-epoch 10 --update-freq 2 --use-ddp
+#python -u $script_dir/main.py --gpu-id 1 2 --mode Train --arch GGNNNER --criterion SLLoss \
+# --char-embed-dim 0 --gnn-steps 3 --save-dir checkpoint/LM_GGNN_new \
+# --w2v-dir data/process/w2v_300d.txt --data-dir data/prepare/pretrain_corrupt.pkl \
+# --optimizer adam --lr 5e-3 --evaluation loss --batch-size 60 --early-stop 5 \
+# --max-epoch 10 --update-freq 2 --use-ddp
 
 # fine-tune
 #python -u $script_dir/main.py --gpu-id 3 --mode Train --arch GGNNNER --criterion SLLoss \
