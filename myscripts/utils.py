@@ -32,11 +32,11 @@ def update_best_checkpoint(save_dir, epoch):
         f.write(save_dir+"/checkpoint"+str(epoch)+".pt")
 
 def save_checkpoint(model, optimizer=None, epoch=None, dir=None):
-    # checkpoint={"epoch":epoch,
-    #             "model":model.state_dict(),
-    #             "optimizer":optimizer}
-    # torch.save(checkpoint, dir)
-    torch.save(model.state_dict(), dir)
+    checkpoint={"epoch":epoch,
+                "model":model.state_dict(),
+                "optimizer":optimizer}
+    torch.save(checkpoint, dir)
+    # torch.save(model.state_dict(), dir)
 
 def load_checkpoint(model, dir):
     def check(key, dic):
