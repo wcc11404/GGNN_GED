@@ -8,6 +8,7 @@ class GGNNNER(nn.Module):
     def __init__(self, args):
         super(GGNNNER, self).__init__()
         assert args.rnn_bidirectional and args.lm_cost_weight >= 0  # 暂时必须是双向lstm
+        assert args.char_embed_dim == 0
         self.args = args
         self.lm_vocab_size = args.lm_vocab_size
         self.lm_cost_weight = args.lm_cost_weight
@@ -27,7 +28,7 @@ class GGNNNER(nn.Module):
         #                                        activation="tanh", dropout=args.linear_drop)
         # else:
         self.charembedding = None
-        self.hiddenlinear = LinearTemplate(args.word_embed_dim, args.hidden_dim, activation="tanh",
+        self.hiddenlinear = LinearTemplate(args.word_embed_dim * 2 , args.hidden_dim, activation="tanh",
                                            dropout=args.linear_drop)
 
         self.classification = LinearTemplate(args.hidden_dim, 2, activation=None)
@@ -54,6 +55,28 @@ class GGNNNER(nn.Module):
         del args.word2id
 
     def forward(self, batchinput, batchlength, batchextradata):
+        batchinput_char, batchlength_char, graph_in, graph_out = batchextradata
+
+        emb = self.wordembedding(batchinput)
+        out, _ = self.rnn(emb, batchlength)  # B S E
+
+        lm_input = out.view(-1, out.shape[1], 2, out.shape[2] // 2).permute(2, 0, 1, 3).contiguous()  # 分成双向的
+        lm_fw_input, lm_bw_input = lm_input[0], lm_input[1]
+
+        lm_fw_output = self.fw_lm_hiddenlinear(lm_fw_input)
+        lm_bw_output = self.bw_lm_hiddenlinear(lm_bw_input)
+        lm_fw_output = self.fw_lm_softmax(lm_fw_output)
+        lm_bw_output = self.bw_lm_softmax(lm_bw_output)
+
+        gout = self.gnn(emb, graph_in, graph_out)
+        out = torch.cat((out, gout), dim=-1)
+
+        out = self.hiddenlinear(out)
+        out = self.classification(out)
+
+        return out, (lm_fw_output, lm_bw_output)
+
+    def bak(self, batchinput, batchlength, batchextradata):
         batchinput_char, batchlength_char, graph_in, graph_out = batchextradata
 
         emb = self.wordembedding(batchinput)
