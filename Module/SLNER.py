@@ -36,9 +36,6 @@ class SLNER(nn.Module):
         self.fw_lm_softmax = LinearTemplate(args.lm_hidden_dim, self.lm_vocab_size, activation=None)
         self.bw_lm_softmax = LinearTemplate(args.lm_hidden_dim, self.lm_vocab_size, activation=None)
 
-        # 损失函数
-        self.Loss = nn.CrossEntropyLoss(ignore_index=-1, reduction="sum")
-
         # 加载词表权重
         self.load_embedding(args)
 
@@ -74,16 +71,4 @@ class SLNER(nn.Module):
         lm_bw_output = self.bw_lm_softmax(lm_bw_output)
 
         return out, (lm_fw_output, lm_bw_output)
-
-    def getLoss(self, input, length, extra_data, output, label):##### 暂时没改
-        xc, xcl = extra_data[0], extra_data[1]
-        out, (lm_fw_out, lm_bw_out) = output
-        loss = self.Loss(out.view(-1, 2), label.view(-1))
-        fw_x = input[:, 1:]
-        fw_x = torch.cat((fw_x, torch.zeros(fw_x.shape[0], 1, dtype=torch.long, device=fw_x.device)), dim=-1)
-        bw_x = input[:, :-1]
-        bw_x = torch.cat((torch.zeros(bw_x.shape[0], 1, dtype=torch.long, device=bw_x.device), bw_x), dim=-1)
-        loss += self.lm_cost_weight * self.Loss(lm_fw_out.view(-1, self.lm_vocab_size), fw_x.view(-1))
-        loss += self.lm_cost_weight * self.Loss(lm_bw_out.view(-1, self.lm_vocab_size), bw_x.view(-1))
-        return loss
 
