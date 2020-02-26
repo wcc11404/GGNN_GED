@@ -143,8 +143,6 @@ class GraphGateTemplate(nn.Module):
         self.init_weight()
 
     def init_weight(self):
-        # self.edge_in.set_pad_zero()
-        # self.edge_out.set_pad_zero()
         pass
 
     def GRUUpdater(self, nodein, nodeout, node):
@@ -179,10 +177,9 @@ class GraphGateTemplate(nn.Module):
 
             out = self.GRUUpdater(graph_in, graph_out, out)
 
-        out = self.dropout(out)
-
         if self.residual:
             out = out + residual
+        out = self.dropout(out)
         if self.use_layernorm:
             out = self.layernorm(out)
         return out
