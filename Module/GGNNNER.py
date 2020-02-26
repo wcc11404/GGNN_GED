@@ -34,13 +34,9 @@ class GGNNNER(nn.Module):
         self.classification = LinearTemplate(args.hidden_dim, 2, activation=None)
 
         ## LM
-        # self.fw_lm_hiddenlinear = LinearTemplate((args.word_embed_dim) // 2 + args.char_embed_dim, args.lm_hidden_dim,
-        #                                          activation="tanh", dropout=args.linear_drop)
-        # self.bw_lm_hiddenlinear = LinearTemplate((args.word_embed_dim) // 2 + args.char_embed_dim, args.lm_hidden_dim,
-        #                                          activation="tanh", dropout=args.linear_drop)
-        self.fw_lm_hiddenlinear = LinearTemplate(args.word_embed_dim, args.lm_hidden_dim,
+        self.fw_lm_hiddenlinear = LinearTemplate((args.word_embed_dim) // 2 + args.char_embed_dim, args.lm_hidden_dim,
                                                  activation="tanh", dropout=args.linear_drop)
-        self.bw_lm_hiddenlinear = LinearTemplate(args.word_embed_dim, args.lm_hidden_dim,
+        self.bw_lm_hiddenlinear = LinearTemplate((args.word_embed_dim) // 2 + args.char_embed_dim, args.lm_hidden_dim,
                                                  activation="tanh", dropout=args.linear_drop)
         if self.lm_vocab_size == -1 or self.lm_vocab_size > args.word_vocabulary_size:
             self.lm_vocab_size = args.word_vocabulary_size
@@ -64,19 +60,17 @@ class GGNNNER(nn.Module):
         emb = self.wordembedding(batchinput)
         out, _ = self.rnn(emb, batchlength)  # B S E
 
-
-
-        gout = self.gnn(emb, graph_in, graph_out)
-        # out = torch.cat((out, gout), dim=-1)
-        out = self.attention(out, gout)
-
-        # lm_input = out.view(-1, out.shape[1], 2, out.shape[2] // 2).permute(2, 0, 1, 3).contiguous()  # 分成双向的
-        lm_fw_input, lm_bw_input = out, out  # lm_input[0], lm_input[1]
+        lm_input = out.view(-1, out.shape[1], 2, out.shape[2] // 2).permute(2, 0, 1, 3).contiguous()  # 分成双向的
+        lm_fw_input, lm_bw_input = lm_input[0], lm_input[1]
 
         lm_fw_output = self.fw_lm_hiddenlinear(lm_fw_input)
         lm_bw_output = self.bw_lm_hiddenlinear(lm_bw_input)
         lm_fw_output = self.fw_lm_softmax(lm_fw_output)
         lm_bw_output = self.bw_lm_softmax(lm_bw_output)
+
+        gout = self.gnn(emb, graph_in, graph_out)
+        # out = torch.cat((out, gout), dim=-1)
+        out = self.attention(out, gout)
 
         out = self.hiddenlinear(out)
         out = self.classification(out)
