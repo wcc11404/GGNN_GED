@@ -28,7 +28,7 @@ class GGNNNER(nn.Module):
         #                                        activation="tanh", dropout=args.linear_drop)
         # else:
         self.charembedding = None
-        self.hiddenlinear = LinearTemplate(args.word_embed_dim, args.hidden_dim, activation="tanh",
+        self.hiddenlinear = LinearTemplate(args.word_embed_dim * 2, args.hidden_dim, activation="tanh",
                                            dropout=args.linear_drop)
 
         self.classification = LinearTemplate(args.hidden_dim, 2, activation=None)
@@ -69,8 +69,8 @@ class GGNNNER(nn.Module):
         lm_bw_output = self.bw_lm_softmax(lm_bw_output)
 
         gout = self.gnn(emb, graph_in, graph_out)
-        # out = torch.cat((out, gout), dim=-1)
-        out = self.attention(out, gout)
+        out = torch.cat((out, gout), dim=-1)
+        # out = self.attention(out, gout)
 
         out = self.hiddenlinear(out)
         out = self.classification(out)
