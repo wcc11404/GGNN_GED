@@ -28,7 +28,7 @@ class GGNNNER(nn.Module):
         #                                        activation="tanh", dropout=args.linear_drop)
         # else:
         self.charembedding = None
-        self.hiddenlinear = LinearTemplate(args.word_embed_dim * 2, args.hidden_dim, activation="tanh",
+        self.hiddenlinear = LinearTemplate(args.word_embed_dim, args.hidden_dim, activation="tanh",
                                            dropout=args.linear_drop)
 
         self.classification = LinearTemplate(args.hidden_dim, 2, activation=None)
