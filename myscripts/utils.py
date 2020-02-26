@@ -31,7 +31,11 @@ def update_best_checkpoint(save_dir, epoch):
     with open(save_dir+"/save.log",'w') as f:
         f.write(save_dir+"/checkpoint"+str(epoch)+".pt")
 
-def save_checkpoint(model, dir):
+def save_checkpoint(model, optimizer=None, epoch=None, dir=None):
+    # checkpoint={"epoch":epoch,
+    #             "model":model.state_dict(),
+    #             "optimizer":optimizer}
+    # torch.save(checkpoint, dir)
     torch.save(model.state_dict(), dir)
 
 def load_checkpoint(model, dir):
@@ -53,6 +57,7 @@ def load_checkpoint(model, dir):
         # 之前save会存储gpu信息，所以可能会导致load cuda error（之前gpu被占）
         load_checkpoint = torch.load(best_dir, map_location=lambda storage, loc: storage)
         model_dict = model.state_dict()  # 获得当前模型的参数字典
+
         # 找名字一样的加载权重
         load_dict = {check(k, model_dict): v for k, v in load_checkpoint.items() if check(k, model_dict) is not None}
         model.load_state_dict(load_dict)  # 加载权重

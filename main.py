@@ -160,7 +160,7 @@ if __name__ == "__main__":
     parser.add_argument("--max-epoch", type=int, default=100)
     parser.add_argument("--early-stop", type=int, default=10)
     parser.add_argument("--lr", type=float, default=1)
-    parser.add_argument("--weight-decay", type=float, default=0.0000)
+    parser.add_argument("--weight-decay", type=float, default=0.0001)
     parser.add_argument("--optimizer", default="adadelta")
     parser.add_argument("--evaluation", default="loss") # 评价指标 loss 和 f0.5 ;模型保存，earlystop等指标的依据
 
