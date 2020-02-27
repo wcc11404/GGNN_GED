@@ -34,11 +34,11 @@ def update_best_checkpoint(save_dir, epoch):
 def save_checkpoint(model, optimizer=None, epoch=None, dir=None):
     checkpoint = {"epoch": epoch,
                   "model": model.state_dict(),
-                  "optimizer": optimizer}
+                  "optimizer": optimizer.state_dict()}
     torch.save(checkpoint, dir)
     # torch.save(model.state_dict(), dir)
 
-def load_checkpoint(model, dir):
+def load_checkpoint(model, optimizer=None, dir=None):
     def check(key, dic):
         if key in dic:
             return key
@@ -64,6 +64,9 @@ def load_checkpoint(model, dir):
         model_dict = model.state_dict()  # 获得当前模型的参数字典
         load_dict = {check(k, model_dict): v for k, v in model_checkpoint.items() if check(k, model_dict) is not None}
         model.load_state_dict(load_dict)  # 加载权重
+
+        if optimizer is not None:
+            optimizer.load_state_dict(optimizer_checkpoint)
     except Exception:
         raise Exception
 
@@ -149,7 +152,7 @@ def train(args, model, loss, optimizer, Corpus):
 
             # 存储策略
             if args.save_dir is not None:
-                save_checkpoint(model, dir=args.save_dir + "/checkpoint" + str(epoch) + ".pt")
+                save_checkpoint(model, optimizer=optimizer, dir=args.save_dir + "/checkpoint" + str(epoch) + ".pt")
 
             if args.evaluation == "loss":
                 if best_evaluation > dev_loss:
