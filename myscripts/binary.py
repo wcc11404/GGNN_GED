@@ -1,5 +1,6 @@
 import argparse
 import pickle
+import random
 
 # 读取训练数据
 def load(fpath, use_lower=False):
@@ -116,29 +117,23 @@ def main(args):
                     pickle.dump(item, f)
 
         f.close()
-        # pickle.dump(trainx, f)
-        # pickle.dump(trainy, f)
-        # pickle.dump(trainsize, f)
-        # pickle.dump(trainx_char, f)
-        # pickle.dump(trainsize_char, f)
-        # pickle.dump(train_graph, f)
-        #
-        # pickle.dump(devx, f)
-        # pickle.dump(devy, f)
-        # pickle.dump(devsize, f)
-        # pickle.dump(devx_char, f)
-        # pickle.dump(devsize_char, f)
-        # pickle.dump(dev_graph, f)
-        #
-        # pickle.dump(testx, f)
-        # pickle.dump(testy, f)
-        # pickle.dump(testsize, f)
-        # pickle.dump(testx_char, f)
-        # pickle.dump(testsize_char, f)
-        # pickle.dump(test_graph, f)
+
+    if len(args.train_graph_dir) !=0 and len(args.train_dir) != len(args.train_graph_dir):
+        raise ValueError()
 
     # 读取原始数据
-    trainx, trainy, trainsize = load(args.train_dir, args.use_lower)
+    trainx, trainy, trainsize = [], [], []
+    for dir in args.train_dir:
+        x, y, s = load(dir, args.use_lower)
+        trainx.expand(x)
+        trainy.expand(y)
+        trainsize.expand(s)
+    random.seed(44)
+    random.shuffle(trainx)
+    random.seed(44)
+    random.shuffle(trainy)
+    random.seed(44)
+    random.shuffle(trainsize)
     devx, devy, devsize = load(args.dev_dir, args.use_lower)
     if args.test_dir is not None:
         testx, testy, testsize = load(args.test_dir, args.use_lower)
@@ -151,16 +146,16 @@ def main(args):
     train_graph, dev_graph, test_graph = None, None, None
     if args.edge_vocab_dir is not None:
         if args.train_graph_dir is not None:
-            train_graph = load_graph(args.train_graph_dir)
+            train_graph = []
+            for dir in args.train_graph_dir:
+                train_graph.expand(load_graph(dir))
+            random.seed(44)
+            random.shuffle(train_graph)
         if args.dev_graph_dir is not None:
             dev_graph = load_graph(args.dev_graph_dir)
         if args.test_graph_dir is not None:
             test_graph = load_graph(args.test_graph_dir)
 
-    # 统计各种表
-    # word2id, id2word = makeword2veclist([trainx, devx])
-    # char2id, id2char = makechar2veclist([trainx, devx])
-    # edge2id, id2edge = makeedge2veclist([train_graph, dev_graph])
     f = open(args.word_vocab_dir, "rb")
     word2id = pickle.load(f)
     id2word = pickle.load(f)
@@ -178,7 +173,7 @@ def main(args):
     label2id = {"c": 0, "i": 1}
 
     # 查表替换
-    sign = [1,0,0,1,0,0,0,0,0]
+    sign = [1, 0, 0, 1, 0, 0, 0, 0, 0]
     if args.char_vocab_dir is not None:
         trainx_char, trainsize_char = lookup_char(trainx, char2id, ispad=False) # 一定要先处理
         sign[1] = 1
@@ -213,11 +208,11 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--train-dir", required=True)
+    parser.add_argument("--train-dir", nargs="+", required=True)
     parser.add_argument("--dev-dir", required=True)
     parser.add_argument("--test-dir")
 
-    parser.add_argument("--train-graph-dir")
+    parser.add_argument("--train-graph-dir", nargs="+")
     parser.add_argument("--dev-graph-dir", default="../data/process/dev_graph.txt")
     parser.add_argument("--test-graph-dir")
 
