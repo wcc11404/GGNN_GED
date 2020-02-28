@@ -125,9 +125,9 @@ def main(args):
     trainx, trainy, trainsize = [], [], []
     for dir in args.train_dir:
         x, y, s = load(dir, args.use_lower)
-        trainx.expand(x)
-        trainy.expand(y)
-        trainsize.expand(s)
+        trainx.extend(x)
+        trainy.extend(y)
+        trainsize.extend(s)
     random.seed(44)
     random.shuffle(trainx)
     random.seed(44)
@@ -148,7 +148,7 @@ def main(args):
         if args.train_graph_dir is not None:
             train_graph = []
             for dir in args.train_graph_dir:
-                train_graph.expand(load_graph(dir))
+                train_graph.extend(load_graph(dir))
             random.seed(44)
             random.shuffle(train_graph)
         if args.dev_graph_dir is not None:
