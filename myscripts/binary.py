@@ -146,11 +146,17 @@ def main(args):
     train_graph, dev_graph, test_graph = None, None, None
     if args.edge_vocab_dir is not None:
         if args.train_graph_dir is not None:
-            train_graph = []
+            train_graph_in, train_graph_out = [], []
             for dir in args.train_graph_dir:
-                train_graph.extend(load_graph(dir))
+                re = load_graph(dir)
+                train_graph_in.extend(re[0])
+                train_graph_out.extend(re[1])
             random.seed(44)
-            random.shuffle(train_graph)
+            random.shuffle(train_graph_in)
+            random.seed(44)
+            random.shuffle(train_graph_out)
+            train_graph = [train_graph_in, train_graph_out]
+
         if args.dev_graph_dir is not None:
             dev_graph = load_graph(args.dev_graph_dir)
         if args.test_graph_dir is not None:
