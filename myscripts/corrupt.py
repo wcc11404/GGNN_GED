@@ -139,4 +139,7 @@ if __name__ == "__main__":
     parser.add_argument("--mode", type=int, default=1) # 0==corrupt 1==pattern
 
     args = parser.parse_args()
-    corrupt_sentence(args)
+    if args.mode==0:
+        corrupt_sentence(args)
+    elif args.mode==1:
+        pattern_corrupt(args)
