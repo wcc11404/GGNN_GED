@@ -15,13 +15,15 @@ script_dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 #python $script_dir/myscripts/mytokenize.py --mode 1 --input data/orign_data/1b.dev.txt --output data/process/pretrain.dev --stanford data/stanford-corenlp-full-2018-10-05
 
 # 生成无标签数据的依赖图（部分）
-#head -n 2000000 data/process/pretrain.train > data/process/pretrain.train.2M
-#head -n 40000 data/process/pretrain.dev > data/process/pretrain.dev.40K
-#python $script_dir/myscripts/genGraph.py --mode 1 --input data/process/pretrain.train.2M --output data/process/pretrain.train.2M.graph --process data/process/pretrain.train.2M.ic --stanford data/stanford-corenlp-full-2018-10-05
-#python $script_dir/myscripts/genGraph.py --mode 1 --input data/process/pretrain.dev.40K --output data/process/pretrain.dev.40K.graph --process data/process/pretrain.dev.40K.ic --stanford data/stanford-corenlp-full-2018-10-05
+head -n 1000000 data/process/pretrain.train > data/process/pretrain.train.1M
+head -n 20000 data/process/pretrain.dev > data/process/pretrain.dev.20K
+python $script_dir/myscripts/corrupt.py --mode 1 --input data/process/pretrain.train.1M --output data/process/pretrain.train.1M.ic.error --errorrate 0.2 --dict-dir data/orign_data/fce-released-dataset/dataset
+python $script_dir/myscripts/corrupt.py --mode 1 --input data/process/pretrain.dev.20K --output data/process/pretrain.dev.20K.ic.error --errorrate 0.2 --dict-dir data/orign_data/fce-released-dataset/dataset
+python $script_dir/myscripts/genGraph.py --mode 0 --input data/process/pretrain.train.1M.ic.error --output data/process/pretrain.train.1M.graph --stanford data/stanford-corenlp-full-2018-10-05
+python $script_dir/myscripts/genGraph.py --mode 0 --input data/process/pretrain.dev.20K.ic.error --output data/process/pretrain.dev.20K.graph --stanford data/stanford-corenlp-full-2018-10-05
 
-#python $script_dir/myscripts/corrupt.py --input data/process/pretrain.train.2M.ic --output data/process/pretrain.train.2M.ic.error --errorrate 0.2
-#python $script_dir/myscripts/corrupt.py --input data/process/pretrain.dev.40K.ic --output data/process/pretrain.dev.40K.ic.error --errorrate 0.2
+#python $script_dir/myscripts/corrupt.py --input data/process/pretrain.train.2M.ic --output data/process/pretrain.train.2M.ic.error --errorrate 0.2 --mode 0
+#python $script_dir/myscripts/corrupt.py --input data/process/pretrain.dev.40K.ic --output data/process/pretrain.dev.40K.ic.error --errorrate 0.2 --mode 0
 
 # 生成word、char以及edge词典
 #python $script_dir/myscripts/genVocab.py --mode 0 --input data/process/fce-public.train.preprocess.tsv data/process/fce-public.dev.preprocess.tsv --output data/prepare/wordvocab.pkl --mergeinput data/process/pretrain.train.1M.ic --mergemaxnum 50000
@@ -55,8 +57,8 @@ script_dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 # --data-dir data/prepare/train.pkl --optimizer adadelta --lr 1 --evaluation f0.5 \
 # --batch-size 32 --early-stop 8 --max-epoch 50 --lm-cost-weight 0.02
 
-# 训练 
-python -u $script_dir/main.py --gpu-id 0 1 2 3 --mode Train --arch GGNNNER --criterion SLLoss \
- --char-embed-dim 0 --gnn-steps 1 --save-dir checkpoint/sum_GGNNNER --w2v-dir data/process/w2v_300d.txt \
- --data-dir data/prepare/pretrain_corrupt_train.pkl --optimizer adadelta --lr 1 --evaluation f0.5 \
- --batch-size 16 --early-stop 5 --max-epoch 15 --lm-cost-weight 0.10 --use-ddp
+# 训练
+#python -u $script_dir/main.py --gpu-id 0 1 2 3 --mode Train --arch GGNNNER --criterion SLLoss \
+# --char-embed-dim 0 --gnn-steps 1 --save-dir checkpoint/sum_GGNNNER --w2v-dir data/process/w2v_300d.txt \
+# --data-dir data/prepare/pretrain_corrupt_train.pkl --optimizer adadelta --lr 1 --evaluation f0.5 \
+# --batch-size 16 --early-stop 5 --max-epoch 15 --lm-cost-weight 0.10 --use-ddp
