@@ -62,6 +62,7 @@ def loaddict(dir):
     for root, dirs, files in os.walk(dir):
         for file in files:
             dir = os.path.join(root, file)
+            print(dir)
             re = readXMLfile(dir)
             for item in re:
                 if item[1] in result:
