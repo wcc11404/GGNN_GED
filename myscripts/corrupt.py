@@ -79,8 +79,9 @@ def findlist(l1,l2):
     i = -1
     while (i < len(l1)):
         i += 1
-        i = l1.index(l2[0], i, len(l1) - 1)
-        if i == -1:
+        try:
+            i = l1.index(l2[0], i, len(l1) - 1)
+        except ValueError:
             return -1
         flag = True
         for j in range(1, len(l2)):
@@ -92,7 +93,7 @@ def findlist(l1,l2):
     return -1
 
 def replacelist(l1,l2,x, num):
-    minnum = min(len(l2),num)
+    minnum = min(len(l2), num)
     for i in range(minnum):
         l1[x + i] = l2[i]
     if len(l2) > minnum:
@@ -115,19 +116,23 @@ def pattern_corrupt(args):
         label = ["c" for _ in range(len(line))]
         line = " ".join(line)
         for k, v in dic.items():
-            while (k in line):
-                r = random.random()
-                if r > 1:  # 选择是否腐化
-                    break
+            x = 0
+            while (k in line[x:]):
+                # r = random.random()
+                # if r > 1:  # 选择是否腐化
+                #     break
                 r = random.randint(0, len(v) - 1)  # 用哪个腐化
                 temp = v[r].split()  # 这个是要替换的
                 line = line.split()
                 k = k.split()
                 x = findlist(line, k)
+                if x == -1:
+                    break
                 line = replacelist(line, temp, x, len(k))
                 label = replacelist(label, ["i" for _ in range(len(temp))], x, len(k))
                 line = " ".join(line)
                 k = " ".join(k)
+                x += len(temp)
                 tj += len(temp)
 
         line = line.split()
