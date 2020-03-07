@@ -82,9 +82,6 @@ def findlist(l1,l2):
         try:
             i = l1.index(l2[0], i, len(l1) - 1)
         except ValueError:
-            print(l1)
-            print(l2)
-            exit()
             return -1
         flag = True
         for j in range(1, len(l2)):
@@ -130,6 +127,7 @@ def pattern_corrupt(args):
                 k = k.split()
                 x = findlist(line, k)
                 if x == -1:
+                    line = " ".join(line)
                     break
                 line = replacelist(line, temp, x, len(k))
                 label = replacelist(label, ["i" for _ in range(len(temp))], x, len(k))
