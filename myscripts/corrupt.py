@@ -127,7 +127,7 @@ def pattern_corrupt(args):
             x = 0
             while (k in line[x:]):
                 r = random.random()
-                if r > 1:  # 选择是否腐化
+                if r > args.errorrate:  # 选择是否腐化
                     break
                 r = random.randint(0, len(v) - 1)  # 用哪个腐化
                 temp = v[r].split()  # 这个是要替换的
