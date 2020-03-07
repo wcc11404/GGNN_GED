@@ -110,12 +110,15 @@ def replacelist(l1, l2, x, num):
 
 def pattern_corrupt(args):
     dic = loaddict(args.dict_dir)
-    print(dic)
     f = open(args.input, "r").read().strip().split("\n")
     f1 = open(args.output, "w")
     tj = 0
     sum = 0
+    i=0
     for line in tqdm.tqdm(f):
+        i+=1
+        if i>100000:
+            break
         line = line.strip().lower()
         line = line.split()
         label = ["c" for _ in range(len(line))]
