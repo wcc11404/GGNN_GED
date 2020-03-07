@@ -114,11 +114,7 @@ def pattern_corrupt(args):
     f1 = open(args.output, "w")
     tj = 0
     sum = 0
-    i = 0
     for line in tqdm.tqdm(f):
-        i += 1
-        if i > 50000:
-            break
         line = line.strip().lower()
         line = line.split()
         label = ["c" for _ in range(len(line))]
