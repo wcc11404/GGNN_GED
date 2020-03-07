@@ -77,8 +77,10 @@ def loaddict(dir):
                     result[item[1]] = [item[0]]
     return result
 
-def findlist(l1, l2):
-    i = -1
+def findlist(l1, l2, num=0):
+    if num >= len(l1):
+        return -1
+    i = num-1
     while (i < len(l1)):
         i += 1
         try:
@@ -120,7 +122,7 @@ def pattern_corrupt(args):
         line = " ".join(line)
         for k, v in dic.items():
             x = 0
-            shit =0
+            shit = 0
             while (k in line[x:]):
                 r = random.random()
                 if r > 1:  # 选择是否腐化
@@ -129,7 +131,7 @@ def pattern_corrupt(args):
                 temp = v[r].split()  # 这个是要替换的
                 line = line.split()
                 kk = k.split()
-                x = findlist(line, kk)
+                x = findlist(line, kk, x)
                 if x == -1:
                     line = " ".join(line)
                     break
@@ -138,8 +140,8 @@ def pattern_corrupt(args):
                 line = " ".join(line)
                 x += len(temp)
                 tj += len(temp)
-                shit+=1
-                if shit>1000:
+                shit += 1
+                if shit > 1000:
                     print("shit")
 
         line = line.split()
