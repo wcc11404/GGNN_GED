@@ -105,30 +105,37 @@ def pattern_corrupt(args):
     dic = loaddict(args.dict_dir)
     f = open(args.input, "r").read().strip().split("\n")
     f1 = open(args.output, "w")
+    tj = 0
+    sum = 0
     for line in f:
         line = line.split()
         label = ["c" for _ in range(len(line))]
         line = " ".join(line)
         for k, v in dic.items():
-            v = v.split()
             while (k in line):
                 r = random.random()
-                if r > args.errorrate:
+                if r > 1:  # 选择是否腐化
                     break
+                r = random.randint(0, len(v) - 1)  # 用哪个腐化
+                temp = v[r].split()  # 这个是要替换的
                 line = line.split()
                 k = k.split()
                 x = findlist(line, k)
-                line = replacelist(line, v, x, len(k))
-                label = replacelist(label, ["i" for _ in range(len(v))], x, len(k))
+                line = replacelist(line, temp, x, len(k))
+                label = replacelist(label, ["i" for _ in range(len(temp))], x, len(k))
                 line = " ".join(line)
                 k = " ".join(k)
+                tj += len(temp)
 
         line = line.split()
+        sum += len(line)
         assert len(line) == len(label)
         for word, lab in zip(line, label):
             f1.write(word + "\t" + lab + "\n")
         f1.write("\n")
     f1.close()
+    print(tj)
+    print(sum)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -139,7 +146,7 @@ if __name__ == "__main__":
     parser.add_argument("--mode", type=int, default=1) # 0==corrupt 1==pattern
 
     args = parser.parse_args()
-    if args.mode==0:
+    if args.mode == 0:
         corrupt_sentence(args)
-    elif args.mode==1:
+    elif args.mode == 1:
         pattern_corrupt(args)
