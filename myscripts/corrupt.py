@@ -114,10 +114,10 @@ def pattern_corrupt(args):
     f1 = open(args.output, "w")
     tj = 0
     sum = 0
-    i=0
+    i = 0
     for line in tqdm.tqdm(f):
-        i+=1
-        if i>100000:
+        i += 1
+        if i > 50000:
             break
         line = line.strip().lower()
         line = line.split()
@@ -141,15 +141,16 @@ def pattern_corrupt(args):
                 label = replacelist(label, ["i" for _ in range(len(temp))], x, len(kk))
                 line = " ".join(line)
                 x += len(temp)  # x位置偏移
-                tj += len(temp)
 
         line = line.split()
+        tj += label.count("i")
         sum += len(line)
         assert len(line) == len(label)
         for word, lab in zip(line, label):
             f1.write(word + "\t" + lab + "\n")
         f1.write("\n")
     f1.close()
+    print()
     print(tj)
     print(sum)
 
