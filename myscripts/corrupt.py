@@ -108,7 +108,6 @@ def replacelist(l1,l2,x, num):
 
 def pattern_corrupt(args):
     dic = loaddict(args.dict_dir)
-    print(dic)
     f = open(args.input, "r").read().strip().split("\n")
     f1 = open(args.output, "w")
     tj = 0
