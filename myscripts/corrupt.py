@@ -45,14 +45,16 @@ def readXMLfile(filepath):
         if incor is None or cor is None:
             continue
         if incor.nodeName == "i" and cor.nodeName == "c":
+            incordata = incor.childNodes[0]._data.strip()
+            cordata = cor.childNodes[0]._data.strip()
             try:
-                if len(incor.childNodes[0]._data) == 1 and incor.childNodes[0]._data in skip:
+                if len(incordata) == 1 and incordata in skip:
                     continue
-                if len(cor.childNodes[0]._data) == 1 and cor.childNodes[0]._data in skip:
+                if len(cordata) == 1 and cordata in skip:
                     continue
-                if incor.childNodes[0]._data == cor.childNodes[0]._data:
+                if incordata == cordata:
                     continue
-                re.append([incor.childNodes[0]._data.lower(), cor.childNodes[0]._data.lower()])
+                re.append([incordata.lower(), cordata.lower()])
             except:
                 pass
     return re
@@ -74,16 +76,16 @@ def loaddict(dir):
     return result
 
 def findlist(l1,l2):
-    i=-1
-    while(i<len(l1)):
-        i+=1
-        i=l1.index(l2[0],i,len(l1)-1)
-        if i==-1:
+    i = -1
+    while (i < len(l1)):
+        i += 1
+        i = l1.index(l2[0], i, len(l1) - 1)
+        if i == -1:
             return -1
-        flag=True
-        for j in range(1,len(l2)):
-            if l2[j]!=l1[i+j]:
-                flag=False
+        flag = True
+        for j in range(1, len(l2)):
+            if l2[j] != l1[i + j]:
+                flag = False
                 break
         if flag:
             return i
