@@ -122,7 +122,6 @@ def pattern_corrupt(args):
         line = " ".join(line)
         for k, v in dic.items():
             x = 0
-            shit = 0
             while (k in line[x:]):
                 r = random.random()
                 if r > 1:  # 选择是否腐化
@@ -131,18 +130,15 @@ def pattern_corrupt(args):
                 temp = v[r].split()  # 这个是要替换的
                 line = line.split()
                 kk = k.split()
-                x = findlist(line, kk, x)
-                if x == -1:
+                x = findlist(line, kk, x)   # 从x的位置开始查找list line中是否有list kk
+                if x == -1: # 没找到退出
                     line = " ".join(line)
                     break
                 line = replacelist(line, temp, x, len(kk))
                 label = replacelist(label, ["i" for _ in range(len(temp))], x, len(kk))
                 line = " ".join(line)
-                x += len(temp)
+                x += len(temp)  # x位置偏移
                 tj += len(temp)
-                shit += 1
-                if shit > 1000:
-                    print("shit")
 
         line = line.split()
         sum += len(line)
