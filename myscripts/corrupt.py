@@ -112,8 +112,6 @@ def pattern_corrupt(args):
     dic = loaddict(args.dict_dir)
     f = open(args.input, "r").read().strip().split("\n")
     f1 = open(args.output, "w")
-    tj = 0
-    sum = 0
     for line in tqdm.tqdm(f):
         line = line.strip().lower()
         line = line.split()
@@ -146,9 +144,6 @@ def pattern_corrupt(args):
             f1.write(word + "\t" + lab + "\n")
         f1.write("\n")
     f1.close()
-    print()
-    print(tj)
-    print(sum)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
