@@ -45,9 +45,9 @@ def readXMLfile(filepath):
         if incor is None or cor is None:
             continue
         if incor.nodeName == "i" and cor.nodeName == "c":
-            incordata = incor.childNodes[0]._data.strip()
-            cordata = cor.childNodes[0]._data.strip()
             try:
+                incordata = incor.childNodes[0]._data.strip()
+                cordata = cor.childNodes[0]._data.strip()
                 if len(incordata) == 1 and incordata in skip:
                     continue
                 if len(cordata) == 1 and cordata in skip:
