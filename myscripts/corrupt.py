@@ -59,6 +59,7 @@ def readXMLfile(filepath):
 
 def loaddict(dir):
     result = {}
+    print(dir)
     for root, dirs, files in os.walk(dir):
         for file in files:
             dir = os.path.join(root, file)
