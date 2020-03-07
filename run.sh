@@ -17,7 +17,7 @@ script_dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 # 生成无标签数据的依赖图（部分）
 #head -n 1000000 data/process/pretrain.train > data/process/pretrain.train.1M
 #head -n 20000 data/process/pretrain.dev > data/process/pretrain.dev.20K
-python $script_dir/myscripts/corrupt.py --mode 1 --input data/process/pretrain.train.1M --output data/process/pretrain.train.1M.ic.error --errorrate 0.2 --dict-dir data/orign_data/fce-released-dataset/dataset
+python -u $script_dir/myscripts/corrupt.py --mode 1 --input data/process/pretrain.train.1M --output data/process/pretrain.train.1M.ic.error --errorrate 0.2 --dict-dir data/orign_data/fce-released-dataset/dataset
 #python $script_dir/myscripts/corrupt.py --mode 1 --input data/process/pretrain.dev.20K --output data/process/pretrain.dev.20K.ic.error --errorrate 0.2 --dict-dir data/orign_data/fce-released-dataset/dataset
 #python $script_dir/myscripts/genGraph.py --mode 0 --input data/process/pretrain.train.1M.ic.error --output data/process/pretrain.train.1M.graph --stanford data/stanford-corenlp-full-2018-10-05
 #python $script_dir/myscripts/genGraph.py --mode 0 --input data/process/pretrain.dev.20K.ic.error --output data/process/pretrain.dev.20K.graph --stanford data/stanford-corenlp-full-2018-10-05
