@@ -46,8 +46,8 @@ def readXMLfile(filepath):
             continue
         if incor.nodeName == "i" and cor.nodeName == "c":
             try:
-                incordata = incor.childNodes[0]._data.strip()
-                cordata = cor.childNodes[0]._data.strip()
+                incordata = incor.childNodes[0]._data.strip().lower()
+                cordata = cor.childNodes[0]._data.strip().lower()
                 if len(incordata) == 1 and incordata in skip:
                     continue
                 if len(cordata) == 1 and cordata in skip:
@@ -56,7 +56,7 @@ def readXMLfile(filepath):
                     continue
                 if len(cordata.split()) > 4:
                     continue
-                re.append([incordata.lower(), cordata.lower()])
+                re.append([incordata, cordata])
             except:
                 pass
     return re
@@ -113,6 +113,7 @@ def pattern_corrupt(args):
     tj = 0
     sum = 0
     for line in tqdm.tqdm(f):
+        line = line.strip().lower()
         line = line.split()
         label = ["c" for _ in range(len(line))]
         line = " ".join(line)
