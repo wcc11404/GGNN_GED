@@ -77,7 +77,7 @@ def loaddict(dir):
                     result[item[1]] = [item[0]]
     return result
 
-def findlist(l1,l2):
+def findlist(l1, l2):
     i = -1
     while (i < len(l1)):
         i += 1
@@ -94,15 +94,15 @@ def findlist(l1,l2):
             return i
     return -1
 
-def replacelist(l1,l2,x, num):
+def replacelist(l1, l2, x, num):
     minnum = min(len(l2), num)
     for i in range(minnum):
         l1[x + i] = l2[i]
     if len(l2) > minnum:
-        for i in range(len(l2)-minnum):
+        for i in range(len(l2) - minnum):
             l1.insert(x + minnum + i, l2[minnum + i])
     if num > minnum:
-        for i in range(num-minnum):
+        for i in range(num - minnum):
             del l1[x + minnum]
     return l1
 
@@ -120,6 +120,7 @@ def pattern_corrupt(args):
         line = " ".join(line)
         for k, v in dic.items():
             x = 0
+            shit =0
             while (k in line[x:]):
                 r = random.random()
                 if r > 1:  # 选择是否腐化
@@ -137,6 +138,9 @@ def pattern_corrupt(args):
                 line = " ".join(line)
                 x += len(temp)
                 tj += len(temp)
+                shit+=1
+                if shit>1000:
+                    print("shit")
 
         line = line.split()
         sum += len(line)
