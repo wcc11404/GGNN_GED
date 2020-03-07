@@ -54,6 +54,8 @@ def readXMLfile(filepath):
                     continue
                 if incordata == cordata:
                     continue
+                if len(cordata.split()) > 4:
+                    continue
                 re.append([incordata.lower(), cordata.lower()])
             except:
                 pass
@@ -111,28 +113,27 @@ def pattern_corrupt(args):
     f1 = open(args.output, "w")
     tj = 0
     sum = 0
-    for line in f:
+    for line in tqdm.tqdm(f):
         line = line.split()
         label = ["c" for _ in range(len(line))]
         line = " ".join(line)
         for k, v in dic.items():
             x = 0
             while (k in line[x:]):
-                # r = random.random()
-                # if r > 1:  # 选择是否腐化
-                #     break
+                r = random.random()
+                if r > 1:  # 选择是否腐化
+                    break
                 r = random.randint(0, len(v) - 1)  # 用哪个腐化
                 temp = v[r].split()  # 这个是要替换的
                 line = line.split()
-                k = k.split()
-                x = findlist(line, k)
+                kk = k.split()
+                x = findlist(line, kk)
                 if x == -1:
                     line = " ".join(line)
                     break
-                line = replacelist(line, temp, x, len(k))
-                label = replacelist(label, ["i" for _ in range(len(temp))], x, len(k))
+                line = replacelist(line, temp, x, len(kk))
+                label = replacelist(label, ["i" for _ in range(len(temp))], x, len(kk))
                 line = " ".join(line)
-                k = " ".join(k)
                 x += len(temp)
                 tj += len(temp)
 
