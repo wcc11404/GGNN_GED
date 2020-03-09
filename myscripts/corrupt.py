@@ -116,7 +116,9 @@ def pattern_corrupt(args):
     f1 = open(args.output, "w")
     for line in tqdm.tqdm(f):
         line = line.strip().lower()
-        line = line.split(".")[0] # 暂时只选取第一个句子，毕竟之前已经拆分整好100W
+        line = line.split(".")[0] + "."  # 暂时只选取第一个句子，毕竟之前已经拆分整好100W
+        line = line.split("!")[0] + "!"
+        line = line.split("?")[0] + "?"
 
         line = line.split()
         label = ["c" for _ in range(len(line))]
