@@ -116,11 +116,16 @@ def generate_graph(args, addcontextedge=False):
                     for i in range(i2 - i1):
                         newlabel[j1 + i] = label[i1 + i]
                 elif tag == "replace":
-                    assert j2 - j1 - i2 + i1 >= 0
-                    for i in range(i2 - i1):
-                        newlabel[j1 + i] = label[i1 + i]
-                    for i in range(j2 - j1 - i2 + i1):
-                        newlabel[i2 - i1 + j1 + i] = label[i2 - 1]
+                    try:
+                        assert j2 - j1 - i2 + i1 >= 0
+                        for i in range(i2 - i1):
+                            newlabel[j1 + i] = label[i1 + i]
+                        for i in range(j2 - j1 - i2 + i1):
+                            newlabel[i2 - i1 + j1 + i] = label[i2 - 1]
+                    except:
+                        print(temp)
+                        print(sen)
+                        print(tag, i1, i2, j1, j2)
                 else:
                     print(temp)
                     print(sen)
