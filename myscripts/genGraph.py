@@ -118,7 +118,8 @@ def generate_graph(args, addcontextedge=False):
                 elif tag == "replace":
                     for i in range(i2 - i1):
                         newlabel[j1 + i] = label[i1 + i]
-                    for i in range(j2 - j1 - i1 + i1):
+                    assert j2 - j1 - i2 + i1 >= 0
+                    for i in range(j2 - j1 - i2 + i1):
                         newlabel[i2 - i1 + j1 + i] = label[i2 - 1]
                 else:
                     print(temp)
