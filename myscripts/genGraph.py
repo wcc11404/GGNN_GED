@@ -1,6 +1,7 @@
 from stanfordcorenlp import StanfordCoreNLP
 import argparse
 import tqdm
+import difflib
 
 #   解析deplist
 def parse(deplist):
@@ -45,47 +46,49 @@ def graph_to_file(graph_maxindex, file_path):
                 f.write(temp + "\n")
             f.write("\n")
 
-# 生成data/train_graph.txt
+# 从.ic文件生成graph
 def generate_graph(args, addcontextedge=False):
-    # sentence = 'Guangdong University of Foreign Studies is located in Guangzhou.'
     nlp = StanfordCoreNLP(args.stanford, memory='4g')
-    # if mode == 0:
-    #     in_path = ['../data/process/fce-public.train.preprocess.tsv', '../data/process/fce-public.dev.preprocess.tsv',
-    #                '../data/process/fce-public.test.preprocess.tsv']
-    # elif mode == 1:
-    #     in_path = ['../data/orign_data/fce-public.train.original.tsv', '../data/orign_data/fce-public.dev.original.tsv',
-    #                '../data/orign_data/fce-public.test.original.tsv']
-    # out_path = ['../data/process/train_graph.txt', '../data/process/dev_graph.txt', '../data/process/test_graph.txt']
     in_path = args.input
     out_path = args.output
 
-    # for ip, op in zip(in_path, out_path):
     f = open(in_path, 'r').read().strip().split('\n\n')
+    process = open(args.process, 'w')
     graph_maxindex = []
     for line in tqdm.tqdm(f):
         line = line.strip()
         if len(line) == 0:
             break
+
+        # 将ic格式转换为单词数组temp
         line = line.split("\n")
         temp = []
+        label = []
         for wordtuple in line:
             wordtuple = wordtuple.split("\t")
             temp.append(wordtuple[0])
-        dp = nlp.dependency_parse(" ".join(temp))
+            label.append(wordtuple[1])
+        # dp = nlp.dependency_parse(" ".join(temp)) # 单纯获取解析树，会出现解析树的分词结果和直接分词结果不统一的情况
+
+        re = nlp._request('depparse', " ".join(temp))['sentences']
+        re = re[0]
+        sen = [item["originalText"] for item in re["tokens"]]
+        dp = [(dep['dep'], dep['governor'], dep['dependent']) for dep in re['basicDependencies']]
+
         g, _ = parse(dp)
 
         ### 加入语序边,每个单词（除首尾）都有一个出边和一个入边
         # id 从1-len(temp)
         # 注test集会有只有一个单词存在的情况
         if addcontextedge == True:
-            if len(temp) > 1:
+            if len(sen) > 1:
                 outstr = str(1) + "out"
                 if outstr in g:
                     g[outstr] = g[outstr][:] + [str(2) + ",nextout"]
                 else:
                     g[outstr] = [str(2) + ",nextout"]
 
-            for num in range(2, len(temp)):
+            for num in range(2, len(sen)):
                 instr = str(num) + "in"
                 if instr in g:
                     g[instr] = g[instr][:] + [str(num - 1) + ",nextin"]
@@ -97,24 +100,44 @@ def generate_graph(args, addcontextedge=False):
                 else:
                     g[outstr] = [str(num + 1) + ",nextout"]
 
-            if len(temp) > 1:
-                instr = str(len(temp)) + "in"
+            if len(sen) > 1:
+                instr = str(len(sen)) + "in"
                 if instr in g:
-                    g[instr] = g[instr][:] + [str(len(temp) - 1) + ",nextin"]
+                    g[instr] = g[instr][:] + [str(len(sen) - 1) + ",nextin"]
                 else:
-                    g[instr] = [str(len(temp) - 1) + ",nextin"]
+                    g[instr] = [str(len(sen) - 1) + ",nextin"]
 
-        graph_maxindex.append((g, len(temp)))
+        # 如果解析树对应的分词结果与原句不一致，则生成新的标签序列
+        if len(sen) != len(temp):
+            matcher = difflib.SequenceMatcher(None, temp, sen)
+            newlabel = ["c" for _ in range(len(sen))]
+            for tag, i1, i2, j1, j2 in matcher.get_opcodes():
+                if tag == "equal":
+                    for i in range(i2 - i1):
+                        newlabel[j1 + i] = label[i1 + i]
+                elif tag == "replace":
+                    for i in range(i2 - i1):
+                        newlabel[j1 + i] = label[i1 + i]
+                    for i in range(j2 - j1 - i1 + i1):
+                        newlabel[i2 + i] = label[i2 - 1]
+                else:
+                    raise ValueError("???")
+            label = newlabel
+
+        for word, lab in zip(sen, label):
+            process.write(word + "\t" + lab + "\n")
+        process.write("\n")
+
+        graph_maxindex.append((g, len(sen)))
     graph_to_file(graph_maxindex, out_path)
     nlp.close()
 
-# 生成data/pretrain_graph.txt
+# 从monilingual生成graph
 def generate_graph_(args, addcontextedge=False):
     nlp = StanfordCoreNLP(args.stanford, memory='4g')
     in_path = args.input
     out_path = args.output
 
-    # for ip, op in zip(in_path, out_path):
     f = open(in_path, 'r').read().strip().split('\n')
     process = open(args.process, 'w')
     graph_maxindex = []
@@ -122,7 +145,6 @@ def generate_graph_(args, addcontextedge=False):
         line = line.strip()
         if len(line) == 0:
             continue
-        # dp = nlp.dependency_parse(" ".join(temp))
 
         re = nlp._request('depparse', line)['sentences']
         re = re[0]
