@@ -121,6 +121,9 @@ def generate_graph(args, addcontextedge=False):
                     for i in range(j2 - j1 - i1 + i1):
                         newlabel[i2 + i] = label[i2 - 1]
                 else:
+                    print(temp)
+                    print(sen)
+                    print(tag,i1,i2,j1,j2)
                     raise ValueError("???")
             label = newlabel
 
