@@ -52,6 +52,8 @@ def readXMLfile(filepath):
                     continue
                 if len(cordata) == 1 and cordata in skip:
                     continue
+                if "." in incordata or "." in cordata:
+                    continue
                 if incordata == cordata:
                     continue
                 if len(cordata.split()) > 4:
@@ -114,6 +116,8 @@ def pattern_corrupt(args):
     f1 = open(args.output, "w")
     for line in tqdm.tqdm(f):
         line = line.strip().lower()
+        line = line.split(".")[0] # 暂时只选取第一个句子，毕竟之前已经拆分整好100W
+
         line = line.split()
         label = ["c" for _ in range(len(line))]
         line = " ".join(line)

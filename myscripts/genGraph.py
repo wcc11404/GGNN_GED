@@ -123,7 +123,7 @@ def generate_graph(args, addcontextedge=False):
                 else:
                     print(temp)
                     print(sen)
-                    print(tag,i1,i2,j1,j2)
+                    print(tag, i1, i2, j1, j2)
                     raise ValueError("???")
             label = newlabel
 
