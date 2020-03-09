@@ -141,8 +141,6 @@ def pattern_corrupt(args):
                 x += len(temp)  # x位置偏移
 
         line = line.split()
-        tj += label.count("i")
-        sum += len(line)
         assert len(line) == len(label)
         for word, lab in zip(line, label):
             f1.write(word + "\t" + lab + "\n")
