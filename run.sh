@@ -26,7 +26,7 @@ script_dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 #python $script_dir/myscripts/corrupt.py --input data/process/pretrain.dev.40K.ic --output data/process/pretrain.dev.40K.ic.error --errorrate 0.2 --mode 0
 
 # 生成word、char以及edge词典
-python $script_dir/myscripts/genVocab.py --mode 0 --input data/process/fce-public.train.preprocess.tsv data/process/fce-public.dev.preprocess.tsv --output data/prepare/wordvocab.pkl --mergeinput data/process/pretrain.train.1M.process --mergemaxnum 50000
+python $script_dir/myscripts/genVocab.py --mode 0 --input data/process/fce-public.train.preprocess.tsv data/process/fce-public.dev.preprocess.tsv --output data/prepare/wordvocab.pkl --mergeinput data/process/pretrain.train.1M.ic.process --mergemaxnum 50000
 python $script_dir/myscripts/genVocab.py --mode 1 --input data/process/pretrain.train.1M.process data/process/fce-public.train.preprocess.tsv data/process/fce-public.dev.preprocess.tsv --output data/prepare/charvocab.pkl
 python $script_dir/myscripts/genVocab.py --mode 2 --input data/process/pretrain.train.1M.graph data/process/train_graph.txt data/process/dev_graph.txt --output data/prepare/edgevocab.pkl
 
@@ -35,7 +35,7 @@ python $script_dir/myscripts/genVocab.py --mode 2 --input data/process/pretrain.
 # --word-vocab-dir data/prepare/wordvocab.pkl --char-vocab-dir data/prepare/charvocab.pkl --edge-vocab-dir data/prepare/edgevocab.pkl --output data/prepare/pretrain.pkl
 
 # pickle化腐化预训练数据
-python $script_dir/myscripts/binary.py --train-dir data/process/pretrain.train.1M.process --dev-dir data/process/fce-public.dev.preprocess.tsv \
+python $script_dir/myscripts/binary.py --train-dir data/process/pretrain.train.1M.ic.process --dev-dir data/process/fce-public.dev.preprocess.tsv \
  --train-graph-dir data/process/pretrain.train.1M.graph --dev-graph-dir data/process/dev_graph.txt \
  --word-vocab-dir data/prepare/wordvocab.pkl --char-vocab-dir data/prepare/charvocab.pkl --edge-vocab-dir data/prepare/edgevocab.pkl --output data/prepare/pretrain_corrupt.pkl
 
