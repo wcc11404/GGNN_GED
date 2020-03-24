@@ -45,11 +45,11 @@ script_dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 # --word-vocab-dir data/prepare/wordvocab.pkl --char-vocab-dir data/prepare/charvocab.pkl --edge-vocab-dir data/prepare/edgevocab.pkl --output data/prepare/train.pkl
 
 # 预训练
-python -u $script_dir/main.py --gpu-id 0 1 2 3 --mode Train --arch GGNNNER --criterion SLLoss \
- --char-embed-dim 0 --gnn-steps 1 --save-dir checkpoint/LM_GGNN_corrupt \
- --w2v-dir data/process/w2v_300d.txt --data-dir data/prepare/pretrain_corrupt.pkl \
- --optimizer adadelta --lr 1 --evaluation f0.5 --batch-size 16 --early-stop 5 \
- --max-epoch 15 --update-freq 1 --use-ddp
+#python -u $script_dir/main.py --gpu-id 0 1 2 3 --mode Train --arch GGNNNER --criterion SLLoss \
+# --char-embed-dim 0 --gnn-steps 1 --save-dir checkpoint/LM_GGNN_corrupt \
+# --w2v-dir data/process/w2v_300d.txt --data-dir data/prepare/pretrain_corrupt.pkl \
+# --optimizer adadelta --lr 1 --evaluation f0.5 --batch-size 16 --early-stop 5 \
+# --max-epoch 15 --update-freq 1 --use-ddp
 
 # fine-tune
 #python -u $script_dir/main.py --gpu-id 3 --mode Train --arch GGNNNER --criterion SLLoss \
@@ -58,7 +58,7 @@ python -u $script_dir/main.py --gpu-id 0 1 2 3 --mode Train --arch GGNNNER --cri
 # --batch-size 32 --early-stop 8 --max-epoch 50 --lm-cost-weight 0.10
 
 # 训练
-#python -u $script_dir/main.py --gpu-id 0 1 2 3 --mode Train --arch GGNNNER --criterion SLLoss \
-# --char-embed-dim 0 --gnn-steps 1 --save-dir checkpoint/sum_GGNNNER --w2v-dir data/process/w2v_300d.txt \
-# --data-dir data/prepare/pretrain_corrupt_train.pkl --optimizer adadelta --lr 1 --evaluation f0.5 \
-# --batch-size 16 --early-stop 5 --max-epoch 15 --lm-cost-weight 0.10 --use-ddp
+python -u $script_dir/main.py --gpu-id 1 --mode Train --arch BaseNER --criterion BaseLoss \
+ --char-embed-dim 0 --gnn-steps 1 --save-dir checkpoint/paper_Bi_LSTM --w2v-dir data/process/w2v_300d.txt \
+ --data-dir data/prepare/train.pkl --optimizer adadelta --lr 1 --evaluation f0.5 \
+ --batch-size 32 --early-stop 5 --max-epoch 15 --lm-cost-weight 0.10
