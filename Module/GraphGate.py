@@ -15,9 +15,6 @@ class GraphGateTemplate(nn.Module):
         self.edge_out = nn.ModuleList(
             [LinearTemplate(self.input_dim, self.input_dim, requires_grad=requires_grad) for _ in range(self.n_edge_types)])
 
-        # self.edge_in = LinearTemplate(self.n_edge_types * self.input_dim, self.n_edge_types * self.input_dim)
-        # self.edge_out = LinearTemplate(self.n_edge_types * self.input_dim, self.n_edge_types * self.input_dim)
-
         # GRUGate
         self.reset_gate = LinearTemplate(self.input_dim * 3, self.input_dim, activation="sigmoid", requires_grad=requires_grad)
         self.update_gate = LinearTemplate(self.input_dim * 3, self.input_dim, activation="sigmoid", requires_grad=requires_grad)
@@ -31,8 +28,6 @@ class GraphGateTemplate(nn.Module):
         self.init_weight()
 
     def init_weight(self):
-        # self.edge_in.set_pad_zero()
-        # self.edge_out.set_pad_zero()
         pass
 
     def GRUUpdater(self, nodein, nodeout, node):
