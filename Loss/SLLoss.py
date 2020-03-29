@@ -13,8 +13,10 @@ class SLLoss(_Loss):
             self.lm_vocab_size = args.word_vocabulary_size
 
         if args.main_label_weight != 1:
-            self.Loss = nn.CrossEntropyLoss(ignore_index=-1, reduction="sum",
-                 weight=torch.from_numpy(np.array([1, args.main_label_weight])).float())
+            weight = torch.from_numpy(np.array([1, args.main_label_weight])).float()
+            if not args.use_cpu:
+                weight = weight.cuda()
+            self.Loss = nn.CrossEntropyLoss(ignore_index=-1, reduction="sum", weight=weight)
         else:
             self.Loss = nn.CrossEntropyLoss(ignore_index=-1, reduction="sum")
         self.forwardLoss = nn.CrossEntropyLoss(ignore_index=-1, reduction="sum")
