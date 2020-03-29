@@ -1,3 +1,5 @@
+import torch
+import numpy as np
 from torch import nn
 from torch.nn.modules.loss import _Loss
 
@@ -10,8 +12,11 @@ class SLLoss(_Loss):
         if self.lm_vocab_size == -1 or self.lm_vocab_size > args.word_vocabulary_size:
             self.lm_vocab_size = args.word_vocabulary_size
 
-        self.Loss = nn.CrossEntropyLoss(ignore_index=-1, reduction="sum")  # ,
-            # weight=torch.from_numpy(np.array([1, 1.2])).float())
+        if args.main_label_weight != 1:
+            self.Loss = nn.CrossEntropyLoss(ignore_index=-1, reduction="sum",
+                 weight=torch.from_numpy(np.array([1, args.main_label_weight])).float())
+        else:
+            self.Loss = nn.CrossEntropyLoss(ignore_index=-1, reduction="sum")
         self.forwardLoss = nn.CrossEntropyLoss(ignore_index=-1, reduction="sum")
         self.bakwardLoss = nn.CrossEntropyLoss(ignore_index=-1, reduction="sum")
 

@@ -163,6 +163,7 @@ if __name__ == "__main__":
     parser.add_argument("--weight-decay", type=float, default=0.0001)
     parser.add_argument("--optimizer", default="adadelta")
     parser.add_argument("--evaluation", default="loss") # 评价指标 loss 和 f0.5 ;模型保存，earlystop等指标的依据
+    parser.add_argument("--main-label-weight", type=float, default=1.0) # c标签的权重
 
     parser.add_argument("--use-dp", action='store_true', default=False)
 
