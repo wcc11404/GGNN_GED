@@ -93,12 +93,14 @@ def main(args):
         device = torch.device('cuda', args.gpu_ids[args.local_rank])
         torch.cuda.set_device(device)
         model = model.to(device)
+        loss = loss.to(device)
         model, optimizer = amp.initialize(model, optimizer, opt_level="O1")
         model = DDP(model) # apex
         # model = DDP(model, device_ids=[args.gpu_ids[args.local_rank]]) # torch
     elif not args.use_cpu and not args.use_ddp and torch.cuda.is_available():# 设置gpu和dp
         torch.cuda.set_device(args.gpu_ids[0])
-        model.to("cuda")
+        model = model.to("cuda")
+        loss = loss.to("cuda")
         if args.use_fpp16:
             model.half()
 
