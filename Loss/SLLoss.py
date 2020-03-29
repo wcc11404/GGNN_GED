@@ -14,6 +14,7 @@ class SLLoss(_Loss):
 
         if args.main_label_weight != 1:
             weight = nn.Parameter(torch.from_numpy(np.array([1, args.main_label_weight])).float(), requires_grad=False)
+            weight = weight.detach()
             self.Loss = nn.CrossEntropyLoss(ignore_index=-1, reduction="sum", weight=weight)
         else:
             self.Loss = nn.CrossEntropyLoss(ignore_index=-1, reduction="sum")
