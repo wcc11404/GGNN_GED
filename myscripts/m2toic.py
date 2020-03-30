@@ -50,8 +50,8 @@ def main(args):
             for i in range(len(temp)-1):
                 if "." in temp[i]:
                     word = temp[i]
-                    temp1 = "c"#l1[i]
-                    temp2 = "c"#l2[i]
+                    temp1 = "i"#l1[i]
+                    temp2 = "i"#l2[i]
                     err = temp[:i]
                     temp = temp[i + 1:]
                     label1 = l1[:i]
