@@ -34,7 +34,14 @@ def collate_fn(train_data):
             stemp = [[[paditem for _ in range(edge_num)] for _ in range(max_seq)] for _ in range(max_seq)]
             for i, word in enumerate(sentence):
                 for id, relation in word:
-                    stemp[i][id - 1][relation] = 1
+                    try:
+                        stemp[i][id - 1][relation] = 1
+                    except:
+                        print(max_seq)
+                        print(i)
+                        print(id)
+                        print(relation)
+                        exit()
             re.append(stemp)
         return re
 
