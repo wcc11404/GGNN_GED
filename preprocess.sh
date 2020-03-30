@@ -45,7 +45,16 @@ script_dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 # --word-vocab-dir data/prepare/wordvocab.pkl --char-vocab-dir data/prepare/charvocab.pkl --edge-vocab-dir data/prepare/edgevocab.pkl --output data/prepare/train.pkl
 
 # m2格式转ic 处理conll2014
-python $script_dir/myscripts/m2toic.py --input data/orign_data/conll2014.test.m2 --output1 data/process/conll2014.test1.ic --output2 data/process/conll2014.test2.ic
+#python $script_dir/myscripts/m2toic.py --input data/orign_data/conll2014.test.m2 --output1 data/process/conll2014.test1.ic --output2 data/process/conll2014.test2.ic
 
-python $script_dir/myscripts/genGraph.py --mode 0 --input data/process/conll2014.test1.ic --output data/process/conll2014.test1.graph --stanford data/stanford-corenlp-full-2018-10-05 --process data/process/conll2014.test1.ic.process
-python $script_dir/myscripts/genGraph.py --mode 0 --input data/process/conll2014.test2.ic --output data/process/conll2014.test2.graph --stanford data/stanford-corenlp-full-2018-10-05 --process data/process/conll2014.test2.ic.process
+#python $script_dir/myscripts/genGraph.py --mode 0 --input data/process/conll2014.test1.ic --output data/process/conll2014.test1.graph --stanford data/stanford-corenlp-full-2018-10-05 --process data/process/conll2014.test1.ic.process
+#python $script_dir/myscripts/genGraph.py --mode 0 --input data/process/conll2014.test2.ic --output data/process/conll2014.test2.graph --stanford data/stanford-corenlp-full-2018-10-05 --process data/process/conll2014.test2.ic.process
+
+# 训练集和验证集无所谓，只要测试集
+python $script_dir/myscripts/binary.py --train-dir data/process/fce-public.train.preprocess.tsv --dev-dir data/process/fce-public.dev.preprocess.tsv --test-dir data/process/conll2014.test1.ic \
+ --train-graph-dir data/process/train_graph.txt --dev-graph-dir data/process/dev_graph.txt --test-graph-dir data/process/conll2014.test1.graph \
+ --word-vocab-dir data/prepare/wordvocab.pkl --char-vocab-dir data/prepare/charvocab.pkl --edge-vocab-dir data/prepare/edgevocab.pkl --output data/prepare/conll2014-1.pkl
+
+ python $script_dir/myscripts/binary.py --train-dir data/process/fce-public.train.preprocess.tsv --dev-dir data/process/fce-public.dev.preprocess.tsv --test-dir data/process/conll2014.test2.ic \
+ --train-graph-dir data/process/train_graph.txt --dev-graph-dir data/process/dev_graph.txt --test-graph-dir data/process/conll2014.test2.graph \
+ --word-vocab-dir data/prepare/wordvocab.pkl --char-vocab-dir data/prepare/charvocab.pkl --edge-vocab-dir data/prepare/edgevocab.pkl --output data/prepare/conll2014-2.pkl
