@@ -4,8 +4,7 @@ import torch
 import pickle
 from torch.utils.data.distributed import DistributedSampler
 from myscripts.utils import log_information
-global num
-num=0
+
 def collate_fn(train_data):
     def pad(data, max_length, paditem=0):
         re = []
@@ -34,15 +33,7 @@ def collate_fn(train_data):
             stemp = [[[paditem for _ in range(edge_num)] for _ in range(max_seq)] for _ in range(max_seq)]
             for i, word in enumerate(sentence):
                 for id, relation in word:
-                    try:
                         stemp[i][id - 1][relation] = 1
-                    except:
-                        print(max_seq)
-                        print(i)
-                        print(id)
-                        print(relation)
-                        print(sentence)
-                        exit()
             re.append(stemp)
         return re
 
@@ -94,7 +85,7 @@ def collate_fn(train_data):
         train_length_char.append(data[5]) # B * (S)
         train_graph_in.append(data[6])
         train_graph_out.append(data[7])
-    global num
+
     #train_x, train_y, train_length, train_x_char, train_length_char = sort(train_x, train_y, train_length,
     #                                                                           train_x_char, train_length_char)
     train_x = pad(train_x, max(train_length), paditem=0)  # B * S
@@ -106,12 +97,9 @@ def collate_fn(train_data):
         train_x_char = padchar(train_x_char, max(train_length), maxchar, paditem=0) # B * S * W
         train_length_char = pad(train_length_char, max(train_length), paditem=1)   # B * S 必须pad1,长度不能为0
     if train_graph_in[0] is not None:
-        try:
             train_graph_in = padgraph(train_graph_in, max(train_length), edge_num, paditem=0) # B * S * S * EN
             train_graph_out = padgraph(train_graph_out, max(train_length), edge_num, paditem=0) # B * S * S * EN
-        except:
-            print(num)
-    num+=1
+
     train_x = torch.from_numpy(np.array(train_x)).long()
     train_left_x = torch.from_numpy(np.array(train_left_x)).long()
     train_right_x = torch.from_numpy(np.array(train_right_x)).long()

@@ -204,9 +204,9 @@ def generate_graph_(args, addcontextedge=False):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--input", default="../data")
-    parser.add_argument("--process", default="../data")
-    parser.add_argument("--output", default="../data")
+    parser.add_argument("--input", default="E:/tt.txt")
+    parser.add_argument("--process", default="E:/p.txt")
+    parser.add_argument("--output", default="E:/out.txt")
     parser.add_argument("--stanford", default="../data/stanford-corenlp-full-2018-10-05")
     parser.add_argument("--addcontextedge", action='store_true', default=False)
     parser.add_argument("--mode", type=int, default=0) # 0==BIO 1==parallel
