@@ -31,7 +31,7 @@ def main(args):
             if start == -1 and end == -1:
                 continue
             elif start == end:
-                continue
+                end = end+1
 
             if writer_id == 0:
                 label1 = replacelist(label1, ["i" for _ in range(end - start)], start, end - start)
