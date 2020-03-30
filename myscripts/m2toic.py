@@ -41,6 +41,10 @@ def main(args):
         assert len(err) == len(label1)
         assert len(err) == len(label2)
 
+        for i, item in enumerate(err):
+            if len(item) != 1 and "\'" in item:
+                label1[i] = "i"
+                label2[i] = "i"
         # 处理特例XXXX.XXX这种没切分的情况
         temp = err
         l1 = label1
