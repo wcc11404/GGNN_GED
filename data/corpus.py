@@ -98,7 +98,7 @@ def collate_fn(train_data):
         train_x_char = padchar(train_x_char, max(train_length), maxchar, paditem=0) # B * S * W
         train_length_char = pad(train_length_char, max(train_length), paditem=1)   # B * S 必须pad1,长度不能为0
     if train_graph_in[0] is not None:
-        try
+        try:
             train_graph_in = padgraph(train_graph_in, max(train_length), edge_num, paditem=0) # B * S * S * EN
             train_graph_out = padgraph(train_graph_out, max(train_length), edge_num, paditem=0) # B * S * S * EN
         except:
