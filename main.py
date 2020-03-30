@@ -19,6 +19,7 @@ def merage_args(user_args, loadargs):
     loadargs["load_dir"] = user_args["load_dir"]
     loadargs["use_cpu"] = user_args["use_cpu"]
     loadargs["gpu_ids"] = user_args["gpu_ids"]
+    loadargs["data_dir"] = user_args["data_dir"]
     return loadargs
 
 def check_args(args):
