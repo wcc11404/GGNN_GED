@@ -40,12 +40,57 @@ def main(args):
 
         assert len(err) == len(label1)
         assert len(err) == len(label2)
-        for word,la in zip(err,label1):
-            f1.write(word+"\t"+la+"\n")
-        f1.write("\n")
-        for word,la in zip(err,label2):
-            f2.write(word+"\t"+la+"\n")
-        f2.write("\n")
+
+        # 处理特例XXXX.XXX这种没切分的情况
+        temp = err
+        l1 = label1
+        l2 = label2
+        while(len(temp) != 0):
+            flag = False
+            for i in range(len(temp)-1):
+                if "." in temp[i]:
+                    word = temp[i]
+                    temp1 = l1[i]
+                    temp2 = l2[i]
+                    err = temp[:i]
+                    temp = temp[i + 1:]
+                    label1 = l1[:i]
+                    label2 = l2[:i]
+                    l1 = l1[i + 1:]
+                    l2 = l2[i + 1:]
+                    if word[0] == ".":
+                       temp.insert(0, word[1:])
+                       l1.insert(0, temp1)
+                       l2.insert(0, temp2)
+                    elif word[-1] == ".":
+                        err.append(word[:-1])
+                        label1.append(temp1)
+                        label2.append(temp2)
+                    else:
+                        p = word.find(".")
+                        temp.insert(0, word[p+1:])
+                        l1.insert(0, temp1)
+                        l2.insert(0, temp2)
+
+                        err.append(word[:p])
+                        label1.append(temp1)
+                        label2.append(temp2)
+
+                    err.append(".")
+                    label1.append(temp1)
+                    label2.append(temp2)
+                    flag = True
+                    break
+            if not flag:
+                err = temp
+                temp = []
+
+            for word, la in zip(err, label1):
+                f1.write(word+"\t"+la+"\n")
+            f1.write("\n")
+            for word, la in zip(err, label2):
+                f2.write(word+"\t"+la+"\n")
+            f2.write("\n")
 
     f1.close()
     f2.close()
