@@ -41,6 +41,7 @@ def collate_fn(train_data):
                         print(i)
                         print(id)
                         print(relation)
+                        print(sentence)
                         exit()
             re.append(stemp)
         return re
