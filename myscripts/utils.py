@@ -185,9 +185,9 @@ def train(args, model, loss, optimizer, Corpus):
 def test(args, model, loss, Corpus):
     #_, train_p, train_r, train_f = evaluate(args, Corpus.traindataloader, myscripts, Loss=None)
     if args.local_rank == 0:
-        dev_loss, dev_p, dev_r, dev_f = evaluate(args, Corpus.devdataloader, model, loss)
-        print("Dev Loss : {:.4f}\tDev Precision : {:.4f}\tDev Recall : {:.4f}\tDev F0.5 : {:.4f}"
-              .format(dev_loss, dev_p, dev_r, dev_f))
+        # dev_loss, dev_p, dev_r, dev_f = evaluate(args, Corpus.devdataloader, model, loss)
+        # print("Dev Loss : {:.4f}\tDev Precision : {:.4f}\tDev Recall : {:.4f}\tDev F0.5 : {:.4f}"
+        #       .format(dev_loss, dev_p, dev_r, dev_f))
 
         if Corpus.testdataloader is not None:
             test_loss, test_p, test_r, test_f = evaluate(args, Corpus.testdataloader, model, loss)
